@@ -36,7 +36,6 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 
-
 ​/*
  * ESP32 Smart Home Device
  * Tích hợp với hệ thống IoT qua MQTT
@@ -1714,9 +1713,7 @@ void loop() {
 }
 
 
-​
-
-​/*
+​​/*
  * ESP32 Smart Home Device
  * Tích hợp với hệ thống IoT qua MQTT
  * 
@@ -3394,4 +3391,3 @@ void loop() {
 
 
 ​
-
