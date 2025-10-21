@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Chào mừng bạn đến với dự án Next.js của tôi! Đây là một ứng dụng web hiện đại được xây dựng với mục tiêu tối ưu hóa hiệu suất, trải nghiệm người dùng (UX) và khả năng mở rộng dễ dàng.
 
-## Getting Started
+🌟 Tổng quan
+Dự án này được khởi tạo bằng create-next-app sử dụng App Router mới nhất. Ứng dụng tập trung vào việc tận dụng tối đa các tính năng của Next.js 14/15 như Server Components, Streaming và tối ưu hóa hình ảnh/font chữ.
 
-First, run the development server:
+Các tính năng chính:
+🏎️ Hiệu suất cực nhanh: Nhờ Server Side Rendering (SSR) và Static Site Generation (SSG).
 
-```bash
+🎨 Giao diện hiện đại: Sử dụng Tailwind CSS (nếu có) và font Geist tối ưu.
+
+📱 Responsive: Hiển thị hoàn hảo trên mọi thiết bị từ Mobile đến Desktop.
+
+🛠️ Type-safe: Phát triển với TypeScript để hạn chế lỗi runtime.
+
+🛠️ Công nghệ sử dụng
+Dự án này sử dụng hệ sinh thái công nghệ mạnh mẽ:
+
+Framework: Next.js (App Router)
+
+Ngôn ngữ: TypeScript
+
+Styling: Tailwind CSS (Tùy chọn)
+
+Font: Geist Sans & Mono
+
+Quản lý trạng thái: (Ví dụ: Zustand / React Context / Redux)
+
+Data Fetching: (Ví dụ: React Query / Fetch API)
+
+🚀 Bắt đầu nhanh
+Để chạy dự án này ở môi trường local, hãy làm theo các bước sau:
+
+1. Yêu cầu hệ thống
+Node.js 18.x trở lên
+
+npm / yarn / pnpm / bun
+
+2. Cài đặt
+Cài đặt các gói phụ thuộc:
+
+Bash
+
+npm install
+# hoặc
+yarn install
+# hoặc
+pnpm install
+3. Chạy môi trường Development
+Khởi động server phát triển:
+
+Bash
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Mở http://localhost:3000 trên trình duyệt của bạn để xem kết quả.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+📂 Cấu trúc thư mục
+Plaintext
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+.
+├── app/                # App router (Pages, Layouts, Components)
+│   ├── favicon.ico     # Icon của trang web
+│   ├── layout.tsx      # Layout chung cho toàn bộ ứng dụng
+│   ├── page.tsx        # Trang chủ
+│   └── globals.css     # Styles toàn cục
+├── components/         # Các UI components dùng chung (tự tạo)
+├── public/             # Tài nguyên tĩnh (images, icons, robots.txt)
+├── next.config.mjs     # Cấu hình Next.js
+├── package.json        # Danh sách thư viện và scripts
+└── tsconfig.json       # Cấu hình TypeScript
+🔧 Scripts chính
+Trong file package.json, bạn có thể sử dụng các lệnh sau:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+npm run dev: Chạy server phát triển với tính năng hot-reload.
 
-## Learn More
+npm run build: Xây dựng ứng dụng để sẵn sàng triển khai (Production).
 
-To learn more about Next.js, take a look at the following resources:
+npm run start: Chạy ứng dụng đã build ở chế độ Production.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+npm run lint: Kiểm tra lỗi code bằng ESLint.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+🌐 Triển khai (Deployment)
+Cách nhanh nhất để đưa ứng dụng này lên internet là sử dụng Vercel Platform:
 
-## Deploy on Vercel
+Đẩy mã nguồn lên GitHub/GitLab/Bitbucket.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Truy cập Vercel.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Import repository của bạn và nhấn Deploy.
+
+Để biết thêm chi tiết, hãy xem tài liệu triển khai Next.js.
+
+🤝 Đóng góp
+Mọi ý kiến đóng góp hoặc báo lỗi (issue) đều được hoan nghênh!
+
+Fork dự án.
+
+Tạo nhánh tính năng (git checkout -b feature/AmazingFeature).
+
+Commit thay đổi (git commit -m 'Add some AmazingFeature').
+
+Push lên nhánh (git push origin feature/AmazingFeature).
+
+Mở một Pull Request.
