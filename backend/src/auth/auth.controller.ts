@@ -12,10 +12,14 @@ import { JwtAuthGuard } from './passport/jwt-auth.guard';
 import { Public } from './decorate/customize';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { ApiBearerAuth, ApiBody, ApiOperation } from '@nestjs/swagger';
+import {MailerService} from '@nestjs-modules/mailer'
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly mailerService: MailerService
+  ) {}
 
   @ApiOperation({summary: 'Người dùng đăng nhập'})
   @UseGuards(LocalAuthGuard)
@@ -40,6 +44,6 @@ export class AuthController {
   @Post('register')
   @Public()
   async register(@Body() createUser: CreateAuthDto ){
-    return this.authService.register(createUser)
+    return await this.authService.register(createUser)
   }
 }
