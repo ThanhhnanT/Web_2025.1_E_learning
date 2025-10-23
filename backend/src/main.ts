@@ -14,8 +14,8 @@ async function bootstrap() {
   const port = configService.get('PORT')
 
   const config = new DocumentBuilder()
-    .setTitle('AirBnB api')
-    .setDescription('API Documentation for AirBnB simple version')
+    .setTitle('E-Learning api')
+    .setDescription('API Documentation for E-learning simple version')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
