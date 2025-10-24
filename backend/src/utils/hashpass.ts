@@ -4,7 +4,6 @@ const saltRound = 10
 
 export const hashPassword = async (plainPassword : string) => {
     try {
-        console.log('utils/hashpass ',plainPassword)
         return await bcrypt.hash(plainPassword, saltRound)
     } catch(e){
         return e

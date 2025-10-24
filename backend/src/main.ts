@@ -12,7 +12,7 @@ async function bootstrap() {
     forbidNonWhitelisted: true
   }))
   const port = configService.get('PORT')
-
+  app.enableCors();
   const config = new DocumentBuilder()
     .setTitle('E-Learning api')
     .setDescription('API Documentation for E-learning simple version')
