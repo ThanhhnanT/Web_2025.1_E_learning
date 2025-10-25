@@ -17,11 +17,25 @@ export async function registerUser(data: {
 export async function loginUser(data: {
     email: string;
     password: string;
-}) {
+}){ 
+  try{
     const res = await fetch(`${BASE_URL}/login`, {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     });
-    return await res.json();
+    const result = await res.json();
+    if (res.ok &&result.access_token){
+        localStorage.setItem("access_token", result.access_token);
+        return {success: true};
+    }else{
+        return {error: true, message: result.message || 'Đăng nhập thất bại'};
+    }
+  }catch(error){
+    console.error("API login error:", error);
+    return {error: true, message: 'Lỗi mạng hoặc máy chủ'};
+  }
+}
+export function logoutUser() {
+    localStorage.removeItem("access_token");
 }

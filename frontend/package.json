@@ -10,8 +10,9 @@
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.1.0",
+    "@tailwindcss/postcss": "^4.1.16",
     "antd": "^5.27.5",
-    "next": "15.5.5",
+    "next": "^15.5.6",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
@@ -20,8 +21,11 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.21",
     "eslint": "9.37.0",
     "eslint-config-next": "15.5.5",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.16",
     "typescript": "5.9.3"
   }
 }
