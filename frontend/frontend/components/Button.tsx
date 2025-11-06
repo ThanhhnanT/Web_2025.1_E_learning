@@ -7,7 +7,6 @@ interface props {
     // children: React.ReactNode;
     // disabled?: boolean;
     text: string;
-    disabled?: boolean;
 }
 
 export default function Button({ type = "button", text }: props) {

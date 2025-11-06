@@ -1,25 +1,154 @@
+/* === Layout container === */
 .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  background-color: #f9fafb;
 }
 
+/* === Form wrapper === */
+.authForm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.authForm {
+  background: #fff;
+  padding: 40px 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  width: 400px;
+  text-align: center;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.authForm h1 {
+  font-size: 1.8rem;
+  color: #2563eb;
+  margin-bottom: 25px;
+}
+
+/* === Input fields === */
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  margin-bottom: 15px;
+}
+
+.inputGroup label {
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.inputGroup input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  outline: none;
+  transition: border 0.2s ease;
+}
+
+.inputGroup input:focus {
+  border-color: #2563eb;
+}
+
+/* === Button styles === */
+.form button[type="submit"],
+.submitButton {
+  width: 100%;
+  background-color: #2563eb;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.3s ease;
+}
+
+.form button[type="submit"]:hover,
+.submitButton:hover {
+  background-color: #1e3a8a;
+}
+
+/* === Message text === */
+.message {
+  margin-top: 15px;
+  color: #059669;
+  font-weight: 500;
+}
+
+/* === Link (chuyển giữa login/register) === */
 .switch {
-    margin-top: 1rem;
-    font-size: 0.9rem;
-    color: #555555;
-    text-align: center;
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #374151;
 }
 
+.switch a,
 .link {
-    color: #1f5ee5;
-    text-decoration: none;
-    font-weight: 500;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
 }
 
+.switch a:hover,
 .link:hover {
-    text-decoration: underline;
+  text-decoration: underline;
+}
+
+/* === Social login buttons (Google/Facebook) === */
+.icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.socialButtons {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.socialBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  width: 100%;
+}
+
+.google {
+  background-color: #db4437;
+}
+
+.facebook {
+  background-color: #1877f2;
+}
+
+.socialBtn:hover {
+  opacity: 0.9;
+}
+.subtitle {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 1rem;
 }
