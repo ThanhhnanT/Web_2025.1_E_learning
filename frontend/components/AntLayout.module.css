@@ -42,3 +42,13 @@
   border-color: #1890ff !important;
   transition: all 0.3s ease;
 }
+body{
+  margin :0;
+}
+.container {
+  width: 100%;
+  max-width: 1200px; 
+  margin: 0 auto;    /* căn giữa ngang */
+  padding: 24px 16px; /* khoảng đệm trong, giúp không dính lề */
+  box-sizing: border-box;
+}

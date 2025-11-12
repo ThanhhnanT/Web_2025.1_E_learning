@@ -1,0 +1,352 @@
+[
+  {
+    "id": 1,
+    "title": "Test JavaScript cơ bản",
+    "description": "Kiểm tra kiến thức về cú pháp JS, function, object",
+    "duration": "20 phút",
+    "level": "Cơ bản"
+  },
+  {
+    "id": 2,
+    "title": "Test HTML & CSS",
+    "description": "Thử thách về layout, responsive và form",
+    "duration": "15 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 3,
+    "title": "Test ReactJS cơ bản",
+    "description": "Câu hỏi về component, props, state và lifecycle",
+    "duration": "25 phút",
+    "level": "Cơ bản"
+  },
+  {
+    "id": 4,
+    "title": "Test Node.js & Express",
+    "description": "Kiểm tra API, middleware, routing và module",
+    "duration": "30 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 5,
+    "title": "Test Python cơ bản",
+    "description": "Câu hỏi về biến, hàm, vòng lặp, list và dictionary",
+    "duration": "20 phút",
+    "level": "Cơ bản"
+  },
+  {
+    "id": 6,
+    "title": "Test SQL nâng cao",
+    "description": "Truy vấn JOIN, GROUP BY, HAVING và subquery",
+    "duration": "25 phút",
+    "level": "Nâng cao"
+  },
+  {
+    "id": 7,
+    "title": "Test Git & GitHub",
+    "description": "Hiểu biết về commit, branch, merge, pull request",
+    "duration": "15 phút",
+    "level": "Cơ bản"
+  },
+  {
+    "id": 8,
+    "title": "Test TypeScript",
+    "description": "Kiểm tra kiến thức về type, interface, generic",
+    "duration": "25 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 9,
+    "title": "Test React Hooks",
+    "description": "useState, useEffect, useContext, custom hook",
+    "duration": "30 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 10,
+    "title": "Test RESTful API",
+    "description": "Kiến thức về HTTP method, status code, JSON format",
+    "duration": "20 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 11,
+    "title": "Test Data Structures",
+    "description": "Câu hỏi về mảng, danh sách liên kết, stack, queue",
+    "duration": "30 phút",
+    "level": "Nâng cao"
+  },
+  {
+    "id": 12,
+    "title": "Test Thuật toán cơ bản",
+    "description": "Tư duy thuật toán, độ phức tạp, sắp xếp, tìm kiếm",
+    "duration": "30 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 13,
+    "title": "Test Java OOP",
+    "description": "Class, object, kế thừa, trừu tượng, interface",
+    "duration": "25 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 14,
+    "title": "Test C++ nâng cao",
+    "description": "Pointer, reference, template và OOP trong C++",
+    "duration": "35 phút",
+    "level": "Nâng cao"
+  },
+  {
+    "id": 15,
+    "title": "Test Linux Command",
+    "description": "Câu hỏi về lệnh cơ bản, phân quyền, file system",
+    "duration": "20 phút",
+    "level": "Cơ bản"
+  },
+  {
+    "id": 16,
+    "title": "Test DevOps cơ bản",
+    "description": "Hiểu CI/CD, Docker, container và deployment",
+    "duration": "25 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 17,
+    "title": "Test Security cơ bản",
+    "description": "Các khái niệm về XSS, SQL Injection, mã hóa dữ liệu",
+    "duration": "25 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 18,
+    "title": "Test AI & Machine Learning",
+    "description": "Kiểm tra kiến thức về supervised learning, model, data",
+    "duration": "35 phút",
+    "level": "Nâng cao"
+  },
+  {
+    "id": 19,
+    "title": "Test UI/UX Design",
+    "description": "Nguyên tắc thiết kế, màu sắc, bố cục và trải nghiệm người dùng",
+    "duration": "20 phút",
+    "level": "Cơ bản"
+  },
+  {
+    "id": 20,
+    "title": "Test IELTS Listening",
+    "description": "Thử sức với kỹ năng nghe học thuật chuẩn quốc tế",
+    "duration": "30 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 21,
+    "title": "Test IELTS Reading",
+    "description": "Đọc hiểu bài học học thuật với câu hỏi chọn lọc",
+    "duration": "30 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 22,
+    "title": "Test JavaScript nâng cao",
+    "description": "Async/Await, Closure, Prototype, Event Loop",
+    "duration": "35 phút",
+    "level": "Nâng cao"
+  },
+  {
+    "id": 23,
+    "title": "Test CSS Flexbox & Grid",
+    "description": "Bố cục linh hoạt và grid responsive hiện đại",
+    "duration": "25 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 24,
+    "title": "Test React Router",
+    "description": "Routing, Nested Route, Link và useNavigate",
+    "duration": "20 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 25,
+    "title": "Test Redux Toolkit",
+    "description": "State management, slice, reducer và thunk",
+    "duration": "30 phút",
+    "level": "Nâng cao"
+  },
+  {
+    "id": 26,
+    "title": "Test MongoDB",
+    "description": "Query, aggregation, index và schema design",
+    "duration": "25 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 27,
+    "title": "Test PostgreSQL",
+    "description": "Table, view, index, trigger, stored procedure",
+    "duration": "25 phút",
+    "level": "Nâng cao"
+  },
+  {
+    "id": 28,
+    "title": "Test Docker nâng cao",
+    "description": "Image, container, volume, network và compose",
+    "duration": "30 phút",
+    "level": "Nâng cao"
+  },
+  {
+    "id": 29,
+    "title": "Test Kubernetes cơ bản",
+    "description": "Pod, deployment, service, configmap, secret",
+    "duration": "25 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 30,
+    "title": "Test Firebase",
+    "description": "Authentication, Firestore, Hosting, Realtime DB",
+    "duration": "25 phút",
+    "level": "Cơ bản"
+  },
+  {
+    "id": 31,
+    "title": "Test Next.js",
+    "description": "SSR, SSG, API routes, App Router và layout",
+    "duration": "30 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 32,
+    "title": "Test VueJS",
+    "description": "Component, directive, v-model, computed, watcher",
+    "duration": "25 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 33,
+    "title": "Test Angular",
+    "description": "Module, component, service và dependency injection",
+    "duration": "30 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 34,
+    "title": "Test PHP cơ bản",
+    "description": "Biến, form, session, include và kết nối database",
+    "duration": "20 phút",
+    "level": "Cơ bản"
+  },
+  {
+    "id": 35,
+    "title": "Test Laravel",
+    "description": "Routing, Controller, Blade, Eloquent ORM",
+    "duration": "25 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 36,
+    "title": "Test SEO cơ bản",
+    "description": "Tối ưu nội dung, từ khóa, liên kết và meta tags",
+    "duration": "15 phút",
+    "level": "Cơ bản"
+  },
+  {
+    "id": 37,
+    "title": "Test Networking cơ bản",
+    "description": "Kiến thức về TCP/IP, DNS, HTTP, subnet",
+    "duration": "25 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 38,
+    "title": "Test Cloud AWS",
+    "description": "EC2, S3, IAM, Lambda, CloudFront cơ bản",
+    "duration": "30 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 39,
+    "title": "Test Cloud Azure",
+    "description": "Resource Group, VM, Storage, Function App",
+    "duration": "30 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 40,
+    "title": "Test Data Analysis",
+    "description": "Hiểu Pandas, NumPy, visualization và statistics",
+    "duration": "35 phút",
+    "level": "Nâng cao"
+  },
+  {
+    "id": 41,
+    "title": "Test Machine Learning Python",
+    "description": "Scikit-learn, regression, classification, metrics",
+    "duration": "35 phút",
+    "level": "Nâng cao"
+  },
+  {
+    "id": 42,
+    "title": "Test Cybersecurity nâng cao",
+    "description": "PenTest, network attack, encryption, OWASP",
+    "duration": "40 phút",
+    "level": "Nâng cao"
+  },
+  {
+    "id": 43,
+    "title": "Test ChatGPT Prompt Engineering",
+    "description": "Cách viết prompt, role, context và formatting",
+    "duration": "25 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 44,
+    "title": "Test English Vocabulary",
+    "description": "Từ vựng tiếng Anh thông dụng trong công nghệ",
+    "duration": "15 phút",
+    "level": "Cơ bản"
+  },
+  {
+    "id": 45,
+    "title": "Test TOEIC Listening",
+    "description": "Câu hỏi nghe hiểu tình huống công sở và hội thoại",
+    "duration": "30 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 46,
+    "title": "Test TOEIC Reading",
+    "description": "Đọc hiểu email, quảng cáo, bài viết doanh nghiệp",
+    "duration": "30 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 47,
+    "title": "Test Writing Skills",
+    "description": "Luyện tập viết bài luận, thư xin việc và email",
+    "duration": "40 phút",
+    "level": "Nâng cao"
+  },
+  {
+    "id": 48,
+    "title": "Test Communication Skills",
+    "description": "Tình huống giao tiếp, thuyết trình, teamwork",
+    "duration": "20 phút",
+    "level": "Trung bình"
+  },
+  {
+    "id": 49,
+    "title": "Test Data Science tổng hợp",
+    "description": "Pandas, sklearn, matplotlib, machine learning pipeline",
+    "duration": "45 phút",
+    "level": "Nâng cao"
+  },
+  {
+    "id": 50,
+    "title": "Test Fullstack Developer",
+    "description": "Tổng hợp kiến thức frontend, backend, database và deploy",
+    "duration": "50 phút",
+    "level": "Nâng cao"
+  }
+]
