@@ -1,0 +1,66 @@
+.containerRow {
+  width: 100%;
+  margin: 0 0 0 0;
+}
+
+.descriptionCol {
+  text-align: justify;
+  padding-right: 20px;
+  line-height: 1.8;
+}
+
+
+.descriptionCol h2 {
+  color: #000000;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.cardForm {
+  width: 100%;
+  border-radius: 12px;
+  background: #fff;
+  color: #000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+
+.cardTitle {
+  text-align: center;
+  font-weight: 600;
+}
+
+.formButtons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.buttonCancel {
+  background: #e6e4e4;
+  border: none;
+  color: #000;
+  border-radius: 6px;
+  padding: 0 20px;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.buttonCancel:hover {
+  background: #777676 !important;
+  color: #ffffff !important;
+}
+
+.buttonOk {
+  background: #35509a;
+  border: none;
+  border-radius: 6px;
+  padding: 0 20px;
+  color: #fff;
+  transition: background 0.3s ease, filter 0.3s ease;
+}
+
+.buttonOk:hover {
+  background: #2a3f7a !important; 
+  filter: brightness(1.1); 
+}
+
