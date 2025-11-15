@@ -1,0 +1,121 @@
+/* Slide Container - Full Width */
+.slideContainer {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+.carousel {
+  width: 100%;
+}
+
+.slideItem {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 40%; /* Tỷ lệ 16:10 */
+  overflow: hidden;
+}
+
+/* Custom Dots */
+:global(.ant-carousel .slick-dots) {
+  bottom: 20px !important;
+}
+
+:global(.ant-carousel .slick-dots li button) {
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 2px solid rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.5) inset !important;
+  transition: all 0.3s ease !important;
+}
+
+:global(.ant-carousel .slick-dots li button:hover) {
+  background: rgba(255, 255, 255, 1) !important;
+  border-color: rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.7) inset !important;
+  transform: scale(1.2) !important;
+}
+
+:global(.ant-carousel .slick-dots li.slick-active button) {
+  background: #ffc107 !important;
+  border: 3px solid #ffffff !important;
+  width: 18px !important;
+  height: 18px !important;
+  box-shadow: 0 0 12px rgba(255, 193, 7, 0.9), 0 4px 8px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.8) inset !important;
+}
+
+/* Custom Arrows */
+:global(.ant-carousel .slick-prev),
+:global(.ant-carousel .slick-next) {
+  z-index: 10 !important;
+  width: 60px !important;
+  height: 60px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 2px solid #1890ff !important;
+  position: relative !important;
+}
+
+:global(.ant-carousel .slick-prev:hover),
+:global(.ant-carousel .slick-next:hover) {
+  background: #1890ff !important;
+  transform: scale(1.15) !important;
+  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.4) !important;
+}
+
+:global(.ant-carousel .slick-prev) {
+  left: 20px !important;
+}
+
+:global(.ant-carousel .slick-next) {
+  right: 20px !important;
+}
+
+:global(.ant-carousel .slick-prev::before),
+:global(.ant-carousel .slick-next::before) {
+  font-size: 32px !important;
+  color: #1890ff !important;
+  opacity: 1 !important;
+  font-weight: bold !important;
+  line-height: 1 !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+}
+
+:global(.ant-carousel .slick-prev:hover::before),
+:global(.ant-carousel .slick-next:hover::before) {
+  color: #ffffff !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+/* Hide arrows on mobile */
+@media (max-width: 768px) {
+  :global(.ant-carousel .slick-prev),
+  :global(.ant-carousel .slick-next) {
+    display: none !important;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .slideItem {
+    padding-bottom: 50%; /* Tỷ lệ cao hơn cho mobile */
+  }
+}
+

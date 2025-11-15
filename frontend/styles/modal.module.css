@@ -1,0 +1,55 @@
+/* Hide scrollbar but allow scrolling for modal body */
+:global(.ant-modal-body)::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+:global(.ant-modal-body)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:global(.ant-modal-body)::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+/* For Firefox */
+:global(.ant-modal-body) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Hide scrollbar but allow scrolling */
+.registerFormScroll::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+.registerFormScroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.registerFormScroll::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+/* For Firefox */
+.registerFormScroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Center modal vertically and horizontally, but slightly higher */
+:global(.ant-modal-wrap) {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding-top: 10vh !important;
+}
+
+:global(.ant-modal) {
+  top: 0 !important;
+  padding-bottom: 0 !important;
+  margin: 0 auto !important;
+  transform: translateY(0) !important;
+}
+

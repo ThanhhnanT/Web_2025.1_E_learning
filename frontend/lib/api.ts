@@ -1,5 +1,7 @@
 const BASE_URL = 'https://api.example.com';
 
+import Cookies from "js-cookie";
+
 export async function registerUser(data: {
     fullName: string;
     email: string;
@@ -37,5 +39,5 @@ export async function loginUser(data: {
   }
 }
 export function logoutUser() {
-    localStorage.removeItem("access_token");
+    Cookies.remove("access_token");
 }

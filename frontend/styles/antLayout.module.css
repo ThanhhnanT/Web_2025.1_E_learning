@@ -1,0 +1,120 @@
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  padding-inline: 24px;
+  height: 64px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+
+:global(.ant-menu-horizontal .ant-menu-item:hover) {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+/* Dropdown Menu Styles */
+:global(.ant-dropdown) {
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  padding: 8px !important;
+  min-width: 200px !important;
+}
+
+:global(.ant-dropdown-menu) {
+  border-radius: 12px !important;
+  padding: 4px !important;
+  border: 1px solid #f0f0f0 !important;
+  box-shadow: none !important;
+}
+
+:global(.ant-dropdown-menu-item) {
+  border-radius: 8px !important;
+  margin: 4px 0 !important;
+  padding: 10px 16px !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+:global(.ant-dropdown-menu-item:hover) {
+  background-color: #e6f7ff !important;
+  color: #1890ff !important;
+  transform: translateX(4px) !important;
+}
+
+:global(.ant-dropdown-menu-item-icon) {
+  font-size: 16px !important;
+  color: #595959 !important;
+  transition: color 0.3s ease !important;
+}
+
+:global(.ant-dropdown-menu-item:hover .ant-dropdown-menu-item-icon) {
+  color: #1890ff !important;
+}
+
+:global(.ant-dropdown-menu-item-active) {
+  background-color: #e6f7ff !important;
+}
+
+:global(.ant-dropdown-menu-item-selected) {
+  background-color: #bae7ff !important;
+  color: #1890ff !important;
+}
+
+:global(.ant-dropdown-menu-item-selected .ant-dropdown-menu-item-icon) {
+  color: #1890ff !important;
+}
+
+
+/* Mobile Menu Button */
+.mobileMenuButton {
+  border: none !important;
+  box-shadow: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.mobileMenuButton:hover {
+  background-color: #f5f5f5 !important;
+  transform: scale(1.05);
+}
+
+/* Avatar pointer */
+.avatar {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.avatar:hover {
+  transform: scale(1.1);
+}
+
+/* Content box */
+.contentBox {
+  background: #fff;
+  min-height: 400px;
+  padding: 24px;
+  border-radius: 8px;
+  margin-top: 32px;
+}
+
+/* Button login hover */
+.loginBtn:hover {
+  background-color: #1890ff !important;
+  color: #fff !important;
+  border-color: #1890ff !important;
+  transition: all 0.3s ease;
+}
+body{
+  margin :0;
+}
+.container {
+  width: 100%;
+  max-width: 1200px; 
+  margin: 0 auto;    /* căn giữa ngang */
+  padding: 0; /* khoảng đệm trong, giúp không dính lề */
+  box-sizing: border-box;
+}

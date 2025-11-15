@@ -3,7 +3,7 @@
 import React from "react";
 import { Pagination, Card, Tag, Button, Row, Col } from "antd";
 import { ClockCircleOutlined, UserOutlined, MessageOutlined } from "@ant-design/icons";
-import styles from "./TestList.module.css";
+import styles from "@/styles/testList.module.css";
 
 export type Test = {
   id: number;

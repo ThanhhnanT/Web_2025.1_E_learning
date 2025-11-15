@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import styles from "./Button.module.css";
+import styles from "@/styles/button.module.css";
 interface props {
     type?: "button" | "submit";
     // onClick?: () => void;

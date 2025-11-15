@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Button, Form, Input, Select, Card, Row, Col } from "antd";
-import styles from "./CourseOnline.module.css"; // import CSS module
+import styles from "@/styles/courseOnline.module.css"; // import CSS module
 
 const layout = {
   labelCol: { span: 8 },

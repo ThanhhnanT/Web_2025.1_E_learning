@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Carousel } from "antd";
 import CourseOnline from "@/components/CourseOnline";
-import TestList, { type Test } from "@/components/TestList"; 
+import TestList, { type Test } from "@/components/TestList";
+import styles from "@/styles/page.module.css"; 
 
 
 export default function Home() {
@@ -33,20 +35,40 @@ export default function Home() {
     }, []);
 
 
+  // Danh sách ảnh cho slide (có thể thêm nhiều ảnh)
+  const slideImages = [
+    { src: "/image.png", alt: "Learnify Banner" },
+    // Có thể thêm nhiều ảnh khác ở đây
+    { src: "/bg2.png", alt: "Banner 2" },
+  ];
+
   return (
     <div>
-      <div>
-        <Link href="/tests">
-        <div style={{ position: "relative", width: "100%", height: "0", paddingBottom: "40%" }}>
-          <Image
-            src="/image.png"
-            alt="Learnify Banner"
-            fill
-            style={{ objectFit: "cover" }}
-            priority
-          />
-        </div>
-      </Link>
+      {/* Slide Banner - Full Width */}
+      <div className={styles.slideContainer}>
+        <Carousel
+          autoplay
+          autoplaySpeed={3000}
+          effect="fade"
+          dots={true}
+          draggable={true}
+          swipe={true}
+          className={styles.carousel}
+        >
+          {slideImages.map((item, index) => (
+            <div key={index}>
+                <div className={styles.slideItem}>
+                  <Image
+                    src={item.src}
+                    alt={item.alt}
+                    fill
+                    style={{ objectFit: "cover" }}
+                    priority={index === 0}
+                  />
+                </div>
+            </div>
+          ))}
+        </Carousel>
       </div>
       
       <div className="course-box" style={{ backgroundColor: "#e8f2ff", padding: "30px", borderRadius: "8px",marginTop:"20px" }}>

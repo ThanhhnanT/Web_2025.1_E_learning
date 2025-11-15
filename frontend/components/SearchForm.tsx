@@ -3,7 +3,7 @@
 import React from "react";
 import { Input } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import styles from "./SearchForm.module.css";
+import styles from "@/styles/searchForm.module.css";
 
 type SearchFormProps = {
   onSearch: (keyword: string) => void;

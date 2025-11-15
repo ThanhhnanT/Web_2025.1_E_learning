@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import styles from "./AuthForm.module.css";
+import styles from "@/styles/authForm.module.css";
 
 interface props {
     title: string;

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { registerUser } from "@/lib/api";
 import AuthForm from "@/components/AuthForm";
 import InputField from "@/components/InputField";
-import styles from "../auth.module.css";
+import styles from "@/styles/auth.module.css";
 import Button from "@/components/Button";
 import Link from "next/link";
 

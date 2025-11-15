@@ -1,7 +1,7 @@
 "use client";
 import { Layout, Row, Col } from "antd";
 import Link from "next/link";
-import "./FooterComponent.css";
+import "@/styles/footerComponent.css";
 import Image from "next/image";
 const { Footer } = Layout;
 
@@ -17,6 +17,7 @@ export default function AppFooter() {
     backgroundRepeat: 'no-repeat',
     padding: "40px 48px",
     color: "#050505ff",
+    minHeight: "300px",
   }}
     >
       <Row gutter={[24, 24]} align="top">

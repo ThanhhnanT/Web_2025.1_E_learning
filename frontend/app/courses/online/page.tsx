@@ -4,6 +4,8 @@ import CourseOnline from '@/components/CourseOnline'
 
 export default function CourseOnlinePage(){
   return(
-    <CourseOnline />
+    <div style={{ marginTop: '24px' }}>
+      <CourseOnline />
+    </div>
   )
 }

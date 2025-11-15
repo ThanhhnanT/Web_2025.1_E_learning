@@ -8,7 +8,7 @@ function TestPage() {
   const [keyword, setKeyword] = React.useState("");
 
   return (
-    <div>
+    <div style={{ marginTop: '24px' }}>
       <SearchForm onSearch={setKeyword} />
       <TestList keyword={keyword} />
     </div>
