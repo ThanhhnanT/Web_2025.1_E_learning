@@ -131,14 +131,14 @@ export default function AntLayout({ children }: { children: React.ReactNode }) {
           }}
         >
           <MessageProvider>
-            <Layout style={{ minHeight: "100vh" }}>
+      <Layout style={{ minHeight: "100vh" }}>
               <Header className={`${styles.header} ${skeletonStyles.headerSkeleton}`} style={{ background: "#ffffff" }}>
                 <div className={skeletonStyles.headerLogoSkeleton} />
                 <div className={skeletonStyles.headerMenuSkeleton}>
                   <div className={skeletonStyles.headerButtonSkeleton} />
                 </div>
               </Header>
-              <Content className={styles.container}></Content>
+        <Content className={styles.container}></Content>
               <Footer className={skeletonStyles.footerSkeleton}>
                 <div className={skeletonStyles.footerContent}>
                   <div className={skeletonStyles.footerLogoSkeleton} />
@@ -150,7 +150,7 @@ export default function AntLayout({ children }: { children: React.ReactNode }) {
                 </div>
                 <div className={skeletonStyles.footerCopyrightSkeleton} />
               </Footer>
-            </Layout>
+      </Layout>
           </MessageProvider>
         </ConfigProvider>
       </AntdRegistry>

@@ -7,9 +7,9 @@ import { handleLogin, handleRegister, handleVerify } from '@/service/auth';
 import VerifyEmailModal from './ModalVerify';
 import modalStyles from '@/styles/modal.module.css';
 import authModalStyles from '@/styles/authModal.module.css';
-
+ 
 const { Title, Text, Link } = Typography;
-
+ 
 const AuthModal= (props: any) => {
   const { visible, onClose, setOpen } = props;
   const [verify, setVerify] = useState(false);
@@ -63,7 +63,7 @@ const AuthModal= (props: any) => {
       
     } catch(e) {
       console.log(e)
-    } 
+    }
       
     } catch (error) {
       console.log('Validation Failed:', error);
@@ -81,28 +81,28 @@ const tabItems = [
       children: (
         <div className={authModalStyles.formContainer}>
           <Form form={loginForm} layout="vertical" size="large" className={authModalStyles.form}>
-            <Form.Item
-              name="email"
+          <Form.Item
+            name="email"
               label={<span className={authModalStyles.label}>Email</span>}
               className={authModalStyles.formItem}
-              rules={[
-                { required: true, message: 'Vui lòng nhập email!' },
-                { type: 'email', message: 'Email không hợp lệ!' },
-              ]}
-            >
+            rules={[
+              { required: true, message: 'Vui lòng nhập email!' },
+              { type: 'email', message: 'Email không hợp lệ!' },
+            ]}
+          >
               <Input 
                 prefix={<MailOutlined className={authModalStyles.inputIcon} />}
                 placeholder="Nhập email của bạn" 
                 className={authModalStyles.input}
               />
-            </Form.Item>
+          </Form.Item>
 
-            <Form.Item
-              name="password"
+          <Form.Item
+            name="password"
               label={<span className={authModalStyles.label}>Mật khẩu</span>}
               className={authModalStyles.formItemSmall}
-              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
-            >
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+          >
               <Input.Password 
                 prefix={<LockOutlined className={authModalStyles.inputIcon} />}
                 placeholder="Nhập mật khẩu của bạn" 
@@ -119,7 +119,7 @@ const tabItems = [
                   Quên mật khẩu?
                 </Link>
               </div>
-            </Form.Item>
+          </Form.Item>
 
             <Divider className={authModalStyles.divider}>Hoặc</Divider>
 
@@ -141,7 +141,7 @@ const tabItems = [
                 Đăng nhập với Facebook
               </Button>
             </div>
-          </Form>
+        </Form>
         </div>
       ),
     },
@@ -158,30 +158,30 @@ const tabItems = [
           className={`${authModalStyles.formContainerScroll} ${modalStyles.registerFormScroll}`}
         >
           <Form form={registerForm} layout="vertical" size="large" className={authModalStyles.form}>
-            <Form.Item
-              name="name"
+          <Form.Item
+            name="name"
               label={<span className={authModalStyles.label}>Họ và tên</span>}
               className={authModalStyles.formItem}
-              rules={[
-                { required: true, message: 'Vui lòng nhập tên của bạn' },
-              ]}
-            >
+            rules={[
+              { required: true, message: 'Vui lòng nhập tên của bạn' },
+            ]}
+          >
               <Input 
                 prefix={<UserOutlined className={authModalStyles.inputIcon} />}
                 placeholder="Nhập họ và tên của bạn" 
                 className={authModalStyles.input}
               />
-            </Form.Item>
+          </Form.Item>
 
-            <Form.Item
-              name="email"
+          <Form.Item
+            name="email"
               label={<span className={authModalStyles.label}>Email</span>}
               className={authModalStyles.formItem}
-              rules={[
-                { required: true, message: 'Vui lòng nhập email!' },
-                { type: 'email', message: 'Email không hợp lệ!' },
-              ]}
-            >
+            rules={[
+              { required: true, message: 'Vui lòng nhập email!' },
+              { type: 'email', message: 'Email không hợp lệ!' },
+            ]}
+          >
               <Input 
                 prefix={<MailOutlined className={authModalStyles.inputIcon} />}
                 placeholder="Nhập email của bạn" 
@@ -202,45 +202,45 @@ const tabItems = [
                 placeholder="Nhập số điện thoại của bạn" 
                 className={authModalStyles.input}
               />
-            </Form.Item>
+          </Form.Item>
 
-            <Form.Item
-              name="password"
+          <Form.Item
+            name="password"
               label={<span className={authModalStyles.label}>Mật khẩu</span>}
               className={authModalStyles.formItem}
-              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
-            >
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+          >
               <Input.Password 
                 prefix={<LockOutlined className={authModalStyles.inputIcon} />}
                 placeholder="Nhập mật khẩu của bạn" 
                 className={authModalStyles.input}
               />
-            </Form.Item>
+          </Form.Item>
 
-            <Form.Item
-              name="confirmPassword"
+          <Form.Item
+            name="confirmPassword"
               label={<span className={authModalStyles.label}>Xác nhận mật khẩu</span>}
               className={authModalStyles.formItem}
-              dependencies={['password']}
-              rules={[
-                { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (!value || getFieldValue('password') === value) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(new Error('Mật khẩu không khớp!'));
-                  },
-                }),
-              ]}
-            >
+            dependencies={['password']}
+            rules={[
+              { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('password') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('Mật khẩu không khớp!'));
+                },
+              }),
+            ]}
+          >
               <Input.Password 
                 prefix={<SafetyOutlined className={authModalStyles.inputIcon} />}
                 placeholder="Nhập lại mật khẩu của bạn" 
                 className={authModalStyles.input}
               />
-            </Form.Item>
-          </Form>
+          </Form.Item>
+        </Form>
         </div>
       ),
     },

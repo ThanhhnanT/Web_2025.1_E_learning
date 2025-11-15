@@ -9,13 +9,22 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/passport/jwt-auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-
+import { TestsModule } from './modules/tests/tests.module';
+import { ContentsModule } from './modules/contents/contents.module';
+import { ResultsModule } from './modules/results/results.module';
+import { AnswersModule } from './modules/answers/answers.module';
+import { CommentsModule } from './modules/comments/comments.module';
 
 @Module({
   imports: [
     UsersModule,
     AuthModule,
-    
+    TestsModule,
+    ContentsModule,
+    ResultsModule,
+    AnswersModule,
+    CommentsModule,
+
     ConfigModule.forRoot({
       isGlobal: true, 
     }),
