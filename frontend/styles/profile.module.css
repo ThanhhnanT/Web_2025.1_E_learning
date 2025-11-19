@@ -1,0 +1,285 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: calc(100vh - 200px);
+  padding: 24px;
+  background-color: #f0f2f5;
+}
+
+.profileCard {
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 200px);
+  background-color: #f0f2f5;
+}
+
+/* Header Section */
+.headerSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 0;
+}
+
+.avatarSection {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatarWrapper {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.avatarWrapper:hover {
+  transform: scale(1.05);
+}
+
+.avatarWrapper:hover .avatarOverlay {
+  opacity: 1;
+}
+
+.avatar {
+  border: 4px solid #1890ff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.avatarOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  cursor: pointer;
+}
+
+.cameraIcon {
+  font-size: 32px;
+  color: #ffffff;
+}
+
+.uploadingIndicator {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #ffffff;
+  border-radius: 50%;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.userInfo {
+  text-align: center;
+  flex: 1;
+}
+
+.userName {
+  margin: 0 !important;
+  color: #1890ff;
+}
+
+.userEmail {
+  display: block;
+  margin-top: 8px;
+  font-size: 16px;
+}
+
+.actionButtons {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Profile Form */
+.profileForm {
+  margin-top: 24px;
+}
+
+.helperText {
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Password Section */
+.passwordSection {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .headerSection {
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .avatarSection {
+    margin-right: 24px;
+  }
+
+  .userInfo {
+    text-align: left;
+    flex: 1;
+  }
+
+  .actionButtons {
+    justify-content: flex-end;
+    width: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .container {
+    padding: 16px;
+  }
+
+  .profileCard {
+    border-radius: 4px;
+  }
+
+  .headerSection {
+    padding: 16px 0;
+  }
+
+  .avatar {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  .userName {
+    font-size: 20px !important;
+  }
+
+  .userEmail {
+    font-size: 14px;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .actionButtons button {
+    width: 100%;
+  }
+}
+
+/* Form Item Styling */
+:global(.profileForm .ant-form-item-label > label) {
+  font-weight: 500;
+  color: #262626;
+}
+
+:global(.profileForm .ant-input:disabled),
+:global(.profileForm .ant-input-disabled) {
+  background-color: #f5f5f5;
+  color: #000000;
+  cursor: not-allowed;
+}
+
+/* Ensure placeholder shows in disabled TextArea */
+:global(.profileForm textarea.ant-input[disabled]) {
+  -webkit-text-fill-color: #000000;
+}
+
+:global(.profileForm textarea.ant-input[disabled]::placeholder) {
+  color: #bfbfbf !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #bfbfbf !important;
+}
+
+:global(.profileForm textarea.ant-input[disabled]:not(:focus):empty::before) {
+  content: attr(placeholder);
+  color: #bfbfbf;
+  pointer-events: none;
+}
+
+/* Card Header Customization */
+:global(.profileCard .ant-card-body) {
+  padding: 32px;
+}
+
+@media (max-width: 767px) {
+  :global(.profileCard .ant-card-body) {
+    padding: 20px;
+  }
+}
+
+/* Crop Modal Styles */
+.cropContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.cropWrapper {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.cropControls {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 16px;
+  gap: 8px;
+}
+
+.cropControls :global(.anticon) {
+  font-size: 18px;
+  color: #1890ff;
+}
+
+.cropHint {
+  text-align: center;
+  padding: 8px 0;
+}
+
+@media (max-width: 767px) {
+  .cropWrapper {
+    height: 300px;
+  }
+  
+  .cropControls {
+    padding: 0 8px;
+  }
+}
+
+/* Password Modal Styles */
+.passwordModal :global(.ant-modal-wrap) {
+  z-index: 1000;
+}
+
+.passwordModal :global(.ant-modal-mask) {
+  background-color: rgba(0, 0, 0, 0.45);
+}
+

@@ -73,6 +73,8 @@ export const upImage = async (path: String, data: object) => {
 
 
 
+// API KÈM ACCESS_TOKEN
+
 const getTokenHeader = () => {
   const token = Cookies.get('access_token'); 
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -89,6 +91,7 @@ export const getAccess = async (path: string, params: object = {}) => {
     return result.data;
   } catch (e) {
     console.error(e);
+    throw e; // Re-throw để component có thể handle error
   }
 };
 
@@ -100,6 +103,64 @@ export const postAccess = async (path: string, data: object) => {
     return res.data;
   } catch (error) {
     console.log('API Error:', error);
+    throw error;
+  }
+};
+
+export const patchAccess = async (path: string, data: object) => {
+  try {
+    const tokenHeader = await getTokenHeader();
+    const res = await axios.patch(API_DOMAIN + path, data, { ...config, headers: { ...config.headers, ...tokenHeader } });
+    return res.data;
+  } catch (error) {
+    console.log('API Error:', error);
+    throw error;
+  }
+};
+
+// Profile functions
+export const getUserProfile = async () => {
+  try {
+    return await getAccess('auth/profile');
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    throw error;
+  }
+};
+
+export const updateProfile = async (data: { name?: string; phone?: string; bio?: string }) => {
+  try {
+    return await patchAccess('users/profile', data);
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    throw error;
+  }
+};
+
+export const uploadAvatar = async (file: File) => {
+  try {
+    const tokenHeader = await getTokenHeader();
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const res = await axios.post(API_DOMAIN + 'users/profile/avatar', formData, {
+      headers: {
+        ...tokenHeader,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error('Error uploading avatar:', error);
+    throw error;
+  }
+};
+
+export const changePassword = async (data: { oldPassword: string; newPassword: string }) => {
+  try {
+    return await patchAccess('users/profile/password', data);
+  } catch (error) {
+    console.error('Error changing password:', error);
     throw error;
   }
 };

@@ -8,6 +8,13 @@
   margin-right: -50vw;
   margin-bottom: 0;
   margin-top: 0;
+  padding-top: 0;
+}
+
+@media (max-width: 768px) {
+  .slideContainer {
+    margin-bottom: 0;
+  }
 }
 
 .carousel {
@@ -112,10 +119,34 @@
   }
 }
 
-/* Responsive */
+/* Responsive - Thu nhỏ slide khi màn hình < 768px */
 @media (max-width: 768px) {
   .slideItem {
-    padding-bottom: 50%; /* Tỷ lệ cao hơn cho mobile */
+    padding-bottom: 35%; /* Thu nhỏ đáng kể chiều cao cho mobile */
+    min-height: 200px; /* Giảm chiều cao tối thiểu */
+  }
+  
+  /* Override object-fit cho mobile để width full chiều ngang và căn giữa trung tâm */
+  .slideItem :global(span),
+  .slideItem :global(img) {
+    object-fit: cover !important; /* Width full chiều ngang */
+    object-position: center center !important; /* Căn giữa trung tâm */
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  /* Giảm khoảng cách dots */
+  :global(.ant-carousel .slick-dots) {
+    bottom: 10px !important;
+  }
+  
+  /* Giảm khoảng cách với phần dưới */
+  :global(.course-box) {
+    margin-top: 10px !important;
+  }
+  
+  :global(.tests) {
+    margin-top: 10px !important;
   }
 }
 

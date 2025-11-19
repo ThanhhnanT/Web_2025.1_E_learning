@@ -20,6 +20,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { checkAuth } from "../lib/helper";
 import { logoutUser } from "@/lib/api";
+import { getUserProfile } from "@/helper/api";
 import Cookies from "js-cookie";
 import FooterComponent from "./FooterComponent";
 import styles from '@/styles/antLayout.module.css';
@@ -38,6 +39,7 @@ const style = commonStyle()
 function UserMenuClient({ onOpenModal }: { onOpenModal: () => void }) {
   const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -46,18 +48,105 @@ function UserMenuClient({ onOpenModal }: { onOpenModal: () => void }) {
 
   useEffect(() => {
     const checkLogin = () => {
-      if (Cookies.get('access_token')) {
-        setIsAuthenticated(true);
-      } else {
-        setIsAuthenticated(false);
+      const token = Cookies.get('access_token');
+      setIsAuthenticated(!!token);
+      if (!token) {
+        setUserAvatar(null);
       }
     };
 
     checkLogin();
 
-    const interval = setInterval(checkLogin, 1000);
+    // Check less frequently to reduce re-renders
+    const interval = setInterval(checkLogin, 3000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Fetch user avatar when authenticated
+  useEffect(() => {
+    let isMounted = true;
+    let timeoutId: NodeJS.Timeout | null = null;
+    
+    const fetchAvatar = async () => {
+      // Check token before making API call
+      const token = Cookies.get('access_token');
+      if (!token || !isAuthenticated) {
+        return;
+      }
+      
+      // Only fetch if we don't have avatar yet
+      if (userAvatar) {
+        return;
+      }
+      
+      try {
+        // Add timeout to prevent blocking
+        const fetchPromise = getUserProfile();
+        timeoutId = setTimeout(() => {
+          if (isMounted) {
+            console.warn('Avatar fetch timeout');
+          }
+        }, 5000);
+        
+        const userProfile = await fetchPromise;
+        
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        
+        if (isMounted && userProfile?.avatar_url) {
+          setUserAvatar(userProfile.avatar_url);
+        }
+      } catch (error: any) {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        // Only log non-401 errors to avoid spam
+        if (error?.response?.status !== 401) {
+          console.error('Error fetching user profile for avatar:', error);
+        }
+        // Keep avatar as null if fetch fails
+      }
+    };
+
+    fetchAvatar();
+    
+    return () => {
+      isMounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
+
+  // Listen for avatar update events
+  useEffect(() => {
+    const handleAvatarUpdate = (event: CustomEvent) => {
+      if (event.detail?.avatar_url) {
+        setUserAvatar(event.detail.avatar_url);
+      } else {
+        // If no avatar_url in event, refetch from API
+        const fetchAvatar = async () => {
+          try {
+            const userProfile = await getUserProfile();
+            if (userProfile?.avatar_url) {
+              setUserAvatar(userProfile.avatar_url);
+            }
+          } catch (error) {
+            console.error('Error fetching updated avatar:', error);
+          }
+        };
+        fetchAvatar();
+      }
+    };
+
+    window.addEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
+
+    return () => {
+      window.removeEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
+    };
   }, []);
 
   if (!mounted) return null;
@@ -70,14 +159,18 @@ function UserMenuClient({ onOpenModal }: { onOpenModal: () => void }) {
     },
     { 
       key: "logout", 
-      label: <span onClick={() => { logoutUser(); setIsAuthenticated(false); router.push("/"); }}>Đăng xuất</span>,
+      label: <span onClick={() => { logoutUser(); setIsAuthenticated(false); setUserAvatar(null); router.push("/"); }}>Đăng xuất</span>,
       icon: <LogoutOutlined />
     },
   ];
 
   return isAuthenticated ? (
     <Dropdown menu={{ items: userMenu }} placement="bottomRight" arrow>
-      <Avatar src="/avatar.png" style={{ cursor: "pointer" }} />
+      <Avatar 
+        src={userAvatar || undefined} 
+        icon={!userAvatar && <UserOutlined />}
+        style={{ cursor: "pointer" }} 
+      />
     </Dropdown>
   ) : (
     <Button

@@ -1,24 +1,27 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import {User} from '@/modules/users/schemas/user.schema'
 import {Model } from 'mongoose'
-import { hashPassword } from '@/utils/hashpass';
+import { hashPassword, comparePass } from '@/utils/hashpass';
 import aqp from 'api-query-params';
 import { CreateAuthDto } from '@/auth/dto/create-auth.dto';
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import {MailerService} from '@nestjs-modules/mailer'
 import { VerifyDto } from '@/auth/dto/verify-email.dto';
+import { CloudinaryService } from './cloudinary.service';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) 
-  private userModel: Model<User>,
-  private readonly mailerService: MailerService
-  
-) {}
+  constructor(
+    @InjectModel(User.name) 
+    private userModel: Model<User>,
+    private readonly mailerService: MailerService,
+    private readonly cloudinaryService: CloudinaryService
+  ) {}
   
  isEmailExist = async (email:string) => {
   const user = await this.userModel.exists({email:email})
@@ -76,8 +79,80 @@ export class UsersService {
     return await this.userModel.findOne({email: email}).select('-password')
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(userId: string, updateUserDto: UpdateUserDto) {
+    const user = await this.userModel.findById(userId);
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const updateData: any = {};
+    if (updateUserDto.name !== undefined) {
+      updateData.name = updateUserDto.name;
+    }
+    if (updateUserDto.phone !== undefined) {
+      updateData.phone = updateUserDto.phone;
+    }
+    if (updateUserDto.bio !== undefined) {
+      updateData.bio = updateUserDto.bio;
+    }
+
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true }
+    ).select('-password');
+
+    return updatedUser;
+  }
+
+  async updateAvatar(userId: string, file: any) {
+    const user = await this.userModel.findById(userId);
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Upload image to Cloudinary
+    const avatarUrl = await this.cloudinaryService.uploadImage(file);
+
+    // Update user's avatar_url
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      { avatar_url: avatarUrl },
+      { new: true }
+    ).select('-password');
+
+    return updatedUser;
+  }
+
+  async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
+    const user = await this.userModel.findById(userId);
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Verify old password
+    const isOldPasswordValid = await comparePass(changePasswordDto.oldPassword, user.password);
+    
+    if (!isOldPasswordValid) {
+      throw new UnauthorizedException('Mật khẩu cũ không đúng');
+    }
+
+    // Hash new password
+    const hashedNewPassword = await hashPassword(changePasswordDto.newPassword);
+
+    // Update password
+    await this.userModel.findByIdAndUpdate(
+      userId,
+      { password: hashedNewPassword }
+    );
+
+    return {
+      message: 'Đổi mật khẩu thành công',
+      statusCode: 200,
+    };
   }
 
   remove(id: number) {
