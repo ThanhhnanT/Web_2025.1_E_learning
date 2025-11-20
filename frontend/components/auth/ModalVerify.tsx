@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Form, Input, Button, Space, Typography, Divider } from "antd";
 import { SafetyOutlined, MailOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { useMessageApi } from "@/components/providers/Message"; 
@@ -19,6 +19,20 @@ const VerifyEmailModal: React.FC<VerifyEmailModalProps> = ({ open, onClose }) =>
   const [form] = Form.useForm();
   const messageApi = useMessageApi();
   const [loading, setLoading] = useState(false);
+
+  // Cleanup handler when modal closes
+  const handleAfterClose = () => {
+    form.resetFields();
+    setLoading(false);
+  };
+
+  // Reset form when modal opens
+  useEffect(() => {
+    if (open) {
+      form.resetFields();
+      setLoading(false);
+    }
+  }, [open, form]);
 
   const handleVerifyCode = async () => {
     const email = Cookies.get("email");
@@ -55,6 +69,9 @@ const VerifyEmailModal: React.FC<VerifyEmailModalProps> = ({ open, onClose }) =>
     <Modal
       open={open}
       onCancel={onClose}
+      afterClose={handleAfterClose}
+      destroyOnClose={true}
+      maskClosable={true}
       footer={null}
       centered
       width={480}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Tabs, Form, Input, Button, message, Typography, Divider } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, SafetyOutlined, GoogleOutlined, FacebookOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie';
@@ -19,6 +19,30 @@ const AuthModal= (props: any) => {
 
   const [loginForm] = Form.useForm();
   const [registerForm] = Form.useForm();
+
+  // Cleanup handler when modal closes
+  const handleAfterClose = () => {
+    // Reset forms
+    loginForm.resetFields();
+    registerForm.resetFields();
+    // Reset active tab to login
+    setActiveTab('login');
+    // Reset loading state
+    setLoading(false);
+    // Reset verify modal state
+    setVerify(false);
+  };
+
+  // Reset forms when modal opens
+  useEffect(() => {
+    if (visible) {
+      loginForm.resetFields();
+      registerForm.resetFields();
+      setActiveTab('login');
+      setLoading(false);
+      setVerify(false);
+    }
+  }, [visible, loginForm, registerForm]);
 
 
   const handleSubmit = async () => {
@@ -263,6 +287,9 @@ const tabItems = [
         </div>
       }
       onCancel={onClose}
+      afterClose={handleAfterClose}
+      destroyOnClose={true}
+      maskClosable={true}
       footer={[
         <Button key="cancel" onClick={onClose} size="large" className={authModalStyles.cancelButton}>
           Hủy

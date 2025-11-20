@@ -39,14 +39,15 @@
 }
 
 /* Center modal vertically and horizontally, but slightly higher */
-:global(.ant-modal-wrap) {
+/* Using more specific selector to avoid interfering with Ant Design's cleanup */
+:global(.ant-modal-wrap.ant-modal-wrap-open) {
   display: flex !important;
   align-items: flex-start !important;
   justify-content: center !important;
   padding-top: 10vh !important;
 }
 
-:global(.ant-modal) {
+:global(.ant-modal-wrap.ant-modal-wrap-open .ant-modal) {
   top: 0 !important;
   padding-bottom: 0 !important;
   margin: 0 auto !important;

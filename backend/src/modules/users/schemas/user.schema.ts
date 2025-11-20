@@ -27,6 +27,9 @@ export class User {
   @Prop({ type: Boolean, default: false })
   email_verified: boolean;
 
+  @Prop({ type: String, enum: ['user', 'admin'], default: 'user' })
+  role: string;
+
   @Prop() 
   codeId: string
   
