@@ -71,6 +71,7 @@ const AuthModal= (props: any) => {
       }
       if (activeTab === 'login') {
         Cookies.set('access_token', res.access_token)
+        Cookies.set('user_id', res.id); 
         setLoading(false)
         messageApi.success('Đăng nhập thành công')
         // Delay để message hiển thị trước khi reload

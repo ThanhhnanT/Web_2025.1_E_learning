@@ -70,7 +70,7 @@ const VerifyEmailModal: React.FC<VerifyEmailModalProps> = ({ open, onClose }) =>
       open={open}
       onCancel={onClose}
       afterClose={handleAfterClose}
-      destroyOnClose={true}
+      destroyOnHidden={true}
       maskClosable={true}
       footer={null}
       centered
@@ -142,7 +142,7 @@ const VerifyEmailModal: React.FC<VerifyEmailModalProps> = ({ open, onClose }) =>
           </Button>
         </div>
       </Form>
-    </Modal>
+  </Modal>
   );
 };
 

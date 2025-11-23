@@ -38,138 +38,71 @@ const style = commonStyle()
 // Component client-only cho User menu
 function UserMenuClient({ onOpenModal }: { onOpenModal: () => void }) {
   const [mounted, setMounted] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(checkAuth());
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
+
   const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Cập nhật lại token sau mỗi lần reload
   useEffect(() => {
-    const checkLogin = () => {
-      const token = Cookies.get('access_token');
-      setIsAuthenticated(!!token);
-      if (!token) {
-        setUserAvatar(null);
-      }
-    };
+    if (checkAuth()) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+      setUserAvatar(null);
+    }
+  }, [mounted]);
 
-    checkLogin();
-
-    // Check less frequently to reduce re-renders
-    const interval = setInterval(checkLogin, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Fetch user avatar when authenticated
+  // Chỉ fetch avatar khi đăng nhập
   useEffect(() => {
-    let isMounted = true;
-    let timeoutId: NodeJS.Timeout | null = null;
-    
+    if (!isAuthenticated) return;
+
     const fetchAvatar = async () => {
-      // Check token before making API call
-      const token = Cookies.get('access_token');
-      if (!token || !isAuthenticated) {
-        return;
-      }
-      
-      // Only fetch if we don't have avatar yet
-      if (userAvatar) {
-        return;
-      }
-      
       try {
-        // Add timeout to prevent blocking
-        const fetchPromise = getUserProfile();
-        timeoutId = setTimeout(() => {
-          if (isMounted) {
-            console.warn('Avatar fetch timeout');
-          }
-        }, 5000);
-        
-        const userProfile = await fetchPromise;
-        
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-        
-        if (isMounted && userProfile?.avatar_url) {
-          setUserAvatar(userProfile.avatar_url);
-        }
-      } catch (error: any) {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-        // Only log non-401 errors to avoid spam
-        if (error?.response?.status !== 401) {
-          console.error('Error fetching user profile for avatar:', error);
-        }
-        // Keep avatar as null if fetch fails
-      }
+        const user = await getUserProfile();
+        if (user?.avatar_url) setUserAvatar(user.avatar_url);
+      } catch {}
     };
 
     fetchAvatar();
-    
-    return () => {
-      isMounted = false;
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
-
-  // Listen for avatar update events
-  useEffect(() => {
-    const handleAvatarUpdate = (event: CustomEvent) => {
-      if (event.detail?.avatar_url) {
-        setUserAvatar(event.detail.avatar_url);
-      } else {
-        // If no avatar_url in event, refetch from API
-        const fetchAvatar = async () => {
-          try {
-            const userProfile = await getUserProfile();
-            if (userProfile?.avatar_url) {
-              setUserAvatar(userProfile.avatar_url);
-            }
-          } catch (error) {
-            console.error('Error fetching updated avatar:', error);
-          }
-        };
-        fetchAvatar();
-      }
-    };
-
-    window.addEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
-
-    return () => {
-      window.removeEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
-    };
-  }, []);
 
   if (!mounted) return null;
 
-  const userMenu: MenuProps['items'] = [
-    { 
-      key: "profile", 
+  const userMenu: MenuProps["items"] = [
+    {
+      key: "profile",
       label: <span onClick={() => router.push("/auth/profile")}>Hồ sơ</span>,
       icon: <UserOutlined />
     },
-    { 
-      key: "logout", 
-      label: <span onClick={() => { logoutUser(); setIsAuthenticated(false); setUserAvatar(null); router.push("/"); }}>Đăng xuất</span>,
+    {
+      key: "logout",
+      label: (
+        <span
+          onClick={() => {
+            logoutUser();
+            setIsAuthenticated(false);
+            setUserAvatar(null);
+            router.push("/");
+          }}
+        >
+          Đăng xuất
+        </span>
+      ),
       icon: <LogoutOutlined />
-    },
+    }
   ];
 
   return isAuthenticated ? (
     <Dropdown menu={{ items: userMenu }} placement="bottomRight" arrow>
-      <Avatar 
-        src={userAvatar || undefined} 
+      <Avatar
+        src={userAvatar || undefined}
         icon={!userAvatar && <UserOutlined />}
-        style={{ cursor: "pointer" }} 
+        style={{ cursor: "pointer" }}
       />
     </Dropdown>
   ) : (
@@ -183,6 +116,7 @@ function UserMenuClient({ onOpenModal }: { onOpenModal: () => void }) {
     </Button>
   );
 }
+
 
 export default function AntLayout({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
@@ -282,7 +216,7 @@ export default function AntLayout({ children }: { children: React.ReactNode }) {
     },
     { 
       key: "flashcards", 
-      label: <Link href="/flashcards"><span style={{ fontWeight: "bold" }}>Flashcards</span></Link>,
+      label: <Link href="/flashcards/discover"><span style={{ fontWeight: "bold" }}>Flashcards</span></Link>,
       icon: <ThunderboltOutlined />
     },
     { 
@@ -384,7 +318,7 @@ export default function AntLayout({ children }: { children: React.ReactNode }) {
               setAuthModalOpen(open);
               // Refresh page when modal closes after successful login to update auth status
               if (!open && checkAuth()) {
-                window.location.reload();
+               setTimeout(()=> window.location.reload(), 200);
               }
             }}
           />

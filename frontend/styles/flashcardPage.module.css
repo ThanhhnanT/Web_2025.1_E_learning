@@ -1,0 +1,300 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 24px;
+  color: #1a1a1a;
+}
+
+.nav {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.navItem {
+  font-size: 16px;
+  color: #666;
+  text-decoration: none;
+  padding: 8px 0;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.navItem:hover {
+  color: #1890ff;
+}
+
+.navItem:first-child {
+  color: #1890ff;
+  border-bottom-color: #1890ff;
+}
+
+.alert {
+  margin-bottom: 32px;
+}
+
+.alertContent {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.section {
+  margin-bottom: 40px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sectionHeader h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.viewAll {
+  color: #1890ff;
+  text-decoration: none;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stats {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.statItem {
+  text-align: center;
+}
+
+.statNumber {
+  font-size: 32px;
+  font-weight: bold;
+  color: #1890ff;
+  margin-bottom: 4px;
+}
+
+.statLabel {
+  font-size: 14px;
+  color: #666;
+}
+
+.flashcardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.flashcard {
+  height: 100%; 
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.flashcard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  border-color: #1890ff; 
+}
+
+.flashcardHeader {
+  margin-bottom: 16px;
+  padding: 16px 16px 0 16px;
+}
+
+.flashcardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.flashcardMeta {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  color: #666;
+  padding: 0 16px;
+}
+
+.flashcardInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding: 12px 16px;
+  border-top: 1px solid #f0f0f0;
+  background-color: #fafafa;
+  border-radius: 0 0 12px 12px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.username {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.progressInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.progressItem {
+  font-size: 12px;
+  color: #999;
+}
+
+.continueButton {
+  width: 100%;
+  height: 40px;
+  font-weight: 500;
+}
+
+.createButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 40px;
+  border: 2px dashed #e8e8e8;
+  border-radius: 12px;
+}
+
+.emptyContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  color: #d9d9d9;
+  margin-bottom: 16px;
+}
+
+.emptyContent p {
+  color: #999;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+
+.decksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px; 
+  
+  margin-top: 20px;
+  width: 100%;
+}
+
+.deckCard {
+  height: 100%; 
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.deckCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  border-color: #1890ff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .nav {
+    gap: 20px;
+  }
+
+  .stats {
+    gap: 20px;
+    padding: 16px;
+  }
+
+  .statNumber {
+    font-size: 24px;
+  }
+
+  .flashcardList {
+    grid-template-columns: 1fr;
+  }
+
+  .flashcardInfo {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}
+.tabsContainer {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0 20px 0;
+}
+
+.tabButton {
+  padding: 6px 14px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.tabButton:hover {
+  background: #f3f4f6;
+}
+
+.active {
+  background: #e8f0ff !important;
+  color: #1a56db;
+  border-color: #1a56db;
+  font-weight: bold;
+}
