@@ -1,26 +1,51 @@
 .searchForm {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   width: 100%;
   margin-bottom: 24px;
+  align-items: flex-end;
 }
 
 .searchInput {
   width: 100%; 
-  max-width: 800px;
+  max-width: 500px;
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 14px;
-  margin-bottom: 10px; 
+}
+
+.skillSelect {
+  min-width: 200px;
+}
+
+.skillSelect :global(.ant-select-selector) {
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  min-height: 40px;
+}
+
+.skillSelect :global(.ant-select-selection-item) {
+  display: flex;
+  align-items: center;
 }
 
 .searchButton {
-  padding: 9px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  background-color: #3f51b5;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+}
+
+@media (max-width: 576px) {
+  .searchInput {
+    max-width: 100%;
+  }
+
+  .skillSelect {
+    min-width: 100%;
+  }
+
+  .searchButton {
+    width: 100%;
+  }
 }

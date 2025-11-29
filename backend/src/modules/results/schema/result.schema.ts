@@ -3,6 +3,20 @@ import { HydratedDocument, Types, Schema as MongooseSchema } from 'mongoose';
 
 export type ResultDocument = HydratedDocument<Result>;
 
+export interface QuestionAnswer {
+  questionId: Types.ObjectId; // Reference to Question
+  questionNumber: number;
+  userAnswer: string[]; // Array to support multiple answers
+  isCorrect: boolean;
+  timeSpent?: number; // Time spent on this question in seconds
+}
+
+export interface ReviewNote {
+  questionId: Types.ObjectId;
+  note: string;
+  createdAt: Date;
+}
+
 @Schema({ timestamps: true })
 export class Result {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
@@ -11,11 +25,17 @@ export class Result {
   @Prop({ type: Types.ObjectId, ref: 'Test', required: true })
   testId: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Answer', required: true })
-  answerId: Types.ObjectId;
+  // DEPRECATED: Keep for backward compatibility, but new attempts should use answers array
+  @Prop({ type: Types.ObjectId, ref: 'Answer' })
+  answerId?: Types.ObjectId;
 
-  @Prop({ type: MongooseSchema.Types.Mixed, required: true })
-  userAnswer: any; // Câu trả lời của user (có thể là string, array, object...)
+  // DEPRECATED: Keep for backward compatibility
+  @Prop({ type: MongooseSchema.Types.Mixed })
+  userAnswer?: any;
+
+  // NEW: Detailed answer tracking per question
+  @Prop({ type: MongooseSchema.Types.Mixed, default: [] })
+  answers: QuestionAnswer[];
 
   @Prop({ type: Number, required: true, min: 0 })
   score: number; // Điểm số
@@ -24,13 +44,17 @@ export class Result {
   totalQuestions: number; // Tổng số câu hỏi
 
   @Prop({ type: Number, required: true, min: 0 })
-  correctAnswers: number; // Số câu trả lời đúng
+  correctAnswers: number; // Số câu trả lời đúng (renamed from correctAnswers)
 
   @Prop({ type: Number, required: true, min: 0 })
   timeSpent: number; // Thời gian làm bài (phút)
 
   @Prop({ type: Date })
   completedAt: Date; // Thời gian hoàn thành bài test
+
+  // NEW: Review notes for wrong answers
+  @Prop({ type: MongooseSchema.Types.Mixed, default: [] })
+  reviewNotes: ReviewNote[];
 
   @Prop({ type: Date, default: null })
   deletedAt: Date | null; // Soft delete

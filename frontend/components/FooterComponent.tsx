@@ -52,7 +52,21 @@ export default function AppFooter() {
           </div>
         </Col>
         <Col xs={24} sm={12} md={6} lg={6}>
-          <h3>Chính sách chung</h3>
+          <h3 style={{ fontWeight: "bold" }}>Liên hệ</h3>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+            <span>📧</span>
+            <a href="mailto:contact@webhoctructuyen.com" className="footer-link">
+              contact@webhoctructuyen.com
+            </a>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+            <span>📱</span>
+            <span>+84 123 456 789</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span>📍</span>
+            <span>Hà Nội, Việt Nam</span>
+          </div>
         </Col>
       </Row>
 

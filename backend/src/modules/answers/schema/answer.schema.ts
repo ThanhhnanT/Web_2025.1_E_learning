@@ -9,7 +9,7 @@ export class Answer {
   contentId: Types.ObjectId;
 
   @Prop({ type: MongooseSchema.Types.Mixed, required: true })
-  correctAnswer: any; // Đáp án đúng (có thể là string, array, object...)
+  correctAnswer: any; 
 
   @Prop({ type: Date, default: null })
   deletedAt: Date | null; // Soft delete

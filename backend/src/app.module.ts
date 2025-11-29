@@ -17,6 +17,9 @@ import { CommentsModule } from './modules/comments/comments.module';
 import { CoursesModule } from './modules/courses/courses.module';
 import { FlashcardsModule } from './modules/flashcards/flashcards.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { TestSectionsModule } from './modules/test-sections/test-sections.module';
+import { QuestionGroupsModule } from './modules/question-groups/question-groups.module';
+import { QuestionsModule } from './modules/questions/questions.module';
 
 @Module({
   imports: [
@@ -30,6 +33,9 @@ import { PaymentsModule } from './modules/payments/payments.module';
     CoursesModule,
     FlashcardsModule,
     PaymentsModule,
+    TestSectionsModule,
+    QuestionGroupsModule,
+    QuestionsModule,
 
     ConfigModule.forRoot({
       isGlobal: true, 

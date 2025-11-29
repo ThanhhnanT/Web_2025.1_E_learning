@@ -30,6 +30,7 @@ import AuthModal from "./auth/ModalAuth";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider } from "antd";
 import {MessageProvider}  from "./providers/Message";
+import { RouteTransitionProvider } from "./providers/RouteTransitionProvider";
 import { commonStyle } from "@/styles/common";
 
 const { Header, Content, Footer } = Layout;
@@ -192,6 +193,11 @@ export default function AntLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
+  // Xác định trang đang làm bài test (khác với trang danh sách đề thi)
+  // Ví dụ: /tests/[testId]/sections/[sectionId]
+  const isDoingTestPage =
+    pathname.startsWith("/tests/") && pathname.includes("/sections/");
+
   useEffect(() => {
     setMounted(true);
 
@@ -199,6 +205,18 @@ export default function AntLayout({ children }: { children: React.ReactNode }) {
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Lắng nghe sự kiện global để mở modal đăng nhập từ bất kỳ trang nào
+  useEffect(() => {
+    const handleOpenAuthModal = () => {
+      setAuthModalOpen(true);
+    };
+
+    window.addEventListener("openAuthModal", handleOpenAuthModal);
+    return () => {
+      window.removeEventListener("openAuthModal", handleOpenAuthModal);
+    };
   }, []);
 
   if (!mounted) {
@@ -331,63 +349,67 @@ export default function AntLayout({ children }: { children: React.ReactNode }) {
         }}
       >
         <MessageProvider>
-          <Layout style={{ minHeight: "100vh" }}>
-            {/* HEADER */}
-            <Header className={`${styles.header} ${skeletonStyles.headerSkeleton}`} style={{ background: "#ffffff" }}>
-              <Link href="/" style={{ display: "flex", alignItems: "center", height: "100%" }}>
-                <Image
-                  src={isMobile ? "/logo1.png" : "/logo.png"}
-                  alt="Logo"
-                  width={isMobile ? 100 : 120 }
-                  height={isMobile ? 100 : 120}
-                  priority
-                  style={{ objectFit: "contain" }}
-                />
-              </Link>
-
-              {isMobile ? (
-                <Dropdown menu={dropdownMenu} placement="bottomRight" arrow>
-                  <Button 
-                    type="text" 
-                    icon={<MenuOutlined style={{ fontSize: 26, color: "black" }} />} 
-                    className={styles.mobileMenuButton}
+          <RouteTransitionProvider>
+            <Layout style={{ minHeight: "100vh" }}>
+              {/* HEADER */}
+              <Header className={`${styles.header} ${skeletonStyles.headerSkeleton}`} style={{ background: "#ffffff" }}>
+                <Link href="/" style={{ display: "flex", alignItems: "center", height: "100%" }}>
+                  <Image
+                    src={isMobile ? "/logo1.png" : "/logo.png"}
+                    alt="Logo"
+                    width={isMobile ? 100 : 120 }
+                    height={isMobile ? 100 : 120}
+                    priority
+                    style={{ objectFit: "contain" }}
                   />
-                </Dropdown>
-              ) : (
-                <Menu
-                  mode="horizontal"
-                  selectedKeys={[selectedKey]}
-                  items={menuItems}
-                  style={{
-                    flex: 1,
-                    justifyContent: "flex-end",
-                    minWidth: 0,
-                    background: "transparent",
-                    borderBottom: "none",
-                  }}
-                />
-              )}
-            </Header>
+                </Link>
 
-            {/* CONTENT */}
-            <Content className={styles.container}>{children}</Content>
+                {isMobile ? (
+                  <Dropdown menu={dropdownMenu} placement="bottomRight" arrow>
+                    <Button 
+                      type="text" 
+                      icon={<MenuOutlined style={{ fontSize: 26, color: "black" }} />} 
+                      className={styles.mobileMenuButton}
+                    />
+                  </Dropdown>
+                ) : (
+                  <Menu
+                    mode="horizontal"
+                    selectedKeys={[selectedKey]}
+                    items={menuItems}
+                    style={{
+                      flex: 1,
+                      justifyContent: "flex-end",
+                      minWidth: 0,
+                      background: "transparent",
+                      borderBottom: "none",
+                    }}
+                  />
+                )}
+              </Header>
 
-            {/* FOOTER */}
-            <FooterComponent />
-          </Layout>
-          
-          {/* AUTH MODAL */}
-          <AuthModal
-            visible={authModalOpen}
-            onClose={() => setAuthModalOpen(false)}
-            setOpen={(open: boolean) => {
-              setAuthModalOpen(open);
-              // Refresh page when modal closes after successful login to update auth status
-              if (!open && checkAuth()) {
-                window.location.reload();
-              }
-            }}
-          />
+              {/* CONTENT */}
+              <Content className={isDoingTestPage ? undefined : styles.container}>
+                {children}
+              </Content>
+
+              {/* FOOTER */}
+              <FooterComponent />
+            </Layout>
+            
+            {/* AUTH MODAL */}
+            <AuthModal
+              visible={authModalOpen}
+              onClose={() => setAuthModalOpen(false)}
+              setOpen={(open: boolean) => {
+                setAuthModalOpen(open);
+                // Refresh page when modal closes after successful login to update auth status
+                if (!open && checkAuth()) {
+                  window.location.reload();
+                }
+              }}
+            />
+          </RouteTransitionProvider>
         </MessageProvider>
       </ConfigProvider>
     </AntdRegistry>

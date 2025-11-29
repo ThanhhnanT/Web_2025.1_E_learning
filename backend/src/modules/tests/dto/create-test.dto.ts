@@ -1,5 +1,6 @@
 import { IsString, IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { TestType } from '../schema/test.schema';
 
 export class CreateTestDto {
   @ApiProperty({ 
@@ -9,6 +10,16 @@ export class CreateTestDto {
   })
   @IsString()
   title: string;
+
+  @ApiProperty({ 
+    description: 'Loại bài test',
+    enum: TestType,
+    example: TestType.IELTS,
+    required: false
+  })
+  @IsOptional()
+  @IsEnum(TestType)
+  testType?: TestType;
 
   @ApiProperty({ 
     description: 'Ngôn ngữ của bài test',
@@ -64,4 +75,50 @@ export class CreateTestDto {
   @IsOptional()
   @IsString()
   createdBy?: string;
+
+  // New fields for restructured database
+  @ApiProperty({ 
+    description: 'External slug for crawler integration',
+    example: 'cambridge-ielts-020-listening-test-01',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  externalSlug?: string;
+
+  @ApiProperty({ 
+    description: 'Series name',
+    example: 'Cambridge IELTS 20',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  series?: string;
+
+  @ApiProperty({ 
+    description: 'Test number',
+    example: 'Test 1',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  testNumber?: string;
+
+  @ApiProperty({ 
+    description: 'Skill type',
+    example: 'listening',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  skill?: string;
+
+  @ApiProperty({ 
+    description: 'Source URL',
+    example: 'https://ieltstrainingonline.com/...',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  sourceUrl?: string;
 }

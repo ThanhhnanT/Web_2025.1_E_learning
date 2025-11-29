@@ -2,15 +2,18 @@
 
 import React from "react";
 import TestList from "@/components/TestList";
-import SearchForm from "@/components/SearchForm";
+import SearchForm, { type SearchFilters } from "@/components/SearchForm";
 
 function TestPage() {
-  const [keyword, setKeyword] = React.useState("");
+  const [filters, setFilters] = React.useState<SearchFilters>({
+    keyword: "",
+    skill: "all",
+  });
 
   return (
     <div style={{ marginTop: '24px' }}>
-      <SearchForm onSearch={setKeyword} />
-      <TestList keyword={keyword} />
+      <SearchForm onSearch={setFilters} initialFilters={filters} />
+      <TestList keyword={filters.keyword} skill={filters.skill} />
     </div>
   );
 }
