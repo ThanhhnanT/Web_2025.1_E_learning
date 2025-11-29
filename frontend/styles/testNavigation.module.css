@@ -7,6 +7,20 @@
   overflow: hidden;
 }
 
+.timerSection {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: center;
+  /* background: #fafafa; */
+}
+
+.timerText {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1890ff;
+  font-variant-numeric: tabular-nums;
+}
+
 .progressSection {
   padding: 12px 14px 10px;
   border-bottom: 1px solid #f0f0f0;

@@ -2,10 +2,10 @@
 
 import React from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Row, Col, Spin, Alert, Button, Card, Space, Carousel } from "antd";
+import { Row, Col, Spin, Alert, Button, Card, Space, Carousel, Modal } from "antd";
 import type { CarouselRef } from "antd/es/carousel";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import { get } from "@/helper/api";
+import { get, postAccess } from "@/helper/api";
 import SectionView from "@/components/test-taking/SectionView";
 import TestNavigation from "@/components/test-taking/TestNavigation";
 import type { TestSection, UserAnswer } from "@/types/test";
@@ -27,6 +27,8 @@ const SectionTakingPage: React.FC = () => {
   const [currentSectionIndex, setCurrentSectionIndex] = React.useState<number>(0);
   const [pendingQuestionToFocus, setPendingQuestionToFocus] =
     React.useState<number | null>(null);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = React.useState(0);
 
   const carouselRef = React.useRef<CarouselRef | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -47,6 +49,14 @@ const SectionTakingPage: React.FC = () => {
     }
   }, []);
 
+  const formatElapsedTime = React.useCallback((totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const mm = String(minutes).padStart(2, "0");
+    const ss = String(seconds).padStart(2, "0");
+    return `${mm}:${ss}`;
+  }, []);
+
   const selectedSectionIds = React.useMemo(() => {
     const raw = searchParams?.get("sections") || "";
     const parts = raw
@@ -56,6 +66,24 @@ const SectionTakingPage: React.FC = () => {
     if (parts.length > 0) return parts;
     return sectionId ? [sectionId.toString()] : [];
   }, [searchParams, sectionId]);
+
+  // Lưu selectedSectionIds vào localStorage khi thay đổi
+  React.useEffect(() => {
+    if (typeof window === "undefined" || !testId) return;
+    const key = `test_${testId}_selectedSections`;
+    if (selectedSectionIds.length > 0) {
+      localStorage.setItem(key, JSON.stringify(selectedSectionIds));
+    }
+  }, [testId, selectedSectionIds]);
+
+  // Timer đếm thời gian làm bài (từ 00:00)
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const timer = window.setInterval(() => {
+      setElapsedSeconds((prev) => prev + 1);
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   // Load toàn bộ sections đã chọn để hiển thị dưới dạng Carousel,
   // tránh reload khi chuyển section.
@@ -75,14 +103,30 @@ const SectionTakingPage: React.FC = () => {
           idsToLoad.map((id) => get(`tests/${testId}/sections/${id}`))
         );
 
-        setSections(responses);
+        // Sắp xếp sections theo order hoặc partNumber để đảm bảo thứ tự đúng
+        const sortedSections = responses.sort((a, b) => {
+          if (a.order !== undefined && b.order !== undefined) {
+            return a.order - b.order;
+          }
+          if (a.partNumber !== undefined && b.partNumber !== undefined) {
+            return a.partNumber - b.partNumber;
+          }
+          // Fallback: sort theo questionRange[0]
+          const aStart = a.questionRange?.[0] || 0;
+          const bStart = b.questionRange?.[0] || 0;
+          return aStart - bStart;
+        });
 
-        // Xác định index section hiện tại dựa vào route param
-        const initialIndex = idsToLoad.indexOf(sectionId.toString());
+        setSections(sortedSections);
+
+        // Xác định index section hiện tại dựa vào route param trong sortedSections
+        const initialIndex = sortedSections.findIndex(
+          (sec) => sec._id.toString() === sectionId.toString()
+        );
         const safeIndex = initialIndex >= 0 ? initialIndex : 0;
         setCurrentSectionIndex(safeIndex);
 
-        const current = responses[safeIndex];
+        const current = sortedSections[safeIndex];
         if (current?.questionRange && Array.isArray(current.questionRange)) {
           const [start] = current.questionRange;
           setCurrentQuestion(start);
@@ -282,6 +326,48 @@ const SectionTakingPage: React.FC = () => {
     })
   );
 
+  const handleSubmitTest = async () => {
+    if (!testId) return;
+    const answersPayload = userAnswersList.map((ua) => ({
+      questionNumber: ua.questionNumber,
+      userAnswer: ua.userAnswer,
+    }));
+
+    if (answersPayload.length === 0) {
+      Modal.warning({
+        title: "Chưa có câu trả lời",
+        content: "Bạn chưa trả lời câu hỏi nào.",
+      });
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const result = await postAccess(`results/auto-score/${testId}`, {
+        answers: answersPayload,
+        timeSpent: elapsedSeconds,
+        selectedSectionIds: selectedSectionIds,
+      });
+
+      if (!result || !result._id) {
+        throw new Error("Không nhận được kết quả hợp lệ từ server.");
+      }
+
+      router.push(`/tests/${testId}/results/${result._id}`);
+    } catch (e: any) {
+      console.error("Lỗi khi nộp bài:", e);
+      Modal.error({
+        title: "Lỗi khi nộp bài",
+        content:
+          e?.response?.data?.message ||
+          e?.message ||
+          "Không thể nộp bài. Vui lòng thử lại.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div ref={containerRef} style={{ padding: "16px 32px" }}>
       <Row gutter={[16, 16]}>
@@ -406,6 +492,7 @@ const SectionTakingPage: React.FC = () => {
               currentQuestion={
                 currentQuestion || currentSection.questionRange[0]
               }
+              elapsedTime={formatElapsedTime(elapsedSeconds)}
               onQuestionClick={(qNum) => {
                 setCurrentQuestion(qNum);
                 const targetIndex = findSectionIndexForQuestion(qNum);
@@ -423,6 +510,7 @@ const SectionTakingPage: React.FC = () => {
                 }
               }}
               onSectionClick={() => {}}
+              onSubmit={handleSubmitTest}
             />
           )}
         </Col>

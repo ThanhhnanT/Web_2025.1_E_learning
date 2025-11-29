@@ -182,6 +182,7 @@ export interface TestResult {
   testId: string;
   answers: QuestionResult[];
   score: number;
+  bandScore?: number;
   totalQuestions: number;
   correctAnswers: number;
   timeSpent: number;

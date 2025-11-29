@@ -17,6 +17,14 @@ export interface ReviewNote {
   createdAt: Date;
 }
 
+export interface SectionScore {
+  sectionId: Types.ObjectId;
+  sectionType: string;
+  correctAnswers: number;
+  totalQuestions: number;
+  bandScore?: number;
+}
+
 @Schema({ timestamps: true })
 export class Result {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
@@ -40,6 +48,9 @@ export class Result {
   @Prop({ type: Number, required: true, min: 0 })
   score: number; // Điểm số
 
+  @Prop({ type: Number, min: 0, max: 9 })
+  bandScore?: number; // Điểm band IELTS tổng (0–9, có .5)
+
   @Prop({ type: Number, required: true, min: 1 })
   totalQuestions: number; // Tổng số câu hỏi
 
@@ -51,6 +62,10 @@ export class Result {
 
   @Prop({ type: Date })
   completedAt: Date; // Thời gian hoàn thành bài test
+
+  // Thống kê điểm theo từng section/skill
+  @Prop({ type: MongooseSchema.Types.Mixed, default: [] })
+  sectionScores?: SectionScore[];
 
   // NEW: Review notes for wrong answers
   @Prop({ type: MongooseSchema.Types.Mixed, default: [] })

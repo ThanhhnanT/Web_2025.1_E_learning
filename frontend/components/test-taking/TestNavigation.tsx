@@ -10,6 +10,7 @@ interface TestNavigationProps {
   sections: TestSection[];
   userAnswers: UserAnswer[];
   currentQuestion: number;
+  elapsedTime?: string;
   onQuestionClick: (questionNumber: number) => void;
   onSectionClick: (sectionId: string) => void;
   onSubmit?: () => void;
@@ -19,6 +20,7 @@ const TestNavigation: React.FC<TestNavigationProps> = ({
   sections,
   userAnswers,
   currentQuestion,
+  elapsedTime,
   onQuestionClick,
   onSectionClick,
   onSubmit,
@@ -41,6 +43,11 @@ const TestNavigation: React.FC<TestNavigationProps> = ({
 
   return (
     <div className={styles.navigationContainer}>
+      {elapsedTime && (
+        <div className={styles.timerSection}>
+          <span className={styles.timerText}>{elapsedTime}</span>
+        </div>
+      )}
       <div className={styles.progressSection}>
         <div className={styles.progressHeader}>
           <h3 className={styles.progressTitle}>Tiến độ làm bài</h3>

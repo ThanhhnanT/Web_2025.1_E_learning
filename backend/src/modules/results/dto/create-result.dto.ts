@@ -1,7 +1,7 @@
-import { IsString, IsNotEmpty, IsNumber, IsDate, IsOptional, Min, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsDate, IsOptional, Min, Max, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { QuestionAnswer, ReviewNote } from '../schema/result.schema';
+import { QuestionAnswer, ReviewNote, SectionScore } from '../schema/result.schema';
 
 export class CreateResultDto {
   @ApiProperty({ 
@@ -69,6 +69,19 @@ export class CreateResultDto {
   @Min(0)
   score: number;
 
+  @ApiProperty({
+    description: 'Điểm band IELTS tổng (0–9, có .5)',
+    example: 7.5,
+    minimum: 0,
+    maximum: 9,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(9)
+  bandScore?: number;
+
   @ApiProperty({ 
     description: 'Tổng số câu hỏi',
     example: 40,
@@ -124,4 +137,23 @@ export class CreateResultDto {
   @IsOptional()
   @IsArray()
   reviewNotes?: ReviewNote[];
+
+  @ApiProperty({
+    description: 'Thống kê điểm theo từng section/skill',
+    example: [
+      {
+        sectionId: '507f1f77bcf86cd799439011',
+        sectionType: 'listening',
+        correctAnswers: 32,
+        totalQuestions: 40,
+        bandScore: 7.5,
+      },
+    ],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => Object)
+  sectionScores?: SectionScore[];
 }
