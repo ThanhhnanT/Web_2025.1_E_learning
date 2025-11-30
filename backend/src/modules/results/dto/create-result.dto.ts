@@ -1,6 +1,7 @@
-import { IsString, IsNotEmpty, IsNumber, IsDate, IsOptional, Min } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsDate, IsOptional, Min, Max, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { QuestionAnswer, ReviewNote, SectionScore } from '../schema/result.schema';
 
 export class CreateResultDto {
   @ApiProperty({ 
@@ -21,22 +22,42 @@ export class CreateResultDto {
   @IsNotEmpty()
   testId: string;
 
+  // DEPRECATED: Keep for backward compatibility
   @ApiProperty({ 
-    description: 'ID của đáp án đúng',
+    description: 'ID của đáp án đúng (deprecated)',
     example: '507f1f77bcf86cd799439011',
-    required: true
+    required: false
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  answerId: string;
+  answerId?: string;
 
+  // DEPRECATED: Keep for backward compatibility
   @ApiProperty({ 
-    description: 'Câu trả lời của user (có thể là string, array, object...)',
+    description: 'Câu trả lời của user (deprecated, use answers instead)',
     example: ['litter', 'dogs', 'insects'],
-    required: true
+    required: false
   })
-  @IsNotEmpty()
-  userAnswer: any;
+  @IsOptional()
+  userAnswer?: any;
+
+  // NEW: Detailed answer tracking
+  @ApiProperty({ 
+    description: 'Detailed answers for each question',
+    example: [
+      {
+        questionId: '507f1f77bcf86cd799439011',
+        questionNumber: 1,
+        userAnswer: ['fish'],
+        isCorrect: true,
+        timeSpent: 30
+      }
+    ],
+    required: false
+  })
+  @IsOptional()
+  @IsArray()
+  answers?: QuestionAnswer[];
 
   @ApiProperty({ 
     description: 'Điểm số đạt được',
@@ -47,6 +68,19 @@ export class CreateResultDto {
   @IsNumber()
   @Min(0)
   score: number;
+
+  @ApiProperty({
+    description: 'Điểm band IELTS tổng (0–9, có .5)',
+    example: 7.5,
+    minimum: 0,
+    maximum: 9,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(9)
+  bandScore?: number;
 
   @ApiProperty({ 
     description: 'Tổng số câu hỏi',
@@ -87,4 +121,39 @@ export class CreateResultDto {
   @IsDate()
   @Type(() => Date)
   completedAt?: Date;
+
+  // NEW: Review notes
+  @ApiProperty({ 
+    description: 'Review notes for wrong answers',
+    example: [
+      {
+        questionId: '507f1f77bcf86cd799439011',
+        note: 'Need to review this topic',
+        createdAt: '2024-01-15T10:30:00.000Z'
+      }
+    ],
+    required: false
+  })
+  @IsOptional()
+  @IsArray()
+  reviewNotes?: ReviewNote[];
+
+  @ApiProperty({
+    description: 'Thống kê điểm theo từng section/skill',
+    example: [
+      {
+        sectionId: '507f1f77bcf86cd799439011',
+        sectionType: 'listening',
+        correctAnswers: 32,
+        totalQuestions: 40,
+        bandScore: 7.5,
+      },
+    ],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => Object)
+  sectionScores?: SectionScore[];
 }

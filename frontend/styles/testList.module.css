@@ -80,6 +80,58 @@
   border-color: #2b6cb0 !important;
 }
 
+.paginationWrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.paginationWrapper :global(.ant-pagination) {
+  display: flex;
+  gap: 8px;
+}
+
+.paginationWrapper :global(.ant-pagination-item) {
+  border-radius: 8px;
+  border: 1px solid #e0e7ff;
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paginationWrapper :global(.ant-pagination-item a) {
+  color: #1e1e1e;
+  font-weight: 500;
+}
+
+.paginationWrapper :global(.ant-pagination-item-active) {
+  background: linear-gradient(135deg, #4c9bff, #1e90ff);
+  border-color: transparent;
+}
+
+.paginationWrapper :global(.ant-pagination-item-active a) {
+  color: #fff !important;
+}
+
+.paginationWrapper :global(.ant-pagination-prev .ant-pagination-item-link),
+.paginationWrapper :global(.ant-pagination-next .ant-pagination-item-link) {
+  border-radius: 8px;
+  height: 36px;
+  width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e0e7ff;
+  color: #1e90ff;
+}
+
+.paginationWrapper :global(.ant-pagination-disabled .ant-pagination-item-link) {
+  color: #a0aec0;
+  border-color: #edf2f7;
+}
+
 
 @media (max-width: 576px) {
   .testCard {

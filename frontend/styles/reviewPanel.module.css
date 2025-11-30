@@ -1,0 +1,313 @@
+.reviewContainer {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.testTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #262626;
+  margin-bottom: 8px;
+}
+
+.completedAt {
+  color: #8c8c8c;
+  font-size: 14px;
+}
+
+.statsCard {
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.avgTime {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 4px;
+}
+
+.distributionWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 20px;
+}
+
+.distributionChart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.distributionCircle {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.distributionCircleInner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.03);
+}
+
+.distributionCircleLabel {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.distributionLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: #595959;
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.breakdownCard {
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.breakdownTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #262626;
+}
+
+.sectionItem {
+  margin-bottom: 20px;
+}
+
+.sectionItem:last-child {
+  margin-bottom: 0;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.sectionTitle {
+  font-weight: 600;
+  font-size: 15px;
+  color: #262626;
+}
+
+.sectionScore {
+  font-size: 14px;
+  color: #595959;
+  font-weight: 500;
+}
+
+.sectionBar {
+  display: flex;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #f0f0f0;
+  margin-bottom: 4px;
+}
+
+.sectionBarSegmentCorrect {
+  background-color: #52c41a;
+  height: 100%;
+}
+
+.sectionBarSegmentWrong {
+  background-color: #ff4d4f;
+  height: 100%;
+}
+
+.sectionBarSegmentUnanswered {
+  background-color: #d9d9d9;
+  height: 100%;
+}
+
+.sectionBarLegend {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+.sectionLegendCorrect::before,
+.sectionLegendWrong::before,
+.sectionLegendUnanswered::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.sectionLegendCorrect::before {
+  background-color: #52c41a;
+}
+
+.sectionLegendWrong::before {
+  background-color: #ff4d4f;
+}
+
+.sectionLegendUnanswered::before {
+  background-color: #d9d9d9;
+}
+
+.filtersCard {
+  margin-bottom: 20px;
+  background: #fafafa;
+}
+
+.filterLabel {
+  font-weight: 500;
+  font-size: 14px;
+  color: #595959;
+}
+
+.tabs {
+  margin-top: 24px;
+}
+
+.answersCard {
+  margin-top: 16px;
+}
+
+.answersCard :global(.ant-card-head-title) {
+  text-align: center;
+}
+
+.questionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.answerRow {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.answerItem {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+  font-weight: 600;
+}
+
+.correctAnswer {
+  color: #52c41a;
+  font-weight: 600;
+}
+
+.checkMark {
+  color: #52c41a;
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+.incorrectAnswer {
+  color: #333;
+  font-weight: 600;
+}
+
+.strikethrough {
+  text-decoration: line-through;
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
+.crossMark {
+  color: #ff4d4f;
+  font-weight: bold;
+  margin: 0 4px;
+}
+
+.correctText {
+  color: #52c41a;
+  font-weight: 600;
+}
+
+.unansweredAnswer {
+  color: #999;
+  font-weight: 600;
+}
+
+.unansweredText {
+  color: #999;
+  font-style: italic;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .reviewContainer {
+    padding: 16px;
+  }
+
+  .testTitle {
+    font-size: 22px;
+  }
+
+  .statsCard .ant-col {
+    margin-bottom: 16px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .filtersCard,
+  .tabs {
+    display: none;
+  }
+
+  .reviewContainer {
+    padding: 0;
+  }
+
+  .questionsContainer {
+    page-break-inside: avoid;
+  }
+}
+

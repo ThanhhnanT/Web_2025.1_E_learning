@@ -7,6 +7,7 @@ import { Carousel } from "antd";
 import CourseOnline from "@/components/CourseOnline";
 import TestList, { type Test } from "@/components/TestList";
 import styles from "@/styles/page.module.css"; 
+import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
 
 
 export default function Home() {
@@ -20,7 +21,6 @@ export default function Home() {
 
           const data = await res.json();
           console.log("Dữ liệu nhận được:", data);
-          // Sắp xếp theo id giảm dần (mới nhất trước)
           const sorted = data.sort((a: any, b: any) => b.id - a.id);
           console.log("Dữ liệu sau khi sắp xếp:", sorted.map((t: any) => t.id));
           const randomEight = sorted.slice(0, 8);
@@ -44,7 +44,6 @@ export default function Home() {
 
   return (
     <div>
-      {/* Slide Banner - Full Width */}
       <div className={styles.slideContainer}>
         <Carousel
           autoplay
@@ -54,6 +53,8 @@ export default function Home() {
           draggable={true}
           swipe={true}
           className={styles.carousel}
+          // adaptiveHeight={true}
+          // centerMode={true}
         >
           {slideImages.map((item, index) => (
             <div key={index}>

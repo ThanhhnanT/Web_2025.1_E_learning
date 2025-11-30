@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { type AxiosRequestConfig } from 'axios';
 import Cookies from "js-cookie";
 
 
@@ -10,17 +10,16 @@ const config = {
     },
     // withCredentials: true
 }
-export const get = async (path: String) => {
+export const get = async (path: string, options: AxiosRequestConfig = {}) => {
     try {
-        const result = await axios.get(API_DOMAIN + path, { withCredentials: true });
-        return result;
-    } catch (e){
-        if(e) {
-            console.log(e)
-        }
-        else {
-            alert("Network connect failed")
-        }
+        const result = await axios.get(API_DOMAIN + path, {
+            ...config,
+            ...options,
+        });
+        return result.data;
+    } catch (error){
+        console.log(error);
+        throw error;
     }
 }
 
@@ -82,7 +81,7 @@ const getTokenHeader = () => {
 
 export const getAccess = async (path: string, params: object = {}) => {
   try {
-    const tokenHeader = await getTokenHeader();
+    const tokenHeader = getTokenHeader();
     const result = await axios.get(API_DOMAIN + path, {
       ...config,
       headers: { ...config.headers, ...tokenHeader },

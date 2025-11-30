@@ -1,13 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { ResultsService } from './results.service';
 import { CreateResultDto } from './dto/create-result.dto';
 import { UpdateResultDto } from './dto/update-result.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { ScoringService, RawUserAnswer } from './scoring.service';
 
 @ApiTags('Results')
 @Controller('results')
 export class ResultsController {
-  constructor(private readonly resultsService: ResultsService) {}
+  constructor(
+    private readonly resultsService: ResultsService,
+    private readonly scoringService: ScoringService,
+  ) {}
 
   @ApiOperation({ 
     summary: 'Tạo kết quả bài test mới',
@@ -20,6 +24,84 @@ export class ResultsController {
   @Post()
   create(@Body() createResultDto: CreateResultDto) {
     return this.resultsService.create(createResultDto);
+  }
+
+  @ApiOperation({
+    summary: 'Tự động chấm điểm và lưu kết quả bài test',
+    description:
+      'Nhận câu trả lời của user cho một bài test, tự động chấm điểm (IELTS Listening/Reading) và lưu vào collection results. Yêu cầu authentication.',
+  })
+  @ApiBearerAuth()
+  @ApiParam({
+    name: 'testId',
+    description: 'ID của bài test',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiBody({
+    description:
+      'Danh sách câu trả lời của user cho bài test. Mỗi phần tử gồm questionNumber, userAnswer (mảng string) và timeSpent (tùy chọn, giây).',
+    schema: {
+      type: 'object',
+      properties: {
+        answers: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              questionNumber: { type: 'number' },
+              userAnswer: {
+                type: 'array',
+                items: { type: 'string' },
+              },
+              timeSpent: {
+                type: 'number',
+                description: 'Thời gian làm câu hỏi (giây)',
+              },
+            },
+            required: ['questionNumber', 'userAnswer'],
+          },
+        },
+        timeSpent: {
+          type: 'number',
+          description: 'Tổng thời gian làm bài (phút)',
+        },
+        completedAt: {
+          type: 'string',
+          format: 'date-time',
+        },
+      },
+      required: ['answers'],
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Chấm điểm và tạo kết quả thành công' })
+  @Post('auto-score/:testId')
+  async autoScoreTest(
+    @Param('testId') testId: string,
+    @Body()
+    payload: {
+      answers: RawUserAnswer[];
+      timeSpent?: number;
+      completedAt?: Date;
+      selectedSectionIds?: string[];
+    },
+    @Req() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?._id || req.user?.id;
+
+    const scoring = await this.scoringService.scoreTest({
+      userId,
+      testId,
+      answers: payload.answers || [],
+      timeSpent: payload.timeSpent,
+      completedAt: payload.completedAt ? new Date(payload.completedAt) : new Date(),
+      selectedSectionIds: payload.selectedSectionIds,
+    });
+
+    const created = await this.resultsService.create(
+      scoring.resultData as unknown as CreateResultDto,
+    );
+
+    return created;
   }
 
   @ApiOperation({ 
@@ -89,6 +171,40 @@ export class ResultsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.resultsService.findOne(id);
+  }
+
+  @ApiOperation({
+    summary: 'Lấy chi tiết kết quả kèm cấu trúc test đầy đủ (cho màn review)',
+    description:
+      'Trả về kết quả làm bài cùng với cấu trúc bài test (sections, question groups, questions) để hiển thị màn hình review chi tiết.',
+  })
+  @ApiBearerAuth()
+  @ApiParam({
+    name: 'id',
+    description: 'ID của kết quả',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lấy chi tiết kết quả + cấu trúc test thành công',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Chưa đăng nhập' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy kết quả' })
+  @Get(':id/detail')
+  async findDetail(@Param('id') id: string) {
+    // Dùng ResultsService để lấy kết quả
+    const result = await this.resultsService.findOne(id);
+    if (!result) {
+      return null;
+    }
+
+    // Tạm thời trả về chỉ result; phần test cấu trúc đầy đủ sẽ được lấy
+    // từ endpoint /tests/:testId/full ở TestsFullController phía frontend.
+    // Nếu muốn gộp luôn ở backend, có thể inject TestsService và các service liên quan.
+
+    return {
+      result,
+    };
   }
 
   @ApiOperation({ 

@@ -289,7 +289,7 @@ const tabItems = [
       }
       onCancel={onClose}
       afterClose={handleAfterClose}
-      destroyOnClose={true}
+      destroyOnHidden={true}
       maskClosable={true}
       footer={[
         <Button key="cancel" onClick={onClose} size="large" className={authModalStyles.cancelButton}>
