@@ -1,0 +1,180 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column; /* mobile: ảnh dưới */
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.card:last-child{
+  margin-bottom: 0;
+}  
+
+@media (min-width: 768px) {
+  .card {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.content {
+  flex: 1;
+  margin-right: 0;
+}
+
+@media (min-width: 768px) {
+  .content {
+    margin-right: 16px;
+  }
+}
+
+.imageContainer {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 768px) {
+  .imageContainer {
+    margin-bottom: 0;
+    margin-left: 16px;
+  }
+}
+
+.imageContainer img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.definition,
+.example {
+  margin-bottom: 8px;
+}
+
+.definitionTitle,
+.exampleTitle {
+  font-weight: 500;
+}
+
+.exampleList {
+  list-style: disc inside;
+  padding-left: 16px;
+  margin: 0;
+}
+
+.buttonWrapper {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.practiceButton {
+  width: 100%;
+  padding: 14px 0;
+  font-size: 18px;
+  font-weight: 600;
+  background:#e8f2ff; 
+  border-color:#35509a ;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.25s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.practiceButton:hover {
+  background: #2e4687;
+  color:#ffffff;
+  border-color:#283c74;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+.practiceButton:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+.progressContainer {
+  width: 100%;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+}
+
+.progressBar {
+  position: relative;
+  display: flex;
+  height: 80px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 8px;
+}
+
+
+.progressLabels {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15px;
+  font-size: 0.85rem;
+  color: #333;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.progressLabels span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.totalValue,
+.learnedValue,
+.rememberedValue
+ {
+  font-weight: bold;
+  font-size: 2.2rem;
+  margin-bottom: 2px;
+}
+.reviewValue{
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-bottom: 2px;
+  color: rgb(234, 114, 114);
+}
+
+.progressBar:hover {
+  transform: scale(1.02);
+  transition: 0.25s ease;
+}

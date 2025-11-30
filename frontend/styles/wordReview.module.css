@@ -1,0 +1,339 @@
+.container {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+
+.headerLinks {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 20px;
+}
+
+.backBtn {
+  color: #1890ff !important;
+  border: 1px solid #1890ff !important;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.backBtn:hover {
+  background: #1890ff !important;
+  color: white !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(24, 144, 255, 0.3);
+}
+
+.stopBtn {
+  color: #ff4d4f !important;
+  border: 1px solid #ff4d4f !important;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.stopBtn:hover {
+  background: #ff4d4f !important;
+  color: white !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 77, 79, 0.3);
+}
+
+.alert {
+  margin-bottom: 20px;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  height: 400px;
+  perspective: 1200px;
+}
+
+.statusTag {
+  position: absolute !important;
+  top: 40px;
+  right: 20px;
+  z-index: 10;
+  padding: 4px 10px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600;
+  border: 1px solid !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.newTag {
+  background: #ffd666 !important;
+  border-color: #e0b94f !important;
+  color: #8a6d0c !important;
+}
+
+.reviewTag {
+  background: #b7eb8f !important;
+  border-color: #87d068 !important;
+  color: #389e0d !important;
+}
+
+.statusInfo {
+  text-align: center;
+  margin-top: 16px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.statusInfo p {
+  margin: 4px 0;
+}
+
+.cardInner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.6s ease;
+  transform-style: preserve-3d;
+}
+
+.flip {
+  transform: rotateY(180deg);
+}
+
+.cardFront,
+.cardBack {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  border-radius: 14px;
+  padding: 40px 60px 60px 60px;
+  box-sizing: border-box;
+  backface-visibility: hidden;
+  top:20px !important;
+
+}
+
+.cardBack {
+  background: #ffffff;
+  transform: rotateY(180deg);
+}
+
+.wordArea {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.wordBlock {
+  font-size: 40px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.soundIcon {
+  color: #1d4ed8 !important;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.phonetic {
+  margin-top: 10px;
+  font-size: 20px;
+  color: #555;
+}
+
+
+.cardBack {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backContent {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  gap: 24px;
+  align-items: center; 
+}
+
+.backLeft {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.backRight {
+
+  width: 40%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image {
+  width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  object-position: center;   /* 👈 Căn giữa theo chiều dọc + ngang */
+  border-radius: 20px;
+}
+
+
+/* Text on back side */
+.defTitle {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.definition {
+  font-size: 17px;
+  margin-bottom: 20px;
+}
+
+.exTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.example {
+  font-size: 16px;
+  color: #374151;
+  font-style: italic;
+}
+
+/* Buttons */
+.leftButtons,
+.rightButtons {
+  position: absolute;
+  bottom: 16px;
+  display: flex;
+  gap: 10px;
+  
+}
+
+.leftButtons {
+  left: 16px;
+}
+
+.rightButtons {
+  right: 16px;
+}
+
+.empty {
+  text-align: center;
+  font-size: 18px;
+  margin-top: 40px;
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 0 20px;
+  flex-wrap: nowrap; 
+}
+
+.actionButtons :global(.ant-btn) {
+  min-width: 120px;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0; 
+  transition: all 0.3s ease;
+}
+
+/* Nút "Đã nhớ" */
+.actionButtons :global(.ant-btn-primary) {
+  background: #1890ff;
+  border-color: #1890ff;
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3);
+}
+
+.actionButtons :global(.ant-btn-primary:hover) {
+  background: #40a9ff;
+  border-color: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+}
+
+/* Nút "Đã học" */
+.actionButtons :global(.ant-btn-default:not(:last-child)) {
+  background: #fafafa;
+  border-color: #d9d9d9;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.actionButtons :global(.ant-btn-default:not(:last-child):hover) {
+  background: #ffffff;
+  border-color: #1890ff;
+  color: #1890ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Nút "Cần ôn lại" */
+.actionButtons :global(.ant-btn-default:last-child) {
+  background: #fff7e6;
+  border-color: #ffd591;
+  color: #fa8c16;
+}
+
+.actionButtons :global(.ant-btn-default:last-child:hover) {
+  background: #ffe7ba;
+  border-color: #ffa940;
+  color: #fa541c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(250, 140, 22, 0.3);
+}
+
+/* Responsive cho màn hình nhỏ */
+@media (max-width: 480px) {
+  .actionButtons {
+    gap: 12px;
+    padding: 0 16px;
+  }
+  
+  .actionButtons :global(.ant-btn) {
+    min-width: 100px;
+    height: 36px;
+    padding: 0 16px;
+    font-size: 13px;
+  }
+}
+
+/* Đảm bảo trên mọi màn hình đều nằm ngang */
+@media (max-width: 320px) {
+  .actionButtons {
+    gap: 8px;
+  }
+  
+  .actionButtons :global(.ant-btn) {
+    min-width: 90px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+}

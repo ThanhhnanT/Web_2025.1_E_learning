@@ -142,7 +142,7 @@ const VerifyEmailModal: React.FC<VerifyEmailModalProps> = ({ open, onClose }) =>
           </Button>
         </div>
       </Form>
-    </Modal>
+  </Modal>
   );
 };
 
