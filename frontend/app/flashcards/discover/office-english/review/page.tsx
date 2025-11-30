@@ -1,5 +1,6 @@
 "use client"
 import React,{useState,useEffect} from 'react'
+import { useSearchParams } from 'next/navigation'
 import WordReview from '@/components/WordReview'
 
 interface Word {
@@ -16,10 +17,14 @@ function WordReviewPage(){
     const [data, setData] = useState<Word[]>([]);
     const [title,setTitle] = useState("");
     const [loading, setLoading] = useState(true);
+    const searchParams = useSearchParams();
   
     useEffect(() => {
-      const savedTitle = localStorage.getItem("current_flashcard_title");
-      if (savedTitle) setTitle(savedTitle);
+      // Get title from URL params instead of localStorage
+      const titleParam = searchParams.get("title");
+      if (titleParam) {
+        setTitle(decodeURIComponent(titleParam));
+      }
 
       fetch("/officeEnglish.json")
         .then((res) => {
@@ -34,7 +39,7 @@ function WordReviewPage(){
           console.error("Fetch error:", err);
           setLoading(false);
         });
-    }, []);
+    }, [searchParams]);
   
     if (loading) return <p className="text-center mt-8">Đang tải dữ liệu...</p>;
   

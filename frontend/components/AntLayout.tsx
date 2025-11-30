@@ -13,7 +13,8 @@ import {
   ReadOutlined, 
   ShoppingCartOutlined,
   UserOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  BarChartOutlined
 } from "@ant-design/icons";
 import Image from "next/image";
 import Link from "next/link";
@@ -157,6 +158,11 @@ function UserMenuClient({ onOpenModal }: { onOpenModal: () => void }) {
       key: "profile", 
       label: <span onClick={() => router.push("/auth/profile")}>Hồ sơ</span>,
       icon: <UserOutlined />
+    },
+    { 
+      key: "statistics", 
+      label: <span onClick={() => router.push("/statistics")}>Thống kê</span>,
+      icon: <BarChartOutlined />
     },
     { 
       key: "logout", 

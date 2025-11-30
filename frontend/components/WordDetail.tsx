@@ -3,6 +3,9 @@ import React, { useRef, useState, useEffect } from "react";
 import { SoundOutlined } from "@ant-design/icons";
 import styles from "@/styles/wordDetail.module.css";
 import { useRouter } from "next/navigation";
+import { checkAuth, getUserId } from "@/lib/helper";
+import AuthModal from "@/components/auth/ModalAuth";
+import { getProgress, updateProgress } from "@/service/flashcards";
 
 interface Word {
   word: string;
@@ -25,12 +28,14 @@ interface WordDetailProps {
   data: Word[];
   href: string;
   title: string;
+  deckId?: string;
   progress?: Progress;
 }
 
-const WordDetail: React.FC<WordDetailProps> = ({ data, href, title }) => {
+const WordDetail: React.FC<WordDetailProps> = ({ data, href, title, deckId }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [currentAudio, setCurrentAudio] = useState<string | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const router = useRouter();
 
   const [progressState, setProgress] = useState<Progress>({
@@ -42,27 +47,65 @@ const WordDetail: React.FC<WordDetailProps> = ({ data, href, title }) => {
 
   
   useEffect(() => {
-    const getStorageKey = (title: string) =>
-    `flashcard_progress_${title.replace(/\s+/g, "_").toLowerCase()}`;
-    const STORAGE_KEY = getStorageKey(title);
-     const saved = localStorage.getItem(STORAGE_KEY);
-     console.log("Saved data:", saved);
-
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        console.log("Parsed:", parsed);
-
-        if (parsed && parsed.stats) {
-          setProgress(parsed.stats);
-        } else {
-          setProgress(parsed);
+    const loadProgress = async () => {
+      // If deckId is provided, use API; otherwise fallback to localStorage for backward compatibility
+      if (deckId) {
+        try {
+          const userId = getUserId();
+          if (userId) {
+            const progressData = await getProgress(deckId, userId);
+            if (progressData) {
+              setProgress({
+                total: data.length,
+                learned: progressData.learned || 0,
+                remembered: progressData.remembered || 0,
+                review: progressData.review || 0,
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error loading progress from API:", error);
+          // Fallback to localStorage for backward compatibility
+          const getStorageKey = (title: string) =>
+            `flashcard_progress_${title.replace(/\s+/g, "_").toLowerCase()}`;
+          const STORAGE_KEY = getStorageKey(title);
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved);
+              if (parsed && parsed.stats) {
+                setProgress(parsed.stats);
+              } else {
+                setProgress(parsed);
+              }
+            } catch (e) {
+              console.error("JSON parse error:", e);
+            }
+          }
         }
-      } catch (e) {
-        console.error("JSON parse error:", e);
+      } else {
+        // No deckId - use localStorage for backward compatibility with old flashcard sets
+        const getStorageKey = (title: string) =>
+          `flashcard_progress_${title.replace(/\s+/g, "_").toLowerCase()}`;
+        const STORAGE_KEY = getStorageKey(title);
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (parsed && parsed.stats) {
+              setProgress(parsed.stats);
+            } else {
+              setProgress(parsed);
+            }
+          } catch (e) {
+            console.error("JSON parse error:", e);
+          }
+        }
       }
-    }
-  }, [href]);
+    };
+
+    loadProgress();
+  }, [href, title, deckId, data.length]);
 
   if (!data || data.length === 0)
     return <p className="text-center mt-8">Không có dữ liệu để hiển thị</p>;
@@ -84,8 +127,44 @@ const WordDetail: React.FC<WordDetailProps> = ({ data, href, title }) => {
     setCurrentAudio(src);
   };
 
-  const handlePractice = () => {
-    router.push(`${href}/review`);
+  const handlePractice = async () => {
+    if (checkAuth()) {
+      // Extract deckId from props or from href if not provided
+      let finalDeckId = deckId;
+      if (!finalDeckId && href) {
+        // Try to extract deckId from href like "/flashcards/lists/{deckId}"
+        const match = href.match(/\/lists\/([^\/\?]+)/);
+        if (match && match[1]) {
+          finalDeckId = match[1];
+        }
+      }
+
+      // If deckId exists, create/update progress record before navigating
+      // This will add the deck to "Đang học" section and increment userCount
+      if (finalDeckId) {
+        try {
+          const userId = getUserId();
+          if (userId) {
+            await updateProgress(finalDeckId, {
+              learned: 0,
+              remembered: 0,
+              review: 0,
+            }, userId);
+            // Set flag to trigger refresh when returning to flashcard page
+            sessionStorage.setItem('flashcard_progress_updated', Date.now().toString());
+          }
+        } catch (error: any) {
+          console.error("Error updating progress:", error);
+          // Continue navigation even if progress update fails
+        }
+      }
+      // Pass title as URL param instead of localStorage
+      router.push(`${href}/review?title=${encodeURIComponent(title)}`);
+    } else {
+      // Store redirect in window object instead of localStorage
+      (window as any).__pendingRedirect = `${href}/review?title=${encodeURIComponent(title)}`;
+      setAuthModalOpen(true);
+    }
   };
 
   const { total, learned, remembered, review } = progressState;
@@ -168,6 +247,21 @@ const WordDetail: React.FC<WordDetailProps> = ({ data, href, title }) => {
       </div>
 
       <audio ref={audioRef} preload="auto" />
+
+      <AuthModal
+        visible={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        setOpen={(open: boolean) => {
+          setAuthModalOpen(open);
+          if (!open && checkAuth()) {
+            const redirect = (window as any).__pendingRedirect;
+            if (redirect) {
+              delete (window as any).__pendingRedirect;
+              router.push(redirect);
+            }
+          }
+        }}
+      />
     </div>
   );
 };

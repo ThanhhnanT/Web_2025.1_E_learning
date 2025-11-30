@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Alert, Collapse } from "antd";
+import { Alert } from "antd";
 import { ThunderboltOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import styles from "@/styles/flashcardPage.module.css";
 import { useRouter, usePathname } from "next/navigation";
@@ -47,29 +47,7 @@ export const HeaderSection = () => {
       <Alert
         type="info"
         icon={<ExclamationCircleOutlined />}
-        message={
-          <div className={styles.alertContent}>
-            Chú ý: Bạn có thể tạo flashcards từ highlights trong trang chi tiết.
-            <Collapse
-              bordered={false}
-              style={{ marginTop: 10 }}
-              items={[
-                {
-                  key: "1",
-                  label: "Xem hướng dẫn",
-                  children: (
-                    <iframe
-                      width="560"
-                      height="315"
-                      src="https://www.youtube.com/embed/RGNMCXzvt4s"
-                      allowFullScreen
-                    ></iframe>
-                  ),
-                },
-              ]}
-            />
-          </div>
-        }
+        message="Chú ý: Bạn có thể tạo flashcards từ highlights trong trang chi tiết."
         className={styles.alert}
       />
     </>

@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import TermListItem from "@/components/FlashCard";
 import { Row, Col, Empty, Spin } from "antd";
+import { getAllProgress } from "@/service/flashcards";
+import { getUserId } from "@/lib/helper";
 
 interface FlashCardSet {
   id: string;
@@ -23,9 +25,48 @@ const LearningList: React.FC<LearningListProps> = ({ allFlashcards }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const filterLearningCards = async () => {
+      const userId = getUserId();
+      let progressMap = new Map<string, { learned: number; remembered: number; review: number }>();
 
-    const filterLearningCards = () => {
+      // Try to get progress from API if user is logged in
+      if (userId) {
+        try {
+          const progressList = await getAllProgress(userId);
+          if (Array.isArray(progressList)) {
+            progressList.forEach((p: any) => {
+              const deckId = typeof p.deckId === 'string' ? p.deckId : p.deckId?._id;
+              if (deckId) {
+                progressMap.set(deckId, {
+                  learned: p.learned || 0,
+                  remembered: p.remembered || 0,
+                  review: p.review || 0,
+                });
+              }
+            });
+          }
+        } catch (error) {
+          console.error("Error loading progress from API, falling back to localStorage:", error);
+        }
+      }
+
       const activeList = allFlashcards.filter((card) => {
+        // Try to get progress from API first (if we have deckId in card)
+        // For now, we'll check both API and localStorage for backward compatibility
+        let isLearning = false;
+
+        // Check API progress if we have deckId (extract from href or card.id)
+        if (card.id) {
+          const progress = progressMap.get(card.id);
+          if (progress) {
+            isLearning = (progress.learned || 0) > 0 ||
+                        (progress.remembered || 0) > 0 ||
+                        (progress.review || 0) > 0;
+            if (isLearning) return true;
+          }
+        }
+
+        // Fallback to localStorage for backward compatibility
         const STORAGE_KEY = `flashcard_progress_${card.title.replace(/\s+/g, "_").toLowerCase()}`;
         const saved = localStorage.getItem(STORAGE_KEY);
 
@@ -33,13 +74,11 @@ const LearningList: React.FC<LearningListProps> = ({ allFlashcards }) => {
 
         try {
           const parsed = JSON.parse(saved);
-          // Xử lý cả 2 trường hợp cấu trúc lưu (stats nằm trong hoặc nằm ngoài)
           const stats = parsed.stats || parsed;
 
           if (!stats) return false;
 
-          // ĐIỀU KIỆN ĐANG HỌC: Có ít nhất 1 từ đã học, đã nhớ hoặc cần ôn
-          const isLearning =
+          isLearning =
             (stats.learned || 0) > 0 ||
             (stats.remembered || 0) > 0 ||
             (stats.review || 0) > 0;

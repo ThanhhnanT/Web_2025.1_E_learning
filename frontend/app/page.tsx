@@ -8,6 +8,7 @@ import CourseOnline from "@/components/CourseOnline";
 import TestList, { type Test } from "@/components/TestList";
 import styles from "@/styles/page.module.css"; 
 import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import { get } from "@/helper/api";
 
 
 export default function Home() {
@@ -16,16 +17,13 @@ export default function Home() {
       useEffect(() => {
       const fetchTests = async () => {
         try {
-          const res = await fetch("/tests.json");
-          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-          const data = await res.json();
-          console.log("Dữ liệu nhận được:", data);
-          const sorted = data.sort((a: any, b: any) => b.id - a.id);
-          console.log("Dữ liệu sau khi sắp xếp:", sorted.map((t: any) => t.id));
-          const randomEight = sorted.slice(0, 8);
-          console.log("8 bài test mới nhất:", randomEight.map((t: any) => t.id));
-          setTests(randomEight);
+          const payload = await get("tests?page=1&pageSize=8");
+          const data = payload?.data;
+          if (Array.isArray(data)) {
+            setTests(data);
+          } else {
+            console.error("Unexpected tests payload:", payload);
+          }
         } catch (error) {
           console.error("Lỗi khi tải test:", error);
         }

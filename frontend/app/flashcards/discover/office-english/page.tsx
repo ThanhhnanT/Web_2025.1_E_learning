@@ -22,9 +22,11 @@ const OfficeEnglishPage = () => {
 
 
   useEffect(() => {
-
-    const savedTitle = localStorage.getItem("current_flashcard_title");
-    if (savedTitle) setTitle(savedTitle);
+    // Get title from URL params instead of localStorage
+    const titleParam = searchParams.get("title");
+    if (titleParam) {
+      setTitle(decodeURIComponent(titleParam));
+    }
 
     fetch("/officeEnglish.json")
       .then((res) => {
