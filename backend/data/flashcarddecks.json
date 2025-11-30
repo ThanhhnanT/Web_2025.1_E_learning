@@ -1,0 +1,35 @@
+[
+  {
+    "name": "Từ vựng tiếng Anh văn phòng",
+    "description": "Bộ từ vựng tiếng Anh chuyên ngành văn phòng",
+    "createdBy": "691879f5d21585549f68a439",
+    "wordCount": 138,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "name": "Từ vựng tiếng Anh giao tiếp trung cấp",
+    "description": "Bộ từ vựng tiếng Anh giao tiếp trình độ trung cấp",
+    "createdBy": "691879f5d21585549f68a439",
+    "wordCount": 178,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "name": "Từ vựng tiếng Anh giao tiếp cơ bản",
+    "description": "Bộ từ vựng tiếng Anh giao tiếp trình độ cơ bản",
+    "createdBy": "691879f5d21585549f68a439",
+    "wordCount": 276,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "name": "900 từ TOEFL (cơ bản)",
+    "description": "Bộ 900 từ vựng TOEFL cơ bản",
+    "createdBy": "691879f5d21585549f68a439",
+    "wordCount": 900,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+]
+

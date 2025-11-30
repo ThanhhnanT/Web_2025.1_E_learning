@@ -11,28 +11,45 @@ const ListsPage = () => {
   const params = useParams();
   const router = useRouter();
   const deckId = params.deckId as string;
-  const userId = getUserId();
+  const [userId, setUserId] = useState<string | null>(null);
 
   const [data, setData] = useState<Word[]>([]);
   const [title, setTitle] = useState("");
   const [isManageOpen, setIsManageOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Get User ID on mount
+  useEffect(() => {
+    const id = getUserId();
+    setUserId(id);
+  }, []);
+
   // Load Data
   useEffect(() => {
-    if (userId && deckId) {
-      const { title, cards } = getDeckData(userId, deckId);
-      setTitle(title);
-      setData(cards);
-    }
-    setLoading(false);
+    const loadData = async () => {
+      if (userId && deckId) {
+        try {
+          const { title, cards } = await getDeckData(userId, deckId);
+          setTitle(title);
+          setData(cards);
+        } catch (error) {
+          console.error("Error loading deck data:", error);
+        }
+      }
+      setLoading(false);
+    };
+    loadData();
   }, [userId, deckId]);
 
   // Handle Save from Modal
-  const handleSaveData = (newCards: Word[]) => {
+  const handleSaveData = async (newCards: Word[]) => {
     if (userId) {
-      saveDeckData(userId, deckId, newCards);
-      setData(newCards); // Cập nhật UI WordDetail ngay lập tức
+      try {
+        await saveDeckData(userId, deckId, newCards);
+        setData(newCards); // Cập nhật UI WordDetail ngay lập tức
+      } catch (error) {
+        console.error("Error saving deck data:", error);
+      }
     }
   };
 
@@ -53,7 +70,8 @@ const ListsPage = () => {
         <WordDetail 
           data={data} 
           title={title} 
-          href={`/flashcards/lists/${deckId}`} 
+          href={`/flashcards/lists/${deckId}`}
+          deckId={deckId}
         />
       ) : (
         <Empty description="Danh sách trống" className="mt-20">

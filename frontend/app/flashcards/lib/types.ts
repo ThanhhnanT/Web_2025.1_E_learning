@@ -8,6 +8,7 @@ export interface FlashCardItem {
   learned: number;
   remembered: number;
   needReview: number;
+  hasProgress?: boolean; // Indicates if a progress record exists (even if all values are 0)
 }
 
 export interface Progress {

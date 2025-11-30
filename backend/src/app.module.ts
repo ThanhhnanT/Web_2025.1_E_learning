@@ -20,6 +20,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { TestSectionsModule } from './modules/test-sections/test-sections.module';
 import { QuestionGroupsModule } from './modules/question-groups/question-groups.module';
 import { QuestionsModule } from './modules/questions/questions.module';
+import { StatisticsModule } from './modules/statistics/statistics.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { QuestionsModule } from './modules/questions/questions.module';
     TestSectionsModule,
     QuestionGroupsModule,
     QuestionsModule,
+    StatisticsModule,
 
     ConfigModule.forRoot({
       isGlobal: true, 

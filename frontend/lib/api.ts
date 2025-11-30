@@ -28,7 +28,7 @@ export async function loginUser(data: {
     });
     const result = await res.json();
     if (res.ok &&result.access_token){
-        localStorage.setItem("access_token", result.access_token);
+        // Token is set in cookie by backend, no need to store in localStorage
         return {success: true};
     }else{
         return {error: true, message: result.message || 'Đăng nhập thất bại'};

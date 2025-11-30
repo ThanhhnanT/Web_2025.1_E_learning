@@ -13,9 +13,6 @@ interface Props {
   onItemClick: (href: string, title: string) => void;
 }
 
-const getStorageKey = (title: string) => 
-  `flashcard_progress_${title.trim().replace(/\s+/g, "_").toLowerCase()}`;
-
 export const LearningSection = React.memo(({ data, onItemClick }: Props) => {
   const [learningItems, setLearningItems] = useState<FlashCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,31 +25,16 @@ export const LearningSection = React.memo(({ data, onItemClick }: Props) => {
         return;
       }
 
-      const activeList: FlashCardItem[] = [];
-
-      for (let i = 0; i < data.length; i++) {
-        const item = data[i];
-        const key = getStorageKey(item.title);
-        const saved = localStorage.getItem(key);
-        if (!saved) continue;
-
-        try {
-          const parsed = JSON.parse(saved);
-          const stats = parsed.stats || parsed;
-
-          if (!stats) continue;
-          const isLearning =
-            (stats.learned || 0) > 0 ||
-            (stats.remembered || 0) > 0 ||
-            (stats.review || 0) > 0;
-
-          if (isLearning) {
-            activeList.push(item);
-          }
-        } catch (e) {
-          console.warn("Corrupt flashcard data:", item.title);
-        }
-      }
+      // Use progress data from API (learned, remembered, needReview) instead of localStorage
+      // Show decks that have progress (even if all values are 0) or have any progress > 0
+      const activeList: FlashCardItem[] = data.filter(item => {
+        const hasProgressRecord = item.hasProgress === true;
+        const hasActiveProgress =
+          (item.learned || 0) > 0 ||
+          (item.remembered || 0) > 0 ||
+          (item.needReview || 0) > 0;
+        return hasProgressRecord || hasActiveProgress;
+      });
 
       setLearningItems(activeList);
       setIsLoading(false);
@@ -70,7 +52,14 @@ export const LearningSection = React.memo(({ data, onItemClick }: Props) => {
     );
   }
   if (learningItems.length === 0) {
-    return null;
+    return (
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h2>Đang học:</h2>
+        </div>
+        <Empty description="Chưa có bộ từ nào đang học" className="mt-10" />
+      </div>
+    );
   }
   
   return (

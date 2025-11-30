@@ -88,8 +88,29 @@ export const getAccess = async (path: string, params: object = {}) => {
       params, 
     });
     return result.data;
-  } catch (e) {
-    console.error(e);
+  } catch (e: any) {
+    // Log more details for debugging
+    if (e?.response) {
+      console.error(`API GET Error [${path}]:`, {
+        status: e.response.status,
+        statusText: e.response.statusText,
+        data: e.response.data,
+        url: e.config?.url || `${API_DOMAIN}${path}`,
+        message: e.message
+      });
+      console.error(`Full error response:`, JSON.stringify(e.response.data, null, 2));
+    } else if (e?.request) {
+      console.error(`API GET Network Error [${path}]:`, {
+        message: e.message,
+        url: `${API_DOMAIN}${path}`,
+        request: e.request
+      });
+    } else {
+      console.error(`API GET Error [${path}]:`, {
+        message: e.message,
+        error: e
+      });
+    }
     throw e; // Re-throw để component có thể handle error
   }
 };
@@ -111,9 +132,30 @@ export const patchAccess = async (path: string, data: object) => {
     const tokenHeader = await getTokenHeader();
     const res = await axios.patch(API_DOMAIN + path, data, { ...config, headers: { ...config.headers, ...tokenHeader } });
     return res.data;
-  } catch (error) {
-    console.log('API Error:', error);
-    throw error;
+  } catch (e: any) {
+    // Log more details for debugging
+    if (e?.response) {
+      console.error(`API PATCH Error [${path}]:`, {
+        status: e.response.status,
+        statusText: e.response.statusText,
+        data: e.response.data,
+        url: e.config?.url || `${API_DOMAIN}${path}`,
+        message: e.message
+      });
+      console.error(`Full error response:`, JSON.stringify(e.response.data, null, 2));
+    } else if (e?.request) {
+      console.error(`API PATCH Network Error [${path}]:`, {
+        message: e.message,
+        url: `${API_DOMAIN}${path}`,
+        request: e.request
+      });
+    } else {
+      console.error(`API PATCH Error [${path}]:`, {
+        message: e.message,
+        error: e
+      });
+    }
+    throw e; // Re-throw để component có thể handle error
   }
 };
 
