@@ -70,7 +70,7 @@ export const adaptDeckToFlashCardItem = (backendDeck: BackendFlashcardDeck, prog
     learned: progress?.learned || 0,
     remembered: progress?.remembered || 0,
     needReview: progress?.review || 0,
-    hasProgress: progress !== undefined, // Track if progress record exists
+    // hasProgress: progress !== undefined, // Track if progress record exists
   };
 };
 
