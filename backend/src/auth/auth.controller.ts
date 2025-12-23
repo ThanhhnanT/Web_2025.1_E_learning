@@ -32,6 +32,11 @@ export class AuthController {
     const user = req.user as any; 
     console.log(user)
     const { _id, email } = user;
+    const forwarded = (req.headers?.['x-forwarded-for'] as string) || '';
+    const clientIp = forwarded ? forwarded.split(',')[0].trim() : (req.ip || req.connection?.remoteAddress);
+    const country = req.headers?.['cf-ipcountry'] as string | undefined;
+    const location = country ? `Country: ${country}` : undefined;
+    await this.authService.recordLogin(_id, clientIp, location);
     return this.authService.signIn( _id, email);
   }
 
@@ -54,5 +59,20 @@ export class AuthController {
   @Post('verify_email')
   verifyEmail(@Body() verifyDto: VerifyDto){
     return this.authService.verifyEmail(verifyDto)
+  }
+
+  @ApiOperation({summary: 'Admin đăng nhập'})
+  @Public()
+  @ApiBody({ type: LoginAuthDto })
+  @Post('admin/login')
+  async adminLogin(@Body() loginDto: LoginAuthDto, @Request() req: any) {
+    const user = await this.authService.validateAdminUser(loginDto.email, loginDto.password);
+    const { _id, email } = user;
+    const forwarded = (req.headers?.['x-forwarded-for'] as string) || '';
+    const clientIp = forwarded ? forwarded.split(',')[0].trim() : (req.ip || req.connection?.remoteAddress);
+    const country = req.headers?.['cf-ipcountry'] as string | undefined;
+    const location = country ? `Country: ${country}` : undefined;
+    await this.authService.recordLogin(_id, clientIp, location);
+    return this.authService.signIn(_id, email);
   }
 }

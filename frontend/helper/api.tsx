@@ -159,6 +159,38 @@ export const patchAccess = async (path: string, data: object) => {
   }
 };
 
+export const deleteAccess = async (path: string) => {
+  try {
+    const tokenHeader = await getTokenHeader();
+    const res = await axios.delete(API_DOMAIN + path, { ...config, headers: { ...config.headers, ...tokenHeader } });
+    return res.data;
+  } catch (e: any) {
+    // Log more details for debugging
+    if (e?.response) {
+      console.error(`API DELETE Error [${path}]:`, {
+        status: e.response.status,
+        statusText: e.response.statusText,
+        data: e.response.data,
+        url: e.config?.url || `${API_DOMAIN}${path}`,
+        message: e.message
+      });
+      console.error(`Full error response:`, JSON.stringify(e.response.data, null, 2));
+    } else if (e?.request) {
+      console.error(`API DELETE Network Error [${path}]:`, {
+        message: e.message,
+        url: `${API_DOMAIN}${path}`,
+        request: e.request
+      });
+    } else {
+      console.error(`API DELETE Error [${path}]:`, {
+        message: e.message,
+        error: e
+      });
+    }
+    throw e; // Re-throw để component có thể handle error
+  }
+};
+
 // Profile functions
 export const getUserProfile = async () => {
   try {

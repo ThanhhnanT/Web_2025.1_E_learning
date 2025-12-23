@@ -13,6 +13,34 @@ export class FlashcardDecksController {
   constructor(private readonly flashcardsService: FlashcardsService) {}
 
   @ApiOperation({ 
+    summary: 'Admin - Lấy danh sách decks với phân trang',
+    description: 'Danh sách deck có phân trang, search, sort. Yêu cầu authentication.'
+  })
+  @ApiQuery({ name: 'page', required: false, description: 'Trang hiện tại', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, description: 'Số bản ghi mỗi trang', example: 12 })
+  @ApiQuery({ name: 'search', required: false, description: 'Tìm theo tên/mô tả' })
+  @ApiQuery({ name: 'sortField', required: false, description: 'Trường sắp xếp', example: 'createdAt' })
+  @ApiQuery({ name: 'sortOrder', required: false, description: 'Thứ tự sắp xếp', example: 'desc' })
+  @Get('admin')
+  findAllPaged(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('search') search?: string,
+    @Query('sortField') sortField?: string,
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+    @Query('userId') userId?: string,
+  ) {
+    return this.flashcardsService.findDecksAdmin({
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+      search,
+      sortField,
+      sortOrder,
+      userId, // optional filter; if omitted, return all
+    });
+  }
+
+  @ApiOperation({ 
     summary: 'Lấy danh sách decks',
     description: 'Lấy danh sách decks của user. Yêu cầu authentication.'
   })
@@ -48,6 +76,18 @@ export class FlashcardDecksController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.flashcardsService.findOneDeck(id);
+  }
+
+  @ApiOperation({ 
+    summary: 'Lấy summary deck',
+    description: 'Trả về deck, stats, cards, progress cho user. Yêu cầu authentication.'
+  })
+  @ApiParam({ name: 'id', description: 'ID của deck', example: '507f1f77bcf86cd799439011' })
+  @ApiQuery({ name: 'userId', required: false, description: 'ID người dùng (mặc định lấy từ token)' })
+  @Get(':id/summary')
+  findSummary(@Request() req: any, @Param('id') id: string, @Query('userId') userId?: string) {
+    const finalUserId = userId || req.user?._id?.toString();
+    return this.flashcardsService.getDeckSummary(id, finalUserId);
   }
 
   @ApiOperation({ 

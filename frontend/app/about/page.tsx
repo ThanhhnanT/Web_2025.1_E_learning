@@ -5,9 +5,34 @@ import { useEffect, useState } from "react";
 
 export default function AboutPage() {
   const [isVisible, setIsVisible] = useState(false);
+  const [animeImages, setAnimeImages] = useState<string[]>([]);
 
   useEffect(() => {
     setIsVisible(true);
+    
+    // Fetch anime images from waifu.pics API
+    const fetchAnimeImages = async () => {
+      try {
+        const responses = await Promise.all([
+          fetch("https://api.waifu.pics/sfw/waifu"),
+          fetch("https://api.waifu.pics/sfw/waifu"),
+          fetch("https://api.waifu.pics/sfw/waifu")
+        ]);
+        
+        const data = await Promise.all(responses.map(r => r.json()));
+        setAnimeImages(data.map(d => d.url));
+      } catch (error) {
+        console.error("Error fetching anime images:", error);
+        // Fallback to placeholder images
+        setAnimeImages([
+          "https://api.dicebear.com/7.x/bottts/svg?seed=NguyenVanA&backgroundColor=b6e3f4",
+          "https://api.dicebear.com/7.x/bottts/svg?seed=TranThiB&backgroundColor=ffd5dc",
+          "https://api.dicebear.com/7.x/bottts/svg?seed=PhamVanC&backgroundColor=c7d2fe"
+        ]);
+      }
+    };
+    
+    fetchAnimeImages();
   }, []);
 
   return (
@@ -107,7 +132,13 @@ export default function AboutPage() {
           <div className={styles.team}>
             <div className={styles.member}>
               <div className={styles.memberImageWrapper}>
-                <img src="/avatar1.jpg" alt="Giảng viên 1" />
+                <img 
+                  src={animeImages[0] || "https://api.dicebear.com/7.x/bottts/svg?seed=NguyenVanA&backgroundColor=b6e3f4"} 
+                  alt="Giảng viên 1" 
+                  onError={(e) => {
+                    e.currentTarget.src = "https://api.dicebear.com/7.x/bottts/svg?seed=NguyenVanA&backgroundColor=b6e3f4";
+                  }}
+                />
                 <div className={styles.memberOverlay}>
                   <div className={styles.memberSocial}>
                     <span>👤</span>
@@ -120,7 +151,13 @@ export default function AboutPage() {
             </div>
             <div className={styles.member}>
               <div className={styles.memberImageWrapper}>
-                <img src="/avatar2.jpg" alt="Giảng viên 2" />
+                <img 
+                  src={animeImages[1] || "https://api.dicebear.com/7.x/bottts/svg?seed=TranThiB&backgroundColor=ffd5dc"} 
+                  alt="Giảng viên 2" 
+                  onError={(e) => {
+                    e.currentTarget.src = "https://api.dicebear.com/7.x/bottts/svg?seed=TranThiB&backgroundColor=ffd5dc";
+                  }}
+                />
                 <div className={styles.memberOverlay}>
                   <div className={styles.memberSocial}>
                     <span>👤</span>
@@ -133,7 +170,13 @@ export default function AboutPage() {
             </div>
             <div className={styles.member}>
               <div className={styles.memberImageWrapper}>
-                <img src="/avatar3.jpg" alt="Giảng viên 3" />
+                <img 
+                  src={animeImages[2] || "https://api.dicebear.com/7.x/bottts/svg?seed=PhamVanC&backgroundColor=c7d2fe"} 
+                  alt="Giảng viên 3" 
+                  onError={(e) => {
+                    e.currentTarget.src = "https://api.dicebear.com/7.x/bottts/svg?seed=PhamVanC&backgroundColor=c7d2fe";
+                  }}
+                />
                 <div className={styles.memberOverlay}>
                   <div className={styles.memberSocial}>
                     <span>👤</span>

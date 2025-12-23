@@ -29,6 +29,8 @@ export class TestsService {
       series?: string;
       level?: string;
       language?: string;
+      status?: string;
+      search?: string;
     },
   ) {
     // Ensure page and pageSize are positive numbers
@@ -51,6 +53,18 @@ export class TestsService {
     }
     if (filters?.language) {
       filter.language = filters.language;
+    }
+    if (filters?.status) {
+      filter.status = filters.status;
+    }
+    if (filters?.search) {
+      const regex = new RegExp(filters.search, 'i');
+      filter.$or = [
+        { title: regex },
+        { series: regex },
+        { testNumber: regex },
+        { externalSlug: regex },
+      ];
     }
 
     // Get total count and paginated data in parallel

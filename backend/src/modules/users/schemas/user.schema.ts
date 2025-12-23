@@ -27,8 +27,20 @@ export class User {
   @Prop({ type: Boolean, default: false })
   email_verified: boolean;
 
-  @Prop({ type: String, enum: ['user', 'admin'], default: 'user' })
+  @Prop({ type: String, enum: ['administrator', 'editor', 'viewer', 'support'], default: 'viewer' })
   role: string;
+
+  @Prop({ type: [String], default: [] })
+  permissions: string[];
+
+  @Prop({ type: Date })
+  lastLoginAt: Date;
+
+  @Prop({ type: String })
+  lastLoginIp: string;
+
+  @Prop({ type: String })
+  lastLoginLocation: string;
 
   @Prop() 
   codeId: string

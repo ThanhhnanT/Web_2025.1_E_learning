@@ -8,6 +8,12 @@ export enum TestType {
   OTHER = 'OTHER',
 }
 
+export enum TestStatus {
+  DRAFT = 'draft',
+  ACTIVE = 'active',
+  ARCHIVED = 'archived',
+}
+
 export enum SectionType {
   LISTENING = 'listening',
   READING = 'reading',
@@ -128,6 +134,7 @@ export interface Test {
   testNumber?: string;
   skill?: string;
   sourceUrl?: string;
+  status?: TestStatus;
   sections?: TestSection[];
   createdAt?: string;
   updatedAt?: string;
@@ -187,5 +194,32 @@ export interface TestResult {
   correctAnswers: number;
   timeSpent: number;
   completedAt: Date;
+}
+
+// Answer types for transcript and answer keys
+export interface AnswerKey {
+  questionNumber: number;
+  correctAnswer: string[];
+  alternatives?: string[];
+}
+
+export interface Answer {
+  _id: string;
+  testId: string;
+  sectionId: string;
+  partNumber: number;
+  transcriptHtml: string; // HTML transcript from website, keep original structure
+  answerKeys: AnswerKey[]; // List of correct answers by questionNumber
+  audioUrl?: string; // Audio link for this part
+  sourceUrl?: string; // URL where the transcript was sourced from
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Props for answer detail page
+export interface AnswerDetailPageProps {
+  testId: string;
+  resultId: string;
+  sectionId: string;
 }
 

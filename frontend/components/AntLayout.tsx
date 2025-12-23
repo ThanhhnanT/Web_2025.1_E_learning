@@ -156,23 +156,40 @@ function UserMenuClient({ onOpenModal }: { onOpenModal: () => void }) {
   const userMenu: MenuProps['items'] = [
     { 
       key: "profile", 
-      label: <span onClick={() => router.push("/auth/profile")}>Hồ sơ</span>,
+      label: "Hồ sơ",
       icon: <UserOutlined />
     },
     { 
       key: "statistics", 
-      label: <span onClick={() => router.push("/statistics")}>Thống kê</span>,
+      label: "Thống kê",
       icon: <BarChartOutlined />
     },
     { 
       key: "logout", 
-      label: <span onClick={() => { logoutUser(); setIsAuthenticated(false); setUserAvatar(null); router.push("/"); }}>Đăng xuất</span>,
+      label: "Đăng xuất",
       icon: <LogoutOutlined />
     },
   ];
 
+  const handleMenuClick = ({ key }: { key: string }) => {
+    switch (key) {
+      case "profile":
+        router.push("/auth/profile");
+        break;
+      case "statistics":
+        router.push("/statistics");
+        break;
+      case "logout":
+        logoutUser();
+        setIsAuthenticated(false);
+        setUserAvatar(null);
+        router.push("/");
+        break;
+    }
+  };
+
   return isAuthenticated ? (
-    <Dropdown menu={{ items: userMenu }} placement="bottomRight" arrow>
+    <Dropdown menu={{ items: userMenu, onClick: handleMenuClick }} placement="bottomRight" arrow>
       <Avatar 
         src={userAvatar || undefined} 
         icon={!userAvatar && <UserOutlined />}

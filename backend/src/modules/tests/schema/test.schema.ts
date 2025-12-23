@@ -11,6 +11,12 @@ export enum TestType {
   OTHER = 'OTHER',
 }
 
+export enum TestStatus {
+  DRAFT = 'draft',
+  ACTIVE = 'active',
+  ARCHIVED = 'archived',
+}
+
 @Schema({ timestamps: true })
 export class Test {
   @Prop({ type: String, required: true })
@@ -61,6 +67,9 @@ export class Test {
 
   @Prop({ type: String })
   sourceUrl: string; // URL where the test was sourced from
+
+  @Prop({ type: String, enum: Object.values(TestStatus), default: TestStatus.DRAFT })
+  status: TestStatus;
 }
 
 export const TestSchema = SchemaFactory.createForClass(Test);
@@ -70,3 +79,4 @@ TestSchema.index({ testType: 1 });
 TestSchema.index({ externalSlug: 1 });
 TestSchema.index({ series: 1 });
 TestSchema.index({ skill: 1 });
+TestSchema.index({ status: 1 });

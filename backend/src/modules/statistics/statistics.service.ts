@@ -6,6 +6,7 @@ import { Payment } from '../payments/schema/payment.schema';
 import { FlashcardProgress } from '../flashcards/schema/flashcard-progress.schema';
 import { Course } from '../courses/schema/course.schema';
 import { UserStatisticsDto, TestStatsDto, CourseStatsDto, FlashcardStatsDto, OverviewDto } from './dto/user-statistics.dto';
+import { TestChartDataDto, TestResultItemDto } from './dto/chart-data.dto';
 
 @Injectable()
 export class StatisticsService {
@@ -173,6 +174,57 @@ export class StatisticsService {
       totalWordsRemembered,
       totalWordsToReview,
       decks,
+    };
+  }
+
+  async getTestChartData(
+    userId: string | Types.ObjectId,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<TestChartDataDto> {
+    const userIdObj = Types.ObjectId.isValid(userId) ? new Types.ObjectId(userId) : userId;
+
+    // Build query filter
+    const filter: any = { userId: userIdObj, deletedAt: null };
+    
+    if (startDate || endDate) {
+      filter.completedAt = {};
+      if (startDate) {
+        filter.completedAt.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        // Include the entire end date (set to end of day)
+        const endOfDay = new Date(endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        filter.completedAt.$lte = endOfDay;
+      }
+    }
+
+    const results = await this.resultModel
+      .find(filter)
+      .populate('testId', 'title language level')
+      .sort({ completedAt: 1 }) // Sort ascending for chronological order
+      .exec();
+
+    const chartResults: TestResultItemDto[] = results.map(r => {
+      const test = r.testId as any;
+      return {
+        _id: r._id.toString(),
+        score: r.score,
+        bandScore: r.bandScore,
+        completedAt: r.completedAt,
+        testId: {
+          _id: test?._id?.toString() || '',
+          title: test?.title || 'N/A',
+          language: test?.language,
+          level: test?.level,
+        },
+      };
+    });
+
+    return {
+      results: chartResults,
+      total: chartResults.length,
     };
   }
 }

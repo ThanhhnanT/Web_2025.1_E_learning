@@ -1,11 +1,18 @@
 "use client";
 
-import React from 'react';
-import { Card, Table, Tag, Typography, Row, Col, Statistic } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Card, Table, Tag, Typography, Row, Col, Statistic, Select, DatePicker, Space, Spin, message } from 'antd';
 import { FileTextOutlined, TrophyOutlined, RiseOutlined, FallOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
+import { getTestChartData } from '@/service/statistics';
+import { getUserId } from '@/lib/helper';
+import TestCharts from './TestCharts';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 
 const { Title } = Typography;
+const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 interface TestStatsProps {
   testStats: {
@@ -21,6 +28,62 @@ interface TestStatsProps {
 
 export default function TestStatistics({ testStats }: TestStatsProps) {
   const router = useRouter();
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [loadingCharts, setLoadingCharts] = useState(false);
+  const [dateRangeType, setDateRangeType] = useState<string>('all');
+  const [customDateRange, setCustomDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
+
+  const fetchChartData = async () => {
+    const userId = getUserId();
+    if (!userId) return;
+
+    setLoadingCharts(true);
+    try {
+      let startDate: string | undefined;
+      let endDate: string | undefined;
+
+      if (dateRangeType === 'custom') {
+        if (customDateRange[0] && customDateRange[1]) {
+          startDate = customDateRange[0].startOf('day').toISOString();
+          endDate = customDateRange[1].endOf('day').toISOString();
+        } else {
+          setLoadingCharts(false);
+          return;
+        }
+      } else if (dateRangeType !== 'all') {
+        const days = parseInt(dateRangeType);
+        const end = dayjs();
+        const start = end.subtract(days, 'day');
+        startDate = start.startOf('day').toISOString();
+        endDate = end.endOf('day').toISOString();
+      }
+
+      const data = await getTestChartData(userId, startDate, endDate);
+      setChartData(data.results || []);
+    } catch (error: any) {
+      console.error('Error fetching chart data:', error);
+      message.error('Không thể tải dữ liệu biểu đồ');
+      setChartData([]);
+    } finally {
+      setLoadingCharts(false);
+    }
+  };
+
+  const handleDateRangeChange = (value: string) => {
+    setDateRangeType(value);
+    if (value !== 'custom') {
+      setCustomDateRange([null, null]);
+    }
+  };
+
+  const handleCustomDateRangeChange = (dates: any) => {
+    setCustomDateRange(dates);
+  };
+
+  useEffect(() => {
+    fetchChartData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateRangeType, customDateRange]);
 
   const columns = [
     {
@@ -140,7 +203,40 @@ export default function TestStatistics({ testStats }: TestStatsProps) {
         </div>
       )}
 
-      <Title level={5}>Kết quả gần đây:</Title>
+      {/* Date Range Selector and Charts */}
+      <div style={{ marginBottom: 24 }}>
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+          <div>
+            <Title level={5} style={{ marginBottom: 12 }}>Khoảng thời gian:</Title>
+            <Space wrap>
+              <Select
+                value={dateRangeType}
+                onChange={handleDateRangeChange}
+                style={{ width: 200 }}
+              >
+                <Option value="all">Tất cả</Option>
+                <Option value="7">7 ngày qua</Option>
+                <Option value="30">30 ngày qua</Option>
+                <Option value="90">90 ngày qua</Option>
+                <Option value="custom">Tùy chọn</Option>
+              </Select>
+              {dateRangeType === 'custom' && (
+                <RangePicker
+                  value={customDateRange}
+                  onChange={handleCustomDateRangeChange}
+                  format="DD/MM/YYYY"
+                  placeholder={['Từ ngày', 'Đến ngày']}
+                />
+              )}
+            </Space>
+          </div>
+        </Space>
+      </div>
+
+      {/* Charts */}
+      <TestCharts data={chartData} loading={loadingCharts} />
+
+      <Title level={5} style={{ marginTop: 24 }}>Kết quả gần đây:</Title>
       <Table
         columns={columns}
         dataSource={testStats.recentResults}

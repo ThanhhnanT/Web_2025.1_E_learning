@@ -35,14 +35,59 @@ export class AnswersController {
   }
 
   @ApiOperation({ 
-    summary: 'Lấy đáp án theo contentId',
-    description: 'Lấy đáp án đúng của một content cụ thể. Yêu cầu authentication.'
+    summary: 'Lấy đáp án theo testId và sectionId',
+    description: 'Lấy đáp án (transcript, answer keys) của một section cụ thể trong test. Yêu cầu authentication.'
+  })
+  @ApiBearerAuth()
+  @ApiParam({ name: 'testId', description: 'ID của test', example: '507f1f77bcf86cd799439011' })
+  @ApiParam({ name: 'sectionId', description: 'ID của test section', example: '507f1f77bcf86cd799439012' })
+  @ApiResponse({ status: 200, description: 'Lấy đáp án theo testId và sectionId thành công' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Chưa đăng nhập' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy đáp án' })
+  @Get('test/:testId/section/:sectionId')
+  findByTestIdAndSectionId(
+    @Param('testId') testId: string,
+    @Param('sectionId') sectionId: string,
+  ) {
+    return this.answersService.findByTestIdAndSectionId(testId, sectionId);
+  }
+
+  @ApiOperation({ 
+    summary: 'Lấy tất cả đáp án theo testId',
+    description: 'Lấy tất cả đáp án của một test. Yêu cầu authentication.'
+  })
+  @ApiBearerAuth()
+  @ApiParam({ name: 'testId', description: 'ID của test', example: '507f1f77bcf86cd799439011' })
+  @ApiResponse({ status: 200, description: 'Lấy đáp án theo testId thành công' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Chưa đăng nhập' })
+  @Get('test/:testId')
+  findByTestId(@Param('testId') testId: string) {
+    return this.answersService.findByTestId(testId);
+  }
+
+  @ApiOperation({ 
+    summary: 'Lấy đáp án theo sectionId',
+    description: 'Lấy đáp án của một section cụ thể. Yêu cầu authentication.'
+  })
+  @ApiBearerAuth()
+  @ApiParam({ name: 'sectionId', description: 'ID của test section', example: '507f1f77bcf86cd799439012' })
+  @ApiResponse({ status: 200, description: 'Lấy đáp án theo sectionId thành công' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Chưa đăng nhập' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy đáp án' })
+  @Get('section/:sectionId')
+  findBySectionId(@Param('sectionId') sectionId: string) {
+    return this.answersService.findBySectionId(sectionId);
+  }
+
+  // DEPRECATED: Keep for backward compatibility
+  @ApiOperation({ 
+    summary: '[DEPRECATED] Lấy đáp án theo contentId',
+    description: 'DEPRECATED: Sử dụng endpoint mới /test/:testId/section/:sectionId thay thế.'
   })
   @ApiBearerAuth()
   @ApiParam({ name: 'contentId', description: 'ID của content', example: '507f1f77bcf86cd799439011' })
   @ApiResponse({ status: 200, description: 'Lấy đáp án theo contentId thành công' })
   @ApiResponse({ status: 401, description: 'Unauthorized - Chưa đăng nhập' })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy đáp án' })
   @Get('content/:contentId')
   findByContentId(@Param('contentId') contentId: string) {
     return this.answersService.findByContentId(contentId);

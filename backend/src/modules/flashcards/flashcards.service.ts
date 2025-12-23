@@ -117,6 +117,55 @@ export class FlashcardsService {
     }
   }
 
+  async findDecksAdmin(options: {
+    search?: string;
+    page?: number;
+    limit?: number;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+    userId?: string;
+  }) {
+    const {
+      search,
+      page = 1,
+      limit = 12,
+      sortField = 'createdAt',
+      sortOrder = 'desc',
+      userId,
+    } = options;
+
+    const query: any = { deletedAt: null };
+    if (userId) {
+      query.createdBy = Types.ObjectId.isValid(userId)
+        ? new Types.ObjectId(userId)
+        : userId;
+    }
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const total = await this.flashcardDeckModel.countDocuments(query).exec();
+    const decks = await this.flashcardDeckModel
+      .find(query)
+      .populate({ path: 'createdBy', select: 'name email' })
+      .sort({ [sortField]: sortOrder === 'asc' ? 1 : -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec();
+
+    return {
+      data: decks || [],
+      pagination: {
+        total,
+        page,
+        limit,
+      },
+    };
+  }
+
   async createDeck(createDeckDto: CreateDeckDto) {
     const newDeck = await this.flashcardDeckModel.create(createDeckDto);
     return newDeck.populate('createdBy', 'name email');
@@ -153,6 +202,33 @@ export class FlashcardsService {
       .populate('userId', 'name email')
       .populate('deckId', 'name')
       .exec();
+  }
+
+  async findCardsByDeckWithFilters(deckId: string, options: { search?: string; page?: number; limit?: number; sortField?: string; sortOrder?: 'asc' | 'desc'; }) {
+    const { search, page = 1, limit = 20, sortField = 'createdAt', sortOrder = 'desc' } = options;
+    const query: any = { deckId, deletedAt: null };
+    if (search) {
+      query.word = { $regex: search, $options: 'i' };
+    }
+
+    const total = await this.flashcardModel.countDocuments(query).exec();
+    const cards = await this.flashcardModel
+      .find(query)
+      .populate('userId', 'name email')
+      .populate('deckId', 'name')
+      .sort({ [sortField]: sortOrder === 'asc' ? 1 : -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec();
+
+    return {
+      data: cards || [],
+      pagination: {
+        total,
+        page,
+        limit,
+      },
+    };
   }
 
   async createCard(deckId: string, createCardDto: CreateCardDto) {
@@ -307,6 +383,29 @@ export class FlashcardsService {
       // Return empty array instead of throwing to prevent 500 errors
       return [];
     }
+  }
+
+  async getDeckSummary(deckId: string, userId?: string) {
+    const deck = await this.findOneDeck(deckId);
+    if (!deck) {
+      return null;
+    }
+
+    const cards = await this.findCardsByDeck(deckId);
+    const progress = userId ? await this.findProgress(deckId, userId) : null;
+
+    return {
+      deck,
+      stats: {
+        wordCount: deck.wordCount,
+        userCount: deck.userCount,
+        learned: progress?.learned || 0,
+        remembered: progress?.remembered || 0,
+        review: progress?.review || 0,
+      },
+      cards,
+      progress,
+    };
   }
 
   // Sample data methods

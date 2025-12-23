@@ -11,8 +11,8 @@
 }
 
 .correctQuestion {
-  border-color: #52c41a;
-  background: #f6ffed;
+  border-color: #1890ff;
+  background: #e6f4ff;
 }
 
 .incorrectQuestion {
@@ -35,7 +35,7 @@
 
 .correctBadge {
   padding: 4px 12px;
-  background: #52c41a;
+  background: #1890ff;
   color: white;
   border-radius: 12px;
   font-size: 13px;
@@ -114,8 +114,8 @@
 }
 
 .correctOption {
-  border-color: #52c41a !important;
-  background: #f6ffed !important;
+  border-color: #1890ff !important;
+  background: #e6f4ff !important;
 }
 
 .incorrectOption {
@@ -142,8 +142,8 @@
 }
 
 .correctInput {
-  border-color: #52c41a !important;
-  background: #f6ffed;
+  border-color: #1890ff !important;
+  background: #e6f4ff;
 }
 
 .incorrectInput {
@@ -164,9 +164,9 @@
 }
 
 .correctButton {
-  background: #52c41a !important;
+  background: #1890ff !important;
   color: white !important;
-  border-color: #52c41a !important;
+  border-color: #1890ff !important;
 }
 
 .incorrectButton {
