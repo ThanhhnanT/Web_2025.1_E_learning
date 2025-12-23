@@ -29,11 +29,13 @@ export class TestsController {
   })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Số trang (mặc định: 1)', example: 1 })
   @ApiQuery({ name: 'pageSize', required: false, type: Number, description: 'Số lượng items mỗi trang (mặc định: 12)', example: 12 })
+  @ApiQuery({ name: 'search', required: false, type: String, description: 'Tìm theo tiêu đề/series/slug', example: 'Cambridge' })
   @ApiQuery({ name: 'skill', required: false, type: String, description: 'Lọc theo kỹ năng (reading, listening, speaking, writing)', example: 'reading' })
   @ApiQuery({ name: 'testType', required: false, type: String, description: 'Lọc theo loại bài test (IELTS, HSK, TOEFL, TOEIC, OTHER)', example: 'IELTS' })
   @ApiQuery({ name: 'series', required: false, type: String, description: 'Lọc theo bộ đề (ví dụ: Cambridge IELTS 20)', example: 'Cambridge IELTS 20' })
   @ApiQuery({ name: 'level', required: false, type: String, description: 'Lọc theo level', example: 'Intermediate' })
   @ApiQuery({ name: 'language', required: false, type: String, description: 'Lọc theo ngôn ngữ đề thi', example: 'English' })
+  @ApiQuery({ name: 'status', required: false, type: String, description: 'Lọc theo trạng thái bài test', example: 'active' })
   @ApiResponse({ 
     status: 200, 
     description: 'Lấy danh sách bài test thành công',
@@ -68,6 +70,8 @@ export class TestsController {
     @Query('series') series?: string,
     @Query('level') level?: string,
     @Query('language') language?: string,
+    @Query('status') status?: string,
+    @Query('search') search?: string,
   ) {
     const pageNum = page ? parseInt(page, 10) : 1;
     const pageSizeNum = pageSize ? parseInt(pageSize, 10) : 12;
@@ -77,6 +81,8 @@ export class TestsController {
       series,
       level,
       language,
+      status,
+      search,
     });
   }
 

@@ -21,36 +21,38 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { Public } from '@/auth/decorate/customize';
 import { JwtAuthGuard } from '@/auth/passport/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { Permissions } from '@/auth/decorate/permissions.decorator';
+import { PermissionsGuard } from '@/auth/permissions.guard';
+import { UpdatePermissionsDto } from './dto/update-permissions.dto';
 
 @ApiTags('Admin')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Public()
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create new user (Admin only)' })
+  @Permissions('user:create')
   @Post('create-user')
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all users with pagination (Admin only)' })
+  @Permissions('user:view')
   @Get()
-  findAll(@Query() query: string, @Query('page') page: string) {
-    return this.usersService.findAll(query, +page);
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  findAll(
+    @Query() query: any, 
+    @Query('page') page: string,
+    @Query('search') search?: string
+  ) {
+    const pageNum = page ? +page : 1;
+    // Convert query object to string for aqp
+    const queryString = new URLSearchParams(query as any).toString();
+    return this.usersService.findAll(queryString, pageNum, search);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -60,6 +62,33 @@ export class UsersController {
   async updateProfile(@Request() req: any, @Body() updateUserDto: UpdateUserDto) {
     const userId = req.user._id || req.user.id;
     return this.usersService.update(userId, updateUserDto);
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user by ID (Admin only)' })
+  @Permissions('user:view')
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update user (Admin only)' })
+  @Permissions('user:edit')
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(id, updateUserDto);
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete user (Admin only)' })
+  @Permissions('user:delete')
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -107,5 +136,32 @@ export class UsersController {
   async changePassword(@Request() req: any, @Body() changePasswordDto: ChangePasswordDto) {
     const userId = req.user._id || req.user.id;
     return this.usersService.changePassword(userId, changePasswordDto);
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get role presets (Admin only)' })
+  @Permissions('user:view')
+  @Get('roles/presets/all')
+  getRolePresets() {
+    return this.usersService.getRolePresets();
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get effective permissions of user (Admin only)' })
+  @Permissions('user:view')
+  @Get(':id/permissions')
+  getPermissions(@Param('id') id: string) {
+    return this.usersService.getPermissions(id);
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update permissions override for user (Admin only)' })
+  @Permissions('user:edit')
+  @Patch(':id/permissions')
+  updatePermissions(@Param('id') id: string, @Body() dto: UpdatePermissionsDto) {
+    return this.usersService.updatePermissions(id, dto.permissions);
   }
 }

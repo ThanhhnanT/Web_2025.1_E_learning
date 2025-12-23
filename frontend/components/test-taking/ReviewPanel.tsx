@@ -1,19 +1,21 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { Card, Statistic, Row, Col, Progress, Tabs, Button, Select, Empty } from 'antd';
+import type { TabsProps } from 'antd';
 import { 
   TrophyOutlined, 
   CheckCircleOutlined, 
   CloseCircleOutlined,
   ClockCircleOutlined,
-  FilterOutlined 
+  FilterOutlined,
+  FileTextOutlined
 } from '@ant-design/icons';
 import styles from '@/styles/reviewPanel.module.css';
 import { TestResult, Question, TestSection } from '@/types/test';
 import QuestionRenderer from './QuestionRenderer';
-
-const { TabPane } = Tabs;
+import { THEME_COLORS } from '@/constants/colors';
 
 interface ReviewPanelProps {
   result: TestResult;
@@ -25,6 +27,9 @@ interface ReviewPanelProps {
 }
 
 const ReviewPanel: React.FC<ReviewPanelProps> = ({ result, test, selectedSectionIds }) => {
+  const router = useRouter();
+  const params = useParams<{ testId: string; resultId: string }>();
+  const { testId, resultId } = params;
   const [filterType, setFilterType] = useState<'all' | 'correct' | 'incorrect'>('all');
   const [selectedSection, setSelectedSection] = useState<string>('all');
 
@@ -123,12 +128,12 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({ result, test, selectedSection
               value={accuracyPercent.toFixed(1)}
               suffix="%"
               prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: accuracyPercent >= 70 ? '#52c41a' : '#ff4d4f' }}
+              valueStyle={{ color: accuracyPercent >= 70 ? THEME_COLORS.success : THEME_COLORS.error }}
             />
             <Progress 
               percent={accuracyPercent} 
               showInfo={false}
-              strokeColor={accuracyPercent >= 70 ? '#52c41a' : '#ff4d4f'}
+              strokeColor={accuracyPercent >= 70 ? THEME_COLORS.success : THEME_COLORS.error}
               size="small"
             />
           </Col>
@@ -137,7 +142,7 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({ result, test, selectedSection
               title="Correct Answers"
               value={result.correctAnswers}
               prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: '#52c41a' }}
+              valueStyle={{ color: THEME_COLORS.success }}
             />
           </Col>
           <Col xs={24} sm={12} md={6}>
@@ -159,8 +164,8 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({ result, test, selectedSection
               className={styles.distributionCircle}
               style={{
                 background: `conic-gradient(
-                  #52c41a 0 ${correctOverallPercent}%,
-                  #ff4d4f ${correctOverallPercent}% ${
+                  ${THEME_COLORS.success} 0 ${correctOverallPercent}%,
+                  ${THEME_COLORS.error} ${correctOverallPercent}% ${
                     correctOverallPercent + wrongOverallPercent
                   }%,
                   #d9d9d9 ${
@@ -180,7 +185,7 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({ result, test, selectedSection
             <div className={styles.legendRow}>
               <span
                 className={styles.legendDot}
-                style={{ backgroundColor: '#52c41a' }}
+                style={{ backgroundColor: THEME_COLORS.success }}
               />
               <span>Đúng: {correctCount} câu</span>
             </div>
@@ -298,6 +303,19 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({ result, test, selectedSection
               key={section._id} 
               className={styles.answersCard}
               title={section.title}
+              extra={
+                <Button
+                  type="link"
+                  icon={<FileTextOutlined />}
+                  onClick={() => {
+                    if (testId && resultId) {
+                      router.push(`/tests/${testId}/results/${resultId}/answers/${section._id}`);
+                    }
+                  }}
+                >
+                  Xem Transcript & Answer Keys
+                </Button>
+              }
             >
               <div className={styles.questionsContainer}>
                 {questionPairs.map((pair, pairIndex) => (
@@ -379,16 +397,31 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({ result, test, selectedSection
             correctInSection === 0
               ? '#d9d9d9'
               : correctInSection === totalQuestionsInSection
-              ? '#52c41a'
-              : '#ff4d4f';
+              ? THEME_COLORS.success
+              : THEME_COLORS.error;
 
           return (
             <div key={section._id} className={styles.sectionItem}>
               <div className={styles.sectionHeader}>
                 <span className={styles.sectionTitle}>{section.title}</span>
-                <span className={styles.sectionScore}>
-                  {correctInSection} / {totalQuestionsInSection}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className={styles.sectionScore}>
+                    {correctInSection} / {totalQuestionsInSection}
+                  </span>
+                  {testId && resultId && (
+                    <Button
+                      type="link"
+                      size="small"
+                      icon={<FileTextOutlined />}
+                      onClick={() => {
+                        router.push(`/tests/${testId}/results/${resultId}/answers/${section._id}`);
+                      }}
+                      style={{ padding: 0, height: 'auto' }}
+                    >
+                      Transcript
+                    </Button>
+                  )}
+                </div>
               </div>
               <div className={styles.sectionBar}>
                 <div
@@ -446,16 +479,26 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({ result, test, selectedSection
       {renderStatistics()}
       {renderSectionBreakdown()}
 
-      <Tabs defaultActiveKey="review" className={styles.tabs}>
-        <TabPane tab="Question Review" key="review">
-          {renderQuestionReview()}
-        </TabPane>
-        <TabPane tab="Performance Analysis" key="analysis">
-          <Card>
-            <p>Detailed performance analysis coming soon...</p>
-          </Card>
-        </TabPane>
-      </Tabs>
+      <Tabs 
+        defaultActiveKey="review" 
+        className={styles.tabs}
+        items={[
+          {
+            key: 'review',
+            label: 'Question Review',
+            children: renderQuestionReview(),
+          },
+          {
+            key: 'analysis',
+            label: 'Performance Analysis',
+            children: (
+              <Card>
+                <p>Detailed performance analysis coming soon...</p>
+              </Card>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 };

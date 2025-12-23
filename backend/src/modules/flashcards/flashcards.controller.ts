@@ -82,6 +82,35 @@ export class FlashcardsController {
   }
 
   @ApiOperation({ 
+    summary: 'Lấy cards trong deck (có phân trang)',
+    description: 'Danh sách card có phân trang, search, sort. API này là public.'
+  })
+  @ApiParam({ name: 'deckId', description: 'ID của deck', example: '507f1f77bcf86cd799439011' })
+  @ApiQuery({ name: 'page', required: false, description: 'Trang hiện tại', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, description: 'Số bản ghi mỗi trang', example: 20 })
+  @ApiQuery({ name: 'search', required: false, description: 'Tìm theo từ vựng' })
+  @ApiQuery({ name: 'sortField', required: false, description: 'Trường sắp xếp', example: 'createdAt' })
+  @ApiQuery({ name: 'sortOrder', required: false, description: 'Thứ tự sắp xếp', example: 'desc' })
+  @Public()
+  @Get('decks/:deckId/cards/search')
+  findCardsByDeckPaged(
+    @Param('deckId') deckId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('search') search?: string,
+    @Query('sortField') sortField?: string,
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+  ) {
+    return this.flashcardsService.findCardsByDeckWithFilters(deckId, {
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+      search,
+      sortField,
+      sortOrder,
+    });
+  }
+
+  @ApiOperation({ 
     summary: 'Thêm card vào deck',
     description: 'Thêm một card mới vào deck. Yêu cầu authentication.'
   })

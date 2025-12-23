@@ -16,6 +16,7 @@ const AuthModal= (props: any) => {
   const messageApi = useMessageApi();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [shouldOpenVerify, setShouldOpenVerify] = useState(false);
 
   const [loginForm] = Form.useForm();
   const [registerForm] = Form.useForm();
@@ -29,9 +30,19 @@ const AuthModal= (props: any) => {
     setActiveTab('login');
     // Reset loading state
     setLoading(false);
-    // Reset verify modal state
-    setVerify(false);
   };
+
+  // Open verify modal after AuthModal closes
+  useEffect(() => {
+    if (!visible && shouldOpenVerify) {
+      // Small delay to ensure AuthModal is fully closed
+      const timer = setTimeout(() => {
+        setVerify(true);
+        setShouldOpenVerify(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [visible, shouldOpenVerify]);
 
   // Reset forms when modal opens
   useEffect(() => {
@@ -41,6 +52,7 @@ const AuthModal= (props: any) => {
       setActiveTab('login');
       setLoading(false);
       setVerify(false);
+      setShouldOpenVerify(false);
     }
   }, [visible, loginForm, registerForm]);
 
@@ -82,8 +94,8 @@ const AuthModal= (props: any) => {
       } else {
         Cookies.set('email', values.email)
         setLoading(false)
+        setShouldOpenVerify(true)
         setOpen(false)
-        setVerify(true)
       }
       
     } catch(e) {
@@ -311,13 +323,13 @@ const tabItems = [
       styles={{
         body: { 
           padding: '24px',
-          maxHeight: 'calc(60vh)',
+          maxHeight: 'calc(70vh - 120px)',
           overflowY: 'auto',
           overflowX: 'hidden'
         }
       }}
       style={{
-        maxHeight: 'calc(70vh)',
+        maxHeight: 'calc(80vh)',
         margin: 0,
         paddingBottom: 0
       }}

@@ -102,3 +102,25 @@ export interface BackendProgress {
   updatedAt: string;
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+  };
+}
+
+export interface DeckSummaryResponse {
+  deck: BackendFlashcardDeck;
+  stats: {
+    wordCount: number;
+    userCount: number;
+    learned: number;
+    remembered: number;
+    review: number;
+  };
+  cards: BackendFlashcard[];
+  progress: BackendProgress | null;
+}
+

@@ -145,7 +145,7 @@
 }
 
 .sectionBarSegmentCorrect {
-  background-color: #52c41a;
+  background-color: var(--theme-success, #1890ff);
   height: 100%;
 }
 
@@ -179,7 +179,7 @@
 }
 
 .sectionLegendCorrect::before {
-  background-color: #52c41a;
+  background-color: var(--theme-success, #1890ff);
 }
 
 .sectionLegendWrong::before {
@@ -237,12 +237,12 @@
 }
 
 .correctAnswer {
-  color: #52c41a;
+  color: var(--theme-success, #1890ff);
   font-weight: 600;
 }
 
 .checkMark {
-  color: #52c41a;
+  color: var(--theme-success, #1890ff);
   font-weight: bold;
   margin-left: 4px;
 }
@@ -265,7 +265,7 @@
 }
 
 .correctText {
-  color: #52c41a;
+  color: var(--theme-success, #1890ff);
   font-weight: 600;
 }
 

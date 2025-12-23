@@ -154,10 +154,12 @@ const SectionsPage: React.FC = () => {
                   <Card
                     key={section._id}
                     style={{ marginBottom: 16 }}
-                    bodyStyle={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 12,
+                    styles={{
+                      body: {
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                      },
                     }}
                   >
                     <Checkbox

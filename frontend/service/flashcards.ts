@@ -6,6 +6,10 @@ export const getDecks = async (userId?: string) => {
   return await getAccess('flashcards/decks', params);
 };
 
+export const getDecksPaged = async (options: { page?: number; limit?: number; search?: string; sortField?: string; sortOrder?: 'asc' | 'desc' } = {}) => {
+  return await getAccess('flashcards/decks/admin', options);
+};
+
 export const createDeck = async (data: { name: string; description?: string; createdBy: string }) => {
   return await postAccess('flashcards/decks', data);
 };
@@ -25,6 +29,13 @@ export const deleteDeck = async (id: string) => {
 // Card APIs
 export const getCardsByDeck = async (deckId: string) => {
   return await getAccess(`flashcards/decks/${deckId}/cards`);
+};
+
+export const getCardsByDeckPaged = async (
+  deckId: string,
+  options: { page?: number; limit?: number; search?: string; sortField?: string; sortOrder?: 'asc' | 'desc' } = {},
+) => {
+  return await getAccess(`flashcards/decks/${deckId}/cards/search`, options);
 };
 
 export const createCard = async (deckId: string, data: {
@@ -79,6 +90,11 @@ export const deleteCard = async (deckId: string, cardId: string) => {
 export const getProgress = async (deckId: string, userId?: string) => {
   const params = userId ? { userId } : {};
   return await getAccess(`flashcard-progress/${deckId}`, params);
+};
+
+export const getDeckSummary = async (deckId: string, userId?: string) => {
+  const params = userId ? { userId } : {};
+  return await getAccess(`flashcards/decks/${deckId}/summary`, params);
 };
 
 export const updateProgress = async (deckId: string, data: {

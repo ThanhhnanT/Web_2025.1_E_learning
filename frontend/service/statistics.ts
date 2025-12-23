@@ -20,3 +20,11 @@ export const getFlashcardStatistics = async (userId: string) => {
   return await getAccess(`statistics/user/${userId}/flashcards`);
 };
 
+// Get test chart data
+export const getTestChartData = async (userId: string, startDate?: string, endDate?: string) => {
+  const params: any = {};
+  if (startDate) params.startDate = startDate;
+  if (endDate) params.endDate = endDate;
+  return await getAccess(`statistics/user/${userId}/tests/chart-data`, params);
+};
+

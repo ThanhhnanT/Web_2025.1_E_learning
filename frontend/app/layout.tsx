@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 //import "./globals.css";
-import AntLayout from "../components/AntLayout";
+import LayoutWrapper from "../components/LayoutWrapper";
 import Loading from "./loading";
 
 
@@ -22,11 +22,11 @@ export default function RootLayout({
       <body
         suppressHydrationWarning
       >
-       <AntLayout>
+       <LayoutWrapper>
          <Suspense fallback={<Loading />}>
            {children}
          </Suspense>
-       </AntLayout>
+       </LayoutWrapper>
       </body>
     </html>
   );

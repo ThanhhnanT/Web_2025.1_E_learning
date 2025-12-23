@@ -24,6 +24,21 @@ export class AuthService {
     return user;
   }
 
+  async validateAdminUser(email: string, pass: string): Promise<any> {
+    const user = await this.usersService.getUserByEmail(email);
+    if (!user) throw new UnauthorizedException('User not found');
+
+    const isValid = await comparePass(pass, user.password);
+    if (!isValid) throw new UnauthorizedException('Invalid password');
+
+    const adminRoles = ['administrator', 'editor', 'support'];
+    if (!adminRoles.includes(user.role)) {
+      throw new UnauthorizedException('Access denied. Admin role required.');
+    }
+
+    return user;
+  }
+
   async getUser(email: string): Promise <any> {
     const user = await this.usersService.getUserByEmail(email);
       if (!user) throw new UnauthorizedException('User not found');
@@ -60,5 +75,9 @@ export class AuthService {
       id: id,
       email: email
     };
+  }
+
+  async recordLogin(userId: string, ip?: string, location?: string) {
+    await this.usersService.recordLogin(userId, ip, location);
   }
 }

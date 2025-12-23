@@ -13,6 +13,7 @@ import dayjs from 'dayjs';
 import {MailerService} from '@nestjs-modules/mailer'
 import { VerifyDto } from '@/auth/dto/verify-email.dto';
 import { CloudinaryService } from './cloudinary.service';
+import { computeEffectivePermissions, LEGACY_ROLE_MAP, ROLE_PRESETS } from './constants/permissions';
 
 @Injectable()
 export class UsersService {
@@ -31,7 +32,7 @@ export class UsersService {
 
  async create(createUserDto: CreateUserDto) {
     
-    const {name, email, password, phone} = createUserDto
+    const {name, email, password, phone, role} = createUserDto
     const isExist = await this.isEmailExist(email)
 
     if(isExist){
@@ -45,7 +46,8 @@ export class UsersService {
       name: name,
       email: email,
       password: hashPass,
-      phone: phone
+      phone: phone,
+      role: role || 'viewer'
     })
 
 
@@ -54,29 +56,66 @@ export class UsersService {
     };
   }
 
-  async findAll(query: string, page: number) {
+  async findAll(query: string, page: number, search?: string) {
     let {filter, limit, sort} = aqp(query)
-    if(!limit) limit =10
+    if(!limit) limit = 10
     if (filter.limit) delete filter.limit
     if (filter.page) delete filter.page
-    console.log(filter, limit)
-    const totalItems = (await this.userModel.find(filter)).length 
-    const totalePage = Math.ceil(totalItems/limit)
-    const offset = (page - 1) * (+limit)
+    
+    // Add search functionality for name and email
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      const searchFilter = {
+        $or: [
+          { name: searchRegex },
+          { email: searchRegex }
+        ]
+      };
+      // Merge search filter with existing filter
+      if (Object.keys(filter).length > 0) {
+        filter = { $and: [filter, searchFilter] };
+      } else {
+        filter = searchFilter;
+      }
+    }
+    
+    const totalItems = await this.userModel.countDocuments(filter);
+    const totalPages = Math.ceil(totalItems / limit);
+    const offset = (page - 1) * (+limit);
+    
     const results = await this.userModel.find(filter)
-    .limit(limit)
-    .skip(offset)
-    .sort(sort as any)
-    .select('-password')
-    return results;
+      .limit(limit)
+      .skip(offset)
+      .sort(sort as any)
+      .select('-password')
+      .exec();
+    
+    return {
+      data: results,
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: page,
+        limit
+      }
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    const user = await this.userModel.findById(id).select('-password');
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    await this.normalizeLegacyRole(user);
+    return user;
   }
 
   async getUserByEmail(email: string) {
-    return await this.userModel.findOne({email: email}).select('-password')
+    const user = await this.userModel.findOne({email: email}).select('-password');
+    if (user) {
+      await this.normalizeLegacyRole(user);
+    }
+    return user;
   }
 
   async update(userId: string, updateUserDto: UpdateUserDto) {
@@ -95,6 +134,12 @@ export class UsersService {
     }
     if (updateUserDto.bio !== undefined) {
       updateData.bio = updateUserDto.bio;
+    }
+    if (updateUserDto.role !== undefined) {
+      updateData.role = updateUserDto.role;
+    }
+    if (updateUserDto.email_verified !== undefined) {
+      updateData.email_verified = updateUserDto.email_verified;
     }
 
     const updatedUser = await this.userModel.findByIdAndUpdate(
@@ -155,8 +200,64 @@ export class UsersService {
     };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    const user = await this.userModel.findById(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    await this.userModel.findByIdAndDelete(id);
+    return {
+      message: 'User deleted successfully',
+      statusCode: 200
+    };
+  }
+
+  async recordLogin(userId: string, ip?: string, location?: string) {
+    await this.userModel.findByIdAndUpdate(userId, {
+      lastLoginAt: new Date(),
+      lastLoginIp: ip,
+      lastLoginLocation: location,
+    });
+  }
+
+  async updatePermissions(userId: string, permissions: string[]) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const unique = Array.from(new Set(permissions));
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      { permissions: unique },
+      { new: true }
+    ).select('-password');
+    return updatedUser;
+  }
+
+  async getPermissions(userId: string) {
+    const user = await this.userModel.findById(userId).select('-password');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    await this.normalizeLegacyRole(user);
+    return {
+      role: user.role,
+      overrides: user.permissions || [],
+      effective: computeEffectivePermissions(user.role, user.permissions),
+    };
+  }
+
+  async getRolePresets() {
+    return ROLE_PRESETS;
+  }
+
+  private async normalizeLegacyRole(user: any) {
+    if (!user || !user.role) return;
+    const mapped = LEGACY_ROLE_MAP[user.role];
+    if (mapped && mapped !== user.role) {
+      await this.userModel.updateOne({ _id: user._id }, { role: mapped });
+      user.role = mapped;
+    }
   }
 
 

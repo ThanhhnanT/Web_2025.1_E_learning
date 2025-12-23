@@ -1,6 +1,6 @@
 import { IsString, IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { TestType } from '../schema/test.schema';
+import { TestStatus, TestType } from '../schema/test.schema';
 
 export class CreateTestDto {
   @ApiProperty({ 
@@ -121,4 +121,14 @@ export class CreateTestDto {
   @IsOptional()
   @IsString()
   sourceUrl?: string;
+
+  @ApiProperty({
+    description: 'Trạng thái bài test',
+    enum: TestStatus,
+    example: TestStatus.ACTIVE,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(TestStatus)
+  status?: TestStatus;
 }
