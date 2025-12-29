@@ -3,6 +3,7 @@ import { Modal, Input, Button, Upload, Avatar, message } from 'antd';
 import { UserOutlined, PictureOutlined, CloseCircleFilled } from '@ant-design/icons';
 import type { RcFile } from 'antd/es/upload';
 import { User } from '@/types/blog';
+import EmojiPicker from './EmojiPicker';
 
 interface CreatePostModalProps {
   open: boolean;
@@ -57,7 +58,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ open, onClose, curren
       title={<div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 18 }}>Tạo bài viết</div>}
       open={open}
       onCancel={onClose}
-      destroyOnClose={true}
+      destroyOnHidden={true}
       maskClosable={false}
       footer={[
         <Button 
@@ -99,7 +100,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ open, onClose, curren
         </div>
       </div>
 
-      <div style={{ minHeight: 120 }}>
+      <div style={{ minHeight: 120, position: 'relative' }}>
           <Input.TextArea
             placeholder={`Bạn đang nghĩ gì, ${safeUser.name}?`}
             autoSize={{ minRows: 4, maxRows: 10 }}
@@ -113,9 +114,31 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ open, onClose, curren
               marginBottom: 15,
               resize: 'none',      
               color: '#050505',     
-              borderRadius: 0       
+              borderRadius: 0,
+              paddingRight: 40
             }}
           />
+          <div style={{ position: 'absolute', bottom: 20, right: 10 }}>
+            <EmojiPicker
+              onSelect={(emoji) => {
+                const emojiMap: Record<string, string> = {
+                  like: '👍',
+                  love: '❤️',
+                  haha: '😂',
+                  wow: '😮',
+                  sad: '😢',
+                  angry: '😠',
+                };
+                setContent(content + (emojiMap[emoji] || emoji));
+              }}
+            >
+              <Button
+                type="text"
+                icon={<span style={{ fontSize: 20 }}>😊</span>}
+                style={{ padding: 0, width: 32, height: 32 }}
+              />
+            </EmojiPicker>
+          </div>
       </div>
 
       {previewImage && (

@@ -137,10 +137,10 @@ export default function AdminFlashcardsPage() {
         <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
           <Text strong style={{ fontSize: 18, wordBreak: "break-word" }}>{deck.name}</Text>
           <Tag color="purple" style={{ borderRadius: 999, marginLeft: "auto" }}>
-            Deck
+            Bộ thẻ
           </Tag>
         </div>
-        <Text type="secondary">{deck.wordCount} Cards</Text>
+        <Text type="secondary">{deck.wordCount} Thẻ</Text>
         <Paragraph
           ellipsis={{ rows: 3 }}
           style={{ marginBottom: 0, wordBreak: "break-word", flex: 1 }}
@@ -197,7 +197,7 @@ export default function AdminFlashcardsPage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <div>
             <Title level={2} style={{ margin: 0 }}>
-              Flashcard Management
+              Quản lý thẻ ghi nhớ
             </Title>
             <Text type="secondary">Quản lý bộ thẻ, thêm mới và chỉnh sửa.</Text>
           </div>

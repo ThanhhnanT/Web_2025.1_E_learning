@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import {User} from '@/modules/users/schemas/user.schema'
+import { RolePreset } from './schema/role-preset.schema';
 import {Model } from 'mongoose'
 import { hashPassword, comparePass } from '@/utils/hashpass';
 import aqp from 'api-query-params';
@@ -14,12 +15,15 @@ import {MailerService} from '@nestjs-modules/mailer'
 import { VerifyDto } from '@/auth/dto/verify-email.dto';
 import { CloudinaryService } from './cloudinary.service';
 import { computeEffectivePermissions, LEGACY_ROLE_MAP, ROLE_PRESETS } from './constants/permissions';
+import { UpdateRolePresetDto } from './dto/update-role-preset.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) 
     private userModel: Model<User>,
+    @InjectModel(RolePreset.name)
+    private rolePresetModel: Model<RolePreset>,
     private readonly mailerService: MailerService,
     private readonly cloudinaryService: CloudinaryService
   ) {}
@@ -248,7 +252,68 @@ export class UsersService {
   }
 
   async getRolePresets() {
-    return ROLE_PRESETS;
+    try {
+      // Try to get from database first
+      const presets = await this.rolePresetModel.find().lean().exec();
+      
+      if (presets.length > 0) {
+        // Convert to the same format as ROLE_PRESETS
+        const result: Record<string, string[]> = {};
+        presets.forEach((preset) => {
+          result[preset.role] = preset.permissions || [];
+        });
+        
+        // Fill in missing roles with defaults
+        Object.keys(ROLE_PRESETS).forEach((role) => {
+          if (!result[role]) {
+            result[role] = ROLE_PRESETS[role as keyof typeof ROLE_PRESETS];
+          }
+        });
+        
+        return result;
+      }
+      
+      // If no presets in DB, initialize DB and return defaults
+      await this.initializeRolePresets();
+      return ROLE_PRESETS;
+    } catch (error) {
+      console.error('Error getting role presets from DB, using defaults:', error);
+      // If DB error, return defaults from constants
+      return ROLE_PRESETS;
+    }
+  }
+
+  async initializeRolePresets() {
+    // Initialize with default presets if not exists
+    try {
+      for (const [role, permissions] of Object.entries(ROLE_PRESETS)) {
+        await this.rolePresetModel.findOneAndUpdate(
+          { role },
+          { role, permissions },
+          { upsert: true, new: true }
+        );
+      }
+    } catch (error) {
+      console.error('Error initializing role presets:', error);
+      // Don't throw, just log - presets will be loaded from constants
+    }
+  }
+
+  async updateRolePreset(role: string, updateDto: UpdateRolePresetDto) {
+    const validRoles = ['administrator', 'editor', 'viewer', 'support'];
+    if (!validRoles.includes(role)) {
+      throw new BadRequestException(`Invalid role: ${role}`);
+    }
+
+    const uniquePermissions = Array.from(new Set(updateDto.permissions));
+    
+    const preset = await this.rolePresetModel.findOneAndUpdate(
+      { role },
+      { role, permissions: uniquePermissions },
+      { upsert: true, new: true }
+    ).lean().exec();
+
+    return preset;
   }
 
   private async normalizeLegacyRole(user: any) {

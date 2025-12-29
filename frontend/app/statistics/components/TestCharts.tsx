@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { Card, Row, Col, Typography, Empty } from 'antd';
-import { Line, Column, Pie } from '@ant-design/charts';
+import { Line, Column } from '@ant-design/charts';
 
 const { Title } = Typography;
 
@@ -106,39 +106,6 @@ export default function TestCharts({ data, loading = false }: TestChartsProps) {
       }));
   }, [data]);
 
-  // Process data for tests by language
-  const languageData = useMemo(() => {
-    if (!data || data.length === 0) return [];
-    
-    const languageCounts: { [key: string]: number } = {};
-    
-    data.forEach((item) => {
-      const language = item.testId?.language || 'Không xác định';
-      languageCounts[language] = (languageCounts[language] || 0) + 1;
-    });
-
-    return Object.entries(languageCounts).map(([language, count]) => ({
-      type: language,
-      value: count,
-    }));
-  }, [data]);
-
-  // Process data for tests by level
-  const levelData = useMemo(() => {
-    if (!data || data.length === 0) return [];
-    
-    const levelCounts: { [key: string]: number } = {};
-    
-    data.forEach((item) => {
-      const level = item.testId?.level || 'Không xác định';
-      levelCounts[level] = (levelCounts[level] || 0) + 1;
-    });
-
-    return Object.entries(levelCounts).map(([level, count]) => ({
-      type: level,
-      value: count,
-    }));
-  }, [data]);
 
   // Chart configurations
   const scoreProgressionConfig = {
@@ -203,45 +170,6 @@ export default function TestCharts({ data, loading = false }: TestChartsProps) {
     loading,
   };
 
-  const languagePieConfig = {
-    data: languageData,
-    angleField: 'value',
-    colorField: 'type',
-    radius: 0.8,
-    label: {
-      type: 'outer' as const,
-      content: '{name}: {percentage}',
-    },
-    tooltip: {
-      formatter: (datum: any) => {
-        return {
-          name: datum.type,
-          value: `${datum.value} bài test`,
-        };
-      },
-    },
-    loading,
-  };
-
-  const levelPieConfig = {
-    data: levelData,
-    angleField: 'value',
-    colorField: 'type',
-    radius: 0.8,
-    label: {
-      type: 'outer' as const,
-      content: '{name}: {percentage}',
-    },
-    tooltip: {
-      formatter: (datum: any) => {
-        return {
-          name: datum.type,
-          value: `${datum.value} bài test`,
-        };
-      },
-    },
-    loading,
-  };
 
   if (loading) {
     return (
@@ -318,29 +246,6 @@ export default function TestCharts({ data, loading = false }: TestChartsProps) {
           </Card>
         </Col>
 
-        {/* Tests by Language Chart */}
-        <Col xs={24} lg={12}>
-          <Card size="small" style={{ marginBottom: 16 }}>
-            <Title level={5}>Phân bố theo ngôn ngữ</Title>
-            {languageData.length > 0 ? (
-              <Pie {...languagePieConfig} height={300} />
-            ) : (
-              <Empty description="Không có dữ liệu" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-            )}
-          </Card>
-        </Col>
-
-        {/* Tests by Level Chart */}
-        <Col xs={24} lg={12}>
-          <Card size="small" style={{ marginBottom: 16 }}>
-            <Title level={5}>Phân bố theo cấp độ</Title>
-            {levelData.length > 0 ? (
-              <Pie {...levelPieConfig} height={300} />
-            ) : (
-              <Empty description="Không có dữ liệu" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-            )}
-          </Card>
-        </Col>
       </Row>
     </Card>
   );

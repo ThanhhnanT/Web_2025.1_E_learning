@@ -6,6 +6,8 @@ import { Result, ResultSchema } from '../results/schema/result.schema';
 import { Payment, PaymentSchema } from '../payments/schema/payment.schema';
 import { FlashcardProgress, FlashcardProgressSchema } from '../flashcards/schema/flashcard-progress.schema';
 import { Course, CourseSchema } from '../courses/schema/course.schema';
+import { User, UserSchema } from '../users/schemas/user.schema';
+import { FriendsModule } from '../friends/friends.module';
 
 @Module({
   imports: [
@@ -14,7 +16,9 @@ import { Course, CourseSchema } from '../courses/schema/course.schema';
       { name: Payment.name, schema: PaymentSchema },
       { name: FlashcardProgress.name, schema: FlashcardProgressSchema },
       { name: Course.name, schema: CourseSchema },
+      { name: User.name, schema: UserSchema },
     ]),
+    FriendsModule,
   ],
   controllers: [StatisticsController],
   providers: [StatisticsService],

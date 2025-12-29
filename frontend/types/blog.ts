@@ -23,4 +23,6 @@ export interface Post {
   comments: Comment[];
   likes: number;
   likedByCurrentUser?: boolean;
+  commentsCount?: number;
+  reactions?: Record<string, { count: number; users: any[]; likedByCurrentUser: boolean }>;
 }

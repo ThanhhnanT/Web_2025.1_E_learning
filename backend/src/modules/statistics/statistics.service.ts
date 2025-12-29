@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Result } from '../results/schema/result.schema';
 import { Payment } from '../payments/schema/payment.schema';
 import { FlashcardProgress } from '../flashcards/schema/flashcard-progress.schema';
 import { Course } from '../courses/schema/course.schema';
+import { User } from '../users/schemas/user.schema';
+import { FriendsService } from '../friends/friends.service';
 import { UserStatisticsDto, TestStatsDto, CourseStatsDto, FlashcardStatsDto, OverviewDto } from './dto/user-statistics.dto';
 import { TestChartDataDto, TestResultItemDto } from './dto/chart-data.dto';
 
@@ -15,7 +17,45 @@ export class StatisticsService {
     @InjectModel(Payment.name) private paymentModel: Model<Payment>,
     @InjectModel(FlashcardProgress.name) private flashcardProgressModel: Model<FlashcardProgress>,
     @InjectModel(Course.name) private courseModel: Model<Course>,
+    @InjectModel(User.name) private userModel: Model<User>,
+    private friendsService: FriendsService,
   ) {}
+
+  /**
+   * Check if a user can access another user's statistics
+   * @param requestUserId The ID of the user making the request
+   * @param targetUserId The ID of the user whose statistics are being requested
+   * @returns true if access is allowed, throws exception otherwise
+   */
+  async canAccessStatistics(requestUserId: string, targetUserId: string): Promise<boolean> {
+    // Normalize IDs to strings
+    const requestUserIdStr = requestUserId?.toString();
+    const targetUserIdStr = targetUserId?.toString();
+
+    // If requesting own statistics, always allow
+    if (requestUserIdStr === targetUserIdStr) {
+      return true;
+    }
+
+    // Check if target user exists and privacy settings
+    const targetUser = await this.userModel.findById(targetUserIdStr).select('showOverview').lean();
+    if (!targetUser) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // Check privacy setting
+    if (targetUser.showOverview === false) {
+      throw new ForbiddenException('User has disabled viewing their statistics');
+    }
+
+    // Check if they are friends
+    const friendshipStatus = await this.friendsService.checkFriendshipStatus(requestUserIdStr, targetUserIdStr);
+    if (friendshipStatus.status !== 'friends') {
+      throw new ForbiddenException('You can only view statistics of your friends');
+    }
+
+    return true;
+  }
 
   async getUserStatistics(userId: string): Promise<UserStatisticsDto> {
     const userIdObj = Types.ObjectId.isValid(userId) ? new Types.ObjectId(userId) : userId;

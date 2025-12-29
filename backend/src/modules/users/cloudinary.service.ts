@@ -15,17 +15,29 @@ export class CloudinaryService implements OnModuleInit {
     });
   }
 
-  async uploadImage(file: any): Promise<string> {
+  async uploadImage(file: any, folder: string = 'avatars'): Promise<string> {
     return new Promise((resolve, reject) => {
+      const options: any = {
+        folder,
+        resource_type: 'image',
+        quality: 'auto',
+      };
+
+      // Only apply face crop for avatars
+      if (folder === 'avatars') {
+        options.transformation = [
+          { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+          { quality: 'auto' },
+        ];
+      } else {
+        // For posts, just optimize quality and limit size
+        options.transformation = [
+          { quality: 'auto', fetch_format: 'auto' },
+        ];
+      }
+
       const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: 'avatars',
-          resource_type: 'image',
-          transformation: [
-            { width: 400, height: 400, crop: 'fill', gravity: 'face' },
-            { quality: 'auto' },
-          ],
-        },
+        options,
         (error: UploadApiErrorResponse | undefined, result: UploadApiResponse | undefined) => {
           if (error) {
             reject(error);

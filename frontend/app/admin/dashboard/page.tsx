@@ -83,28 +83,28 @@ export default function AdminDashboard() {
 
   const orderColumns: ColumnsType<OrderData> = [
     {
-      title: "Order ID",
+      title: "Mã đơn hàng",
       dataIndex: "orderId",
       key: "orderId",
       render: (text) => <Text strong>#{text}</Text>,
     },
     {
-      title: "Customer",
+      title: "Khách hàng",
       dataIndex: "customer",
       key: "customer",
     },
     {
-      title: "Date",
+      title: "Ngày",
       dataIndex: "date",
       key: "date",
     },
     {
-      title: "Amount",
+      title: "Số tiền",
       dataIndex: "amount",
       key: "amount",
     },
     {
-      title: "Status",
+      title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       render: (status: string) => {
@@ -113,15 +113,20 @@ export default function AdminDashboard() {
           Processing: "orange",
           Cancelled: "red",
         };
-        return <Tag color={colorMap[status]}>{status}</Tag>;
+        const statusMap: Record<string, string> = {
+          Shipped: "Đã giao",
+          Processing: "Đang xử lý",
+          Cancelled: "Đã hủy",
+        };
+        return <Tag color={colorMap[status]}>{statusMap[status] || status}</Tag>;
       },
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       key: "actions",
       render: () => (
         <Button type="link" style={{ padding: 0 }}>
-          View
+          Xem
         </Button>
       ),
     },
@@ -165,22 +170,22 @@ export default function AdminDashboard() {
   const topProducts: ProductData[] = [
     {
       key: "1",
-      name: "Running Shoes",
-      sold: "1,204 sold",
+      name: "Giày chạy bộ",
+      sold: "1,204 đã bán",
       revenue: "$120,400",
       image: "https://via.placeholder.com/56",
     },
     {
       key: "2",
-      name: "Classic Watch",
-      sold: "891 sold",
+      name: "Đồng hồ cổ điển",
+      sold: "891 đã bán",
       revenue: "$98,010",
       image: "https://via.placeholder.com/56",
     },
     {
       key: "3",
-      name: "Headphones",
-      sold: "742 sold",
+      name: "Tai nghe",
+      sold: "742 đã bán",
       revenue: "$74,125",
       image: "https://via.placeholder.com/56",
     },
@@ -201,10 +206,10 @@ export default function AdminDashboard() {
       >
         <div>
           <Title level={2} style={{ margin: 0, marginBottom: 8 }}>
-            Welcome back, Admin!
+            Chào mừng trở lại, Admin!
           </Title>
           <Text type="secondary" style={{ fontSize: 16 }}>
-            Here&apos;s a summary of your key metrics.
+            Đây là tóm tắt các chỉ số quan trọng của bạn.
           </Text>
         </div>
         <Button
@@ -213,7 +218,7 @@ export default function AdminDashboard() {
           size="large"
           style={{ height: 40 }}
         >
-          Export Data
+          Xuất dữ liệu
         </Button>
       </div>
 
@@ -227,7 +232,7 @@ export default function AdminDashboard() {
             }}
           >
             <Statistic
-              title="Total Revenue"
+              title="Tổng doanh thu"
               value={12450}
               prefix={<DollarOutlined />}
               precision={2}
@@ -248,7 +253,7 @@ export default function AdminDashboard() {
             }}
           >
             <Statistic
-              title="Total Users"
+              title="Tổng người dùng"
               value={1234}
               prefix={<UserOutlined />}
               valueStyle={{ color: "#101922", fontSize: 30, fontWeight: "bold" }}
@@ -268,7 +273,7 @@ export default function AdminDashboard() {
             }}
           >
             <Statistic
-              title="New Orders (Today)"
+              title="Đơn hàng mới (Hôm nay)"
               value={56}
               prefix={<ShoppingCartOutlined />}
               valueStyle={{ color: "#101922", fontSize: 30, fontWeight: "bold" }}
@@ -288,7 +293,7 @@ export default function AdminDashboard() {
             }}
           >
             <Statistic
-              title="Pending Shipments"
+              title="Đơn hàng chờ giao"
               value={12}
               prefix={<TruckOutlined />}
               valueStyle={{ color: "#101922", fontSize: 30, fontWeight: "bold" }}
@@ -321,7 +326,7 @@ export default function AdminDashboard() {
               }}
             >
               <Title level={4} style={{ margin: 0 }}>
-                Sales Overview
+                Tổng quan doanh số
               </Title>
               <Segmented
                 options={["1W", "1M", "1Y"]}
@@ -345,7 +350,7 @@ export default function AdminDashboard() {
             }}
           >
             <Title level={4} style={{ marginBottom: 24 }}>
-              Top Products
+              Sản phẩm bán chạy
             </Title>
             <Space direction="vertical" size="middle" style={{ width: "100%" }}>
               {topProducts.map((product) => (
@@ -390,7 +395,7 @@ export default function AdminDashboard() {
         }}
       >
         <Title level={4} style={{ marginBottom: 24, paddingBottom: 16, borderBottom: "1px solid #e5e7eb" }}>
-          Recent Orders
+          Đơn hàng gần đây
         </Title>
         <Table
           columns={orderColumns}

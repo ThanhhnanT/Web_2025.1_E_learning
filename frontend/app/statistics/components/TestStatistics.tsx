@@ -24,9 +24,10 @@ interface TestStatsProps {
     byLevel: { [key: string]: number };
     recentResults: any[];
   };
+  userId?: string; // Optional userId prop
 }
 
-export default function TestStatistics({ testStats }: TestStatsProps) {
+export default function TestStatistics({ testStats, userId: propUserId }: TestStatsProps) {
   const router = useRouter();
   const [chartData, setChartData] = useState<any[]>([]);
   const [loadingCharts, setLoadingCharts] = useState(false);
@@ -34,7 +35,7 @@ export default function TestStatistics({ testStats }: TestStatsProps) {
   const [customDateRange, setCustomDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
 
   const fetchChartData = async () => {
-    const userId = getUserId();
+    const userId = propUserId || getUserId();
     if (!userId) return;
 
     setLoadingCharts(true);
@@ -177,31 +178,6 @@ export default function TestStatistics({ testStats }: TestStatsProps) {
         </Col>
       </Row>
 
-      {Object.keys(testStats.byLanguage).length > 0 && (
-        <div style={{ marginBottom: 24 }}>
-          <Title level={5}>Theo ngôn ngữ:</Title>
-          <div>
-            {Object.entries(testStats.byLanguage).map(([lang, count]) => (
-              <Tag key={lang} color="blue" style={{ marginBottom: 8 }}>
-                {lang}: {count} bài
-              </Tag>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {Object.keys(testStats.byLevel).length > 0 && (
-        <div style={{ marginBottom: 24 }}>
-          <Title level={5}>Theo level:</Title>
-          <div>
-            {Object.entries(testStats.byLevel).map(([level, count]) => (
-              <Tag key={level} color="green" style={{ marginBottom: 8 }}>
-                {level}: {count} bài
-              </Tag>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Date Range Selector and Charts */}
       <div style={{ marginBottom: 24 }}>

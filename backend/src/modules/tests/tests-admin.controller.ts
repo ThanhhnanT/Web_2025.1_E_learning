@@ -59,24 +59,24 @@ export class TestsAdminController {
     const sections = await this.testSectionsService.findByTestId(testId);
     for (const section of sections) {
       const groups = await this.questionGroupsService.findBySectionId(
-        section._id.toString(),
+        (section as any)._id.toString(),
       );
       for (const group of groups) {
         const questions = await this.questionsService.findByQuestionGroupId(
-          group._id.toString(),
+          (group as any)._id.toString(),
         );
         for (const q of questions) {
-          await this.questionsService.remove(q._id.toString());
+          await this.questionsService.remove((q as any)._id.toString());
         }
-        await this.questionGroupsService.remove(group._id.toString());
+        await this.questionGroupsService.remove((group as any)._id.toString());
       }
       const answer = await this.answersService.findBySectionId(
-        section._id.toString(),
+        (section as any)._id.toString(),
       );
       if (answer?._id) {
-        await this.answersService.remove(answer._id.toString());
+        await this.answersService.remove((answer as any)._id.toString());
       }
-      await this.testSectionsService.remove(section._id.toString());
+      await this.testSectionsService.remove((section as any)._id.toString());
     }
     return this.testsService.remove(testId);
   }
@@ -118,12 +118,12 @@ export class TestsAdminController {
     const groups = await this.questionGroupsService.findBySectionId(sectionId);
     for (const group of groups) {
       const questions = await this.questionsService.findByQuestionGroupId(
-        group._id.toString(),
+        (group as any)._id.toString(),
       );
       for (const q of questions) {
-        await this.questionsService.remove(q._id.toString());
+        await this.questionsService.remove((q as any)._id.toString());
       }
-      await this.questionGroupsService.remove(group._id.toString());
+      await this.questionGroupsService.remove((group as any)._id.toString());
     }
     const answer = await this.answersService.findBySectionId(sectionId);
     if (answer?._id) {
@@ -179,7 +179,7 @@ export class TestsAdminController {
       groupId,
     );
     for (const q of questions) {
-      await this.questionsService.remove(q._id.toString());
+      await this.questionsService.remove((q as any)._id.toString());
     }
     return this.questionGroupsService.remove(groupId);
   }

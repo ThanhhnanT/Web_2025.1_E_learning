@@ -24,6 +24,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nes
 import { Permissions } from '@/auth/decorate/permissions.decorator';
 import { PermissionsGuard } from '@/auth/permissions.guard';
 import { UpdatePermissionsDto } from './dto/update-permissions.dto';
+import { UpdateRolePresetDto } from './dto/update-role-preset.dto';
 
 @ApiTags('Admin')
 @Controller('users')
@@ -142,9 +143,31 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get role presets (Admin only)' })
   @Permissions('user:view')
-  @Get('roles/presets/all')
-  getRolePresets() {
+  @Get('roles/presets')
+  async getRolePresets() {
     return this.usersService.getRolePresets();
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Initialize role presets in database (Admin only)' })
+  @Permissions('user:edit')
+  @Post('roles/presets/initialize')
+  async initializeRolePresets() {
+    await this.usersService.initializeRolePresets();
+    return { message: 'Role presets initialized successfully' };
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update role preset permissions (Admin only)' })
+  @Permissions('user:edit')
+  @Patch('roles/presets/:role')
+  updateRolePreset(
+    @Param('role') role: string,
+    @Body() updateDto: UpdateRolePresetDto,
+  ) {
+    return this.usersService.updateRolePreset(role, updateDto);
   }
 
   @UseGuards(JwtAuthGuard, PermissionsGuard)

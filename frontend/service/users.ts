@@ -81,3 +81,14 @@ export const deleteUser = async (id: string): Promise<{ message: string; statusC
   return await deleteAccess(`users/${id}`);
 };
 
+export const getRolePresets = async (): Promise<Record<string, string[]>> => {
+  return await getAccess('users/roles/presets');
+};
+
+export const updateRolePreset = async (
+  role: string,
+  permissions: string[]
+): Promise<any> => {
+  return await patchAccess(`users/roles/presets/${role}`, { permissions });
+};
+

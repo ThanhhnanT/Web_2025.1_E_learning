@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, Avatar } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
-import { Post, User } from '@/types/blog';
+import { Post, User, Comment } from '@/types/blog';
 import LikeCommentSection from './LikeAndComment'; // Import component vừa tạo
 
 interface PostDetailModalProps {
@@ -10,8 +10,9 @@ interface PostDetailModalProps {
   open: boolean;
   onClose: () => void;
   onAddComment: (postId: string, content: string) => void;
-   onReplyComment: (postId: string, parentCommentId: string, content: string) => void;
+  onReplyComment: (postId: string, parentCommentId: string, content: string) => void;
   onReactComment: (postId: string, commentId: string, emoji: string) => void;
+  comments?: Comment[];
 }
 
 const PostDetailModal: React.FC<PostDetailModalProps> = ({ 
@@ -21,7 +22,8 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
   onClose, 
   onAddComment,
   onReplyComment,
-  onReactComment
+  onReactComment,
+  comments = []
 }) => {
 
   if (!post) return null;
@@ -33,7 +35,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
         <div style={{ fontWeight: 'bold' }}>
           {post.user.name} 
           <span style={{ color: 'gray', fontWeight: 'normal', fontSize: 12 }}>
-             {' '}• {post.createdAt}
+             {' '}• {new Date(post.createdAt).toLocaleString('vi-VN')}
           </span>
         </div>
         <div style={{ marginTop: 5, whiteSpace: 'pre-wrap' }}>{post.content}</div>
@@ -63,10 +65,10 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
       title="Chi tiết bài viết"
     >
       <LikeCommentSection
-        comments={post.comments}
+        comments={comments}
         currentUser={currentUser}
-        onSubmit={(content) => onAddComment(post.id, content)}
-        onReplyComment={(parentId, content) => onReplyComment(post.id, parentId, content)}
+        onSubmit={(content, imageFile) => onAddComment(post.id, content, imageFile)}
+        onReplyComment={(parentId, content, imageFile) => onReplyComment(post.id, parentId, content, imageFile)}
         onReactComment={(commentId, emoji) => onReactComment(post.id, commentId, emoji)}
         headerContent={postContentNode} 
       />

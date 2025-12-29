@@ -21,6 +21,9 @@ import { TestSectionsModule } from './modules/test-sections/test-sections.module
 import { QuestionGroupsModule } from './modules/question-groups/question-groups.module';
 import { QuestionsModule } from './modules/questions/questions.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
+import { PostsModule } from './modules/posts/posts.module';
+import { FriendsModule } from './modules/friends/friends.module';
+import { ChatsModule } from './modules/chats/chats.module';
 
 @Module({
   imports: [
@@ -38,6 +41,9 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
     QuestionGroupsModule,
     QuestionsModule,
     StatisticsModule,
+    PostsModule,
+    FriendsModule,
+    ChatsModule,
 
     ConfigModule.forRoot({
       isGlobal: true, 

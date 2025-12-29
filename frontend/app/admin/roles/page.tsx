@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Button,
   Card,
@@ -25,6 +25,8 @@ import {
   SaveOutlined,
   SafetyOutlined,
 } from "@ant-design/icons";
+import { getRolePresets, updateRolePreset } from "@/service/users";
+import { useMessageApi } from "@/components/providers/Message";
 
 const { Title, Text } = Typography;
 
@@ -45,51 +47,62 @@ type PermissionGroup = {
 const ROLE_META: Record<RoleKey, { icon: React.ReactNode; name: string; desc: string }> = {
   administrator: {
     icon: <SafetyOutlined />,
-    name: "Administrator",
-    desc: "Full access to all features and settings.",
+    name: "Quản trị viên",
+    desc: "Quyền truy cập đầy đủ vào tất cả tính năng và cài đặt.",
   },
   editor: {
     icon: <EditOutlined />,
-    name: "Editor",
-    desc: "Can create, edit, and publish content.",
+    name: "Biên tập viên",
+    desc: "Có thể tạo, chỉnh sửa và xuất bản nội dung.",
   },
   viewer: {
     icon: <EyeOutlined />,
-    name: "Viewer",
-    desc: "Read-only access to view content.",
+    name: "Người xem",
+    desc: "Chỉ có quyền xem nội dung, không thể chỉnh sửa.",
   },
   support: {
     icon: <CustomerServiceOutlined />,
-    name: "Support Agent",
-    desc: "Can view user data and respond to tickets.",
+    name: "Nhân viên hỗ trợ",
+    desc: "Có thể xem dữ liệu người dùng và phản hồi yêu cầu.",
   },
 };
 
 const PERMISSION_GROUPS: PermissionGroup[] = [
   {
     key: "user-mgmt",
-    title: "User Management",
+    title: "Quản lý người dùng",
     permissions: [
-      { key: "create-user", label: "Create User", description: "Allows creating new user accounts." },
-      { key: "edit-user", label: "Edit User", description: "Allows modifying existing user profiles." },
-      { key: "delete-user", label: "Delete User", description: "Allows permanently deleting user accounts." },
-      { key: "view-users", label: "View User List", description: "Allows viewing the complete list of users." },
+      { key: "user:create", label: "Tạo người dùng", description: "Cho phép tạo tài khoản người dùng mới." },
+      { key: "user:edit", label: "Chỉnh sửa người dùng", description: "Cho phép chỉnh sửa thông tin người dùng hiện có." },
+      { key: "user:delete", label: "Xóa người dùng", description: "Cho phép xóa vĩnh viễn tài khoản người dùng." },
+      { key: "user:view", label: "Xem danh sách người dùng", description: "Cho phép xem danh sách đầy đủ người dùng." },
     ],
   },
   {
     key: "content",
-    title: "Content Settings",
+    title: "Quản lý nội dung",
     permissions: [
-      { key: "publish", label: "Publish Content", description: "Allows publishing new articles or posts." },
-      { key: "categories", label: "Manage Categories", description: "Allows creating and editing content categories." },
+      { key: "content:publish", label: "Xuất bản nội dung", description: "Cho phép xuất bản bài viết hoặc bài đăng mới." },
+      { key: "content:categories", label: "Quản lý danh mục", description: "Cho phép tạo và chỉnh sửa danh mục nội dung." },
+    ],
+  },
+  {
+    key: "posts",
+    title: "Quản lý bài viết",
+    permissions: [
+      { key: "post:create", label: "Tạo bài viết", description: "Cho phép tạo bài viết mới." },
+      { key: "post:edit", label: "Chỉnh sửa bài viết", description: "Cho phép chỉnh sửa bài viết của người khác." },
+      { key: "post:delete", label: "Xóa bài viết", description: "Cho phép xóa bài viết của người khác." },
+      { key: "post:view", label: "Xem bài viết", description: "Cho phép xem tất cả bài viết." },
+      { key: "post:moderate", label: "Kiểm duyệt bài viết", description: "Cho phép phê duyệt hoặc từ chối bài viết." },
     ],
   },
   {
     key: "billing",
-    title: "Billing",
+    title: "Thanh toán",
     permissions: [
-      { key: "view-invoices", label: "View Invoices", description: "Allows viewing past and current invoices." },
-      { key: "manage-sub", label: "Manage Subscription", description: "Allows changing the subscription plan." },
+      { key: "billing:view", label: "Xem hóa đơn", description: "Cho phép xem hóa đơn trước và hiện tại." },
+      { key: "billing:manage", label: "Quản lý gói đăng ký", description: "Cho phép thay đổi gói đăng ký." },
     ],
   },
 ];
@@ -100,42 +113,60 @@ const PRESET_PERMS: Record<RoleKey, Record<string, boolean>> = {
     return acc;
   }, {} as Record<string, boolean>),
   editor: {
-    "create-user": false,
-    "edit-user": false,
-    "delete-user": false,
-    "view-users": true,
-    publish: true,
-    categories: true,
-    "view-invoices": false,
-    "manage-sub": false,
+    "user:create": false,
+    "user:edit": false,
+    "user:delete": false,
+    "user:view": true,
+    "content:publish": true,
+    "content:categories": true,
+    "post:create": true,
+    "post:edit": true,
+    "post:delete": false,
+    "post:view": true,
+    "post:moderate": true,
+    "billing:view": false,
+    "billing:manage": false,
   },
   viewer: {
-    "create-user": false,
-    "edit-user": false,
-    "delete-user": false,
-    "view-users": true,
-    publish: false,
-    categories: false,
-    "view-invoices": false,
-    "manage-sub": false,
+    "user:create": false,
+    "user:edit": false,
+    "user:delete": false,
+    "user:view": true,
+    "content:publish": false,
+    "content:categories": false,
+    "post:create": true,
+    "post:edit": false,
+    "post:delete": false,
+    "post:view": true,
+    "post:moderate": false,
+    "billing:view": false,
+    "billing:manage": false,
   },
   support: {
-    "create-user": false,
-    "edit-user": true,
-    "delete-user": false,
-    "view-users": true,
-    publish: false,
-    categories: false,
-    "view-invoices": true,
-    "manage-sub": false,
+    "user:create": false,
+    "user:edit": true,
+    "user:delete": false,
+    "user:view": true,
+    "content:publish": false,
+    "content:categories": false,
+    "post:create": false,
+    "post:edit": false,
+    "post:delete": false,
+    "post:view": true,
+    "post:moderate": false,
+    "billing:view": true,
+    "billing:manage": false,
   },
 };
 
 export default function RolesManagementPage() {
+  const messageApi = useMessageApi();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<RoleKey>("administrator");
   const [overrides, setOverrides] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
+  const [presets, setPresets] = useState<Record<string, Record<string, boolean>>>({});
+  const [loading, setLoading] = useState(true);
 
   const list = useMemo(() => {
     const entries = Object.entries(ROLE_META) as [RoleKey, (typeof ROLE_META)[RoleKey]][];
@@ -143,9 +174,46 @@ export default function RolesManagementPage() {
   }, [search]);
 
   const perms = useMemo(() => {
-    const base = PRESET_PERMS[selected];
+    // Use presets from API if available, otherwise use local presets
+    const base = presets[selected] || PRESET_PERMS[selected];
     return { ...base, ...overrides };
-  }, [selected, overrides]);
+  }, [selected, overrides, presets]);
+
+  useEffect(() => {
+    const fetchPresets = async () => {
+      try {
+        setLoading(true);
+        const data = await getRolePresets();
+        // Convert array of permissions to object with boolean values
+        const presetsObj: Record<string, Record<string, boolean>> = {};
+        Object.entries(data).forEach(([role, permissions]) => {
+          presetsObj[role] = {};
+          // Initialize all permissions to false first
+          PERMISSION_GROUPS.forEach((group) => {
+            group.permissions.forEach((p) => {
+              presetsObj[role][p.key] = false;
+            });
+          });
+          // Set enabled permissions to true
+          (permissions as string[]).forEach((perm) => {
+            presetsObj[role][perm] = true;
+          });
+        });
+        setPresets(presetsObj);
+      } catch (error) {
+        console.error('Error fetching role presets:', error);
+        // Fallback to local presets
+        const presetsObj: Record<string, Record<string, boolean>> = {};
+        Object.keys(PRESET_PERMS).forEach((role) => {
+          presetsObj[role] = PRESET_PERMS[role as RoleKey];
+        });
+        setPresets(presetsObj);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPresets();
+  }, []);
 
   const handleToggle = (key: string, value: boolean) => {
     setOverrides((prev) => ({ ...prev, [key]: value }));
@@ -159,11 +227,31 @@ export default function RolesManagementPage() {
   const handleReset = () => setOverrides({});
 
   const handleSave = async () => {
-    // Placeholder: here would call backend to save custom permissions if implemented
     setSaving(true);
-    setTimeout(() => {
+    try {
+      const permissions = Object.entries(perms)
+        .filter(([_, enabled]) => enabled)
+        .map(([key]) => key);
+      
+      await updateRolePreset(selected, permissions);
+
+      // Update local presets
+      setPresets((prev) => ({
+        ...prev,
+        [selected]: perms,
+      }));
+
+      // Reset overrides after successful save
+      setOverrides({});
+      messageApi.success('Cập nhật quyền hạn thành công!');
+    } catch (error: any) {
+      console.error('Error saving permissions:', error);
+      messageApi.error(
+        error?.response?.data?.message || 'Không thể lưu quyền hạn. Vui lòng thử lại.'
+      );
+    } finally {
       setSaving(false);
-    }, 500);
+    }
   };
 
   return (
@@ -171,9 +259,9 @@ export default function RolesManagementPage() {
       <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
         <Col>
           <Title level={2} style={{ margin: 0, marginBottom: 8 }}>
-            Roles & Permissions
+            Vai trò & Quyền hạn
           </Title>
-          <Text type="secondary">Manage access control for application.</Text>
+          <Text type="secondary">Quản lý kiểm soát truy cập cho ứng dụng.</Text>
         </Col>
       </Row>
 
@@ -184,12 +272,12 @@ export default function RolesManagementPage() {
             styles={{ header: { padding: "12px 16px" }, body: { padding: 12 } }}
             title={
               <Button type="primary" block icon={<PlusOutlined />}>
-                Create New Role
+                Tạo vai trò mới
               </Button>
             }
           >
             <Input
-              placeholder="Search roles..."
+              placeholder="Tìm kiếm vai trò..."
               prefix={<SearchOutlined />}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -249,14 +337,14 @@ export default function RolesManagementPage() {
           <Card
             variant="outlined"
             styles={{ header: { padding: "12px 16px" }, body: { padding: 16 } }}
-            title={`Permissions for ${ROLE_META[selected].name}`}
+            title={`Quyền hạn cho ${ROLE_META[selected].name}`}
             extra={
               <Space>
                 <Button icon={<ReloadOutlined />} onClick={handleReset}>
-                  Reset
+                  Đặt lại
                 </Button>
                 <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={handleSave}>
-                  Save Changes
+                  Lưu thay đổi
                 </Button>
               </Space>
             }
@@ -281,7 +369,7 @@ export default function RolesManagementPage() {
                           group.permissions.forEach((p) => handleToggle(p.key, e.target.checked))
                         }
                       >
-                        Select All
+                        Chọn tất cả
                       </Checkbox>
                     </Flex>
                   }

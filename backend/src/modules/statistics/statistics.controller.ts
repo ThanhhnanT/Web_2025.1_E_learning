@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Req, Query, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Param, Req, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { StatisticsService } from './statistics.service';
 import { JwtAuthGuard } from '@/auth/passport/jwt-auth.guard';
@@ -24,11 +24,9 @@ export class StatisticsController {
     @Param('userId') userId: string,
     @Req() req: any,
   ): Promise<UserStatisticsDto> {
-    // Verify user can only access their own statistics
     const requestUserId = req.user?._id?.toString() || req.user?.userId?.toString();
-    if (requestUserId !== userId) {
-      throw new UnauthorizedException('You can only access your own statistics');
-    }
+    // Check if user can access these statistics
+    await this.statisticsService.canAccessStatistics(requestUserId, userId);
     return await this.statisticsService.getUserStatistics(userId);
   }
 
@@ -45,9 +43,7 @@ export class StatisticsController {
     @Req() req: any,
   ): Promise<TestStatsDto> {
     const requestUserId = req.user?._id?.toString() || req.user?.userId?.toString();
-    if (requestUserId !== userId) {
-      throw new UnauthorizedException('You can only access your own statistics');
-    }
+    await this.statisticsService.canAccessStatistics(requestUserId, userId);
     return await this.statisticsService.getTestStatistics(userId);
   }
 
@@ -64,9 +60,7 @@ export class StatisticsController {
     @Req() req: any,
   ): Promise<CourseStatsDto> {
     const requestUserId = req.user?._id?.toString() || req.user?.userId?.toString();
-    if (requestUserId !== userId) {
-      throw new UnauthorizedException('You can only access your own statistics');
-    }
+    await this.statisticsService.canAccessStatistics(requestUserId, userId);
     return await this.statisticsService.getCourseStatistics(userId);
   }
 
@@ -83,9 +77,7 @@ export class StatisticsController {
     @Req() req: any,
   ): Promise<FlashcardStatsDto> {
     const requestUserId = req.user?._id?.toString() || req.user?.userId?.toString();
-    if (requestUserId !== userId) {
-      throw new UnauthorizedException('You can only access your own statistics');
-    }
+    await this.statisticsService.canAccessStatistics(requestUserId, userId);
     return await this.statisticsService.getFlashcardStatistics(userId);
   }
 
@@ -106,9 +98,7 @@ export class StatisticsController {
     @Query('endDate') endDate?: string,
   ): Promise<TestChartDataDto> {
     const requestUserId = req.user?._id?.toString() || req.user?.userId?.toString();
-    if (requestUserId !== userId) {
-      throw new UnauthorizedException('You can only access your own statistics');
-    }
+    await this.statisticsService.canAccessStatistics(requestUserId, userId);
 
     const start = startDate ? new Date(startDate) : undefined;
     const end = endDate ? new Date(endDate) : undefined;

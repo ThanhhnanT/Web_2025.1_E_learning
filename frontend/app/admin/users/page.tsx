@@ -176,9 +176,9 @@ export default function UsersManagementPage() {
 
   const getStatusTag = (user: User) => {
     if (user.email_verified) {
-      return <Tag color="green">Active</Tag>;
+      return <Tag color="green">Hoạt động</Tag>;
     } else {
-      return <Tag color="orange">Pending</Tag>;
+      return <Tag color="orange">Chờ xử lý</Tag>;
     }
   };
 
@@ -190,27 +190,27 @@ export default function UsersManagementPage() {
       const diffDays = now.diff(date, "day");
       
       if (diffDays === 0) {
-        return "Today";
+        return "Hôm nay";
       } else if (diffDays === 1) {
-        return "1 day ago";
+        return "1 ngày trước";
       } else if (diffDays < 7) {
-        return `${diffDays} days ago`;
+        return `${diffDays} ngày trước`;
       } else if (diffDays < 30) {
         const weeks = Math.floor(diffDays / 7);
-        return `${weeks} ${weeks === 1 ? "week" : "weeks"} ago`;
+        return `${weeks} ${weeks === 1 ? "tuần" : "tuần"} trước`;
       } else if (diffDays < 365) {
         const months = Math.floor(diffDays / 30);
-        return `${months} ${months === 1 ? "month" : "months"} ago`;
+        return `${months} ${months === 1 ? "tháng" : "tháng"} trước`;
       } else {
-        return date.format("MMM DD, YYYY");
+        return date.format("DD/MM/YYYY");
       }
     }
-    return "Never";
+    return "Chưa đăng nhập";
   };
 
   const columns: ColumnsType<User> = [
     {
-      title: "User",
+      title: "Người dùng",
       key: "user",
       render: (_, record) => (
         <Space>
@@ -233,29 +233,29 @@ export default function UsersManagementPage() {
       ),
     },
     {
-      title: "Role",
+      title: "Vai trò",
       dataIndex: "role",
       key: "role",
       render: (role: string) => (
         <Tag color={role === "admin" ? "blue" : "default"}>
-          {role === "admin" ? "Admin" : "User"}
+          {role === "admin" ? "Quản trị viên" : "Người dùng"}
         </Tag>
       ),
     },
     {
-      title: "Status",
+      title: "Trạng thái",
       key: "status",
       render: (_, record) => getStatusTag(record),
     },
     {
-      title: "Last Login",
+      title: "Đăng nhập lần cuối",
       key: "lastLogin",
       render: (_, record) => (
         <Text type="secondary">{formatLastLogin(record)}</Text>
       ),
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       key: "actions",
       align: "right",
       render: (_, record) => (
@@ -269,7 +269,7 @@ export default function UsersManagementPage() {
             type="text"
             onClick={() => router.push(`/admin/users/${record._id}`)}
           >
-            View
+            Xem
           </Button>
           <Popconfirm
             title="Xóa người dùng"
@@ -296,9 +296,9 @@ export default function UsersManagementPage() {
       <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
         <Col>
           <Title level={2} style={{ margin: 0, marginBottom: 8 }}>
-            User Management
+            Quản lý người dùng
           </Title>
-          <Text type="secondary">Manage all users in the system.</Text>
+          <Text type="secondary">Quản lý tất cả người dùng trong hệ thống.</Text>
         </Col>
         <Col>
           <Button
@@ -307,7 +307,7 @@ export default function UsersManagementPage() {
             size="large"
             onClick={() => setIsAddModalVisible(true)}
           >
-            Add User
+            Thêm người dùng
           </Button>
         </Col>
       </Row>
@@ -317,7 +317,7 @@ export default function UsersManagementPage() {
         <Row gutter={16} align="middle">
           <Col flex="auto">
             <Input
-              placeholder="Search users..."
+              placeholder="Tìm kiếm người dùng..."
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => handleSearch(e.target.value)}
@@ -332,11 +332,11 @@ export default function UsersManagementPage() {
               style={{ width: 150 }}
               suffixIcon={<FilterOutlined />}
             >
-              <Option value="all">All Roles</Option>
-              <Option value="administrator">Administrator</Option>
-              <Option value="editor">Editor</Option>
-              <Option value="viewer">Viewer</Option>
-              <Option value="support">Support</Option>
+              <Option value="all">Tất cả vai trò</Option>
+              <Option value="administrator">Quản trị viên</Option>
+              <Option value="editor">Biên tập viên</Option>
+              <Option value="viewer">Người xem</Option>
+              <Option value="support">Hỗ trợ</Option>
             </Select>
           </Col>
         </Row>
@@ -359,7 +359,7 @@ export default function UsersManagementPage() {
             total: pagination.total,
             showSizeChanger: true,
             showTotal: (total, range) =>
-              `Showing ${range[0]} to ${range[1]} of ${total} entries`,
+              `Hiển thị ${range[0]} đến ${range[1]} trong tổng số ${total} mục`,
             pageSizeOptions: ["10", "20", "50", "100"],
           }}
           onChange={handleTableChange}
@@ -368,7 +368,7 @@ export default function UsersManagementPage() {
 
       {/* Add User Modal */}
       <Modal
-        title="Add User"
+        title="Thêm người dùng"
         open={isAddModalVisible}
         onCancel={() => {
           setIsAddModalVisible(false);
@@ -385,46 +385,46 @@ export default function UsersManagementPage() {
         >
           <Form.Item
             name="name"
-            label="Name"
-            rules={[{ required: true, message: "Please enter name" }]}
+            label="Tên"
+            rules={[{ required: true, message: "Vui lòng nhập tên" }]}
           >
-            <Input placeholder="Enter name" />
+            <Input placeholder="Nhập tên" />
           </Form.Item>
           <Form.Item
             name="email"
             label="Email"
             rules={[
-              { required: true, message: "Please enter email" },
-              { type: "email", message: "Please enter a valid email" },
+              { required: true, message: "Vui lòng nhập email" },
+              { type: "email", message: "Vui lòng nhập email hợp lệ" },
             ]}
           >
-            <Input placeholder="Enter email" />
+            <Input placeholder="Nhập email" />
           </Form.Item>
           <Form.Item
             name="password"
-            label="Password"
+            label="Mật khẩu"
             rules={[
-              { required: true, message: "Please enter password" },
-              { min: 6, message: "Password must be at least 6 characters" },
+              { required: true, message: "Vui lòng nhập mật khẩu" },
+              { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự" },
             ]}
           >
-            <Input.Password placeholder="Enter password" />
+            <Input.Password placeholder="Nhập mật khẩu" />
           </Form.Item>
           <Form.Item
             name="phone"
-            label="Phone"
-            rules={[{ required: true, message: "Please enter phone" }]}
+            label="Số điện thoại"
+            rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}
           >
-            <Input placeholder="Enter phone number" />
+            <Input placeholder="Nhập số điện thoại" />
           </Form.Item>
           <Form.Item
             name="role"
-            label="Role"
+            label="Vai trò"
             initialValue="user"
           >
             <Select>
-              <Option value="user">User</Option>
-              <Option value="admin">Admin</Option>
+              <Option value="user">Người dùng</Option>
+              <Option value="admin">Quản trị viên</Option>
             </Select>
           </Form.Item>
           <Form.Item style={{ marginBottom: 0, marginTop: 24 }}>
@@ -434,7 +434,7 @@ export default function UsersManagementPage() {
                 htmlType="submit"
                 loading={loading}
               >
-                Create User
+                Tạo người dùng
               </Button>
               <Button
                 onClick={() => {
@@ -442,7 +442,7 @@ export default function UsersManagementPage() {
                   addForm.resetFields();
                 }}
               >
-                Cancel
+                Hủy
               </Button>
             </Space>
           </Form.Item>
@@ -451,7 +451,7 @@ export default function UsersManagementPage() {
 
       {/* Edit User Modal */}
       <Modal
-        title="Edit User"
+        title="Chỉnh sửa người dùng"
         open={isEditModalVisible}
         onCancel={() => {
           setIsEditModalVisible(false);
@@ -470,48 +470,48 @@ export default function UsersManagementPage() {
         >
           <Form.Item
             name="name"
-            label="Name"
-            rules={[{ required: true, message: "Please enter name" }]}
+            label="Tên"
+            rules={[{ required: true, message: "Vui lòng nhập tên" }]}
           >
-            <Input placeholder="Enter name" />
+            <Input placeholder="Nhập tên" />
           </Form.Item>
           <Form.Item
             name="email"
             label="Email"
             shouldUpdate={false}
           >
-            <Input placeholder="Enter email" disabled />
+            <Input placeholder="Nhập email" disabled />
           </Form.Item>
           <Form.Item
             name="phone"
-            label="Phone"
+            label="Số điện thoại"
           >
-            <Input placeholder="Enter phone number" />
+            <Input placeholder="Nhập số điện thoại" />
           </Form.Item>
           <Form.Item
             name="bio"
-            label="Bio"
+            label="Giới thiệu"
           >
             <Input.TextArea
-              placeholder="Enter bio"
+              placeholder="Nhập giới thiệu"
               rows={3}
             />
           </Form.Item>
           <Form.Item
             name="role"
-            label="Role"
+            label="Vai trò"
           >
             <Select>
-              <Option value="user">User</Option>
-              <Option value="admin">Admin</Option>
+              <Option value="user">Người dùng</Option>
+              <Option value="admin">Quản trị viên</Option>
             </Select>
           </Form.Item>
           <Form.Item
             name="email_verified"
-            label="Email Verified"
+            label="Email đã xác thực"
             valuePropName="checked"
           >
-            <Switch checkedChildren="Verified" unCheckedChildren="Not Verified" />
+            <Switch checkedChildren="Đã xác thực" unCheckedChildren="Chưa xác thực" />
           </Form.Item>
           <Form.Item style={{ marginBottom: 0, marginTop: 24 }}>
             <Space>
@@ -520,7 +520,7 @@ export default function UsersManagementPage() {
                 htmlType="submit"
                 loading={loading}
               >
-                Update User
+                Cập nhật người dùng
               </Button>
               <Button
                 onClick={() => {
@@ -529,7 +529,7 @@ export default function UsersManagementPage() {
                   editForm.resetFields();
                 }}
               >
-                Cancel
+                Hủy
               </Button>
             </Space>
           </Form.Item>

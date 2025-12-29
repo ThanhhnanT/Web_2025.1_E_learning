@@ -17,6 +17,7 @@ import {
   BellOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
@@ -84,6 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const selectedKey = useMemo(() => {
     if (!pathname) return "/admin/dashboard";
     if (pathname.startsWith("/admin/flashcards")) return "/admin/flashcards";
+    if (pathname.startsWith("/admin/posts")) return "/admin/posts";
     return pathname;
   }, [pathname]);
 
@@ -102,49 +104,55 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     {
       key: "/admin/dashboard",
       icon: <DashboardOutlined />,
-      label: "Dashboard",
+      label: "Bảng điều khiển",
       onClick: () => router.push("/admin/dashboard"),
     },
     {
       key: "/admin/users",
       icon: <UserOutlined />,
-      label: "Users",
+      label: "Người dùng",
       onClick: () => router.push("/admin/users"),
     },
     {
       key: "/admin/roles",
       icon: <TeamOutlined />,
-      label: "Roles",
+      label: "Vai trò",
       onClick: () => router.push("/admin/roles"),
     },
     {
       key: "/admin/courses",
       icon: <BookOutlined />,
-      label: "Courses",
+      label: "Khóa học",
       onClick: () => router.push("/admin/courses"),
     },
     {
       key: "/admin/tests",
       icon: <FileTextOutlined />,
-      label: "Tests",
+      label: "Bài kiểm tra",
       onClick: () => router.push("/admin/tests"),
+    },
+    {
+      key: "/admin/posts",
+      icon: <EditOutlined />,
+      label: "Quản lý bài viết",
+      onClick: () => router.push("/admin/posts"),
     },
     {
       key: "/admin/flashcards",
       icon: <ThunderboltOutlined />,
-      label: "Flashcards",
+      label: "Thẻ ghi nhớ",
       onClick: () => router.push("/admin/flashcards"),
     },
     {
       key: "/admin/analytics",
       icon: <BarChartOutlined />,
-      label: "Analytics",
+      label: "Phân tích",
       onClick: () => router.push("/admin/analytics"),
     },
     {
       key: "/admin/settings",
       icon: <SettingOutlined />,
-      label: "Settings",
+      label: "Cài đặt",
       onClick: () => router.push("/admin/settings"),
     },
   ];
@@ -152,7 +160,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const userMenu: MenuProps["items"] = [
     {
       key: "logout",
-      label: "Logout",
+      label: "Đăng xuất",
       icon: <LogoutOutlined />,
       onClick: handleLogout,
     },
@@ -160,16 +168,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const getPageTitle = () => {
     const titleMap: Record<string, string> = {
-      "/admin/dashboard": "Dashboard",
-      "/admin/users": "Users",
-      "/admin/roles": "Roles",
-      "/admin/courses": "Courses",
-      "/admin/tests": "Tests",
-      "/admin/flashcards": "Flashcards",
-      "/admin/analytics": "Analytics",
-      "/admin/settings": "Settings",
+      "/admin/dashboard": "Bảng điều khiển",
+      "/admin/users": "Người dùng",
+      "/admin/roles": "Vai trò",
+      "/admin/courses": "Khóa học",
+      "/admin/tests": "Bài kiểm tra",
+      "/admin/posts": "Quản lý bài viết",
+      "/admin/flashcards": "Thẻ ghi nhớ",
+      "/admin/analytics": "Phân tích",
+      "/admin/settings": "Cài đặt",
     };
-    return titleMap[pathname] || "Dashboard";
+    return titleMap[pathname] || "Bảng điều khiển";
   };
 
   return (
@@ -272,13 +281,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </Text>
                   </div>
                 </div>
-                <Menu
+                  <Menu
                   mode="inline"
                   items={[
                     {
                       key: "logout",
                       icon: <LogoutOutlined />,
-                      label: "Logout",
+                      label: "Đăng xuất",
                       onClick: handleLogout,
                     },
                   ]}
@@ -334,7 +343,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
                 <Space size="middle" style={{ flex: 1, justifyContent: "flex-end" }}>
                   <Input
-                    placeholder="Search..."
+                    placeholder="Tìm kiếm..."
                     prefix={<SearchOutlined />}
                     style={{
                       width: 240,

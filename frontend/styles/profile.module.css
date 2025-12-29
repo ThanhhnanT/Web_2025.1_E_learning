@@ -1,232 +1,397 @@
-.container {
+/* Profile Page Container - Force Light Mode */
+.profilePageContainer {
+  min-height: calc(100vh - 64px);
+  background-color: #f6f7f8 !important;
+  padding: 32px 16px;
+  color: #1a1a1a !important;
+}
+
+/* Override any dark mode styles */
+.profilePageContainer * {
+  color-scheme: light !important;
+}
+
+.profileLayout {
+  max-width: 1280px;
+  margin: 0 auto;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: calc(100vh - 200px);
-  padding: 24px;
-  background-color: #f0f2f5;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+/* Sidebar */
+.profileSidebar {
+  width: 100%;
+  max-width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .profileCard {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.coverImage {
+  height: 96px;
+  background: linear-gradient(135deg, rgba(19, 127, 236, 0.8) 0%, rgba(139, 92, 246, 0.8) 100%);
   width: 100%;
-  max-width: 800px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
 }
 
-.loadingContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 200px);
-  background-color: #f0f2f5;
-}
-
-/* Header Section */
-.headerSection {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  padding: 24px 0;
+.profileContent {
+  padding: 24px;
+  position: relative;
 }
 
 .avatarSection {
-  position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: center;
+  margin-top: -48px;
+  margin-bottom: 16px;
 }
 
 .avatarWrapper {
   position: relative;
   cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.avatarWrapper:hover {
-  transform: scale(1.05);
-}
-
-.avatarWrapper:hover .avatarOverlay {
-  opacity: 1;
 }
 
 .avatar {
-  border: 4px solid #1890ff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 4px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.avatarOverlay {
+.avatarEditButton {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  right: 0;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 50%;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
   cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
 }
 
-.cameraIcon {
-  font-size: 32px;
-  color: #ffffff;
+.avatarEditButton:hover {
+  background: #f5f5f5;
+  color: #137fec;
 }
 
-.uploadingIndicator {
+.onlineIndicator {
   position: absolute;
-  top: -10px;
-  right: -10px;
-  background: #ffffff;
+  bottom: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  background: #52c41a;
+  border: 3px solid #fff;
   border-radius: 50%;
-  padding: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .userInfo {
   text-align: center;
-  flex: 1;
+  margin-bottom: 24px;
 }
 
 .userName {
-  margin: 0 !important;
-  color: #1890ff;
+  margin: 0 0 8px 0 !important;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.userTagline {
+  display: block;
+  font-size: 14px;
+  color: #8c8c8c;
+  margin-bottom: 4px;
+  line-height: 1.5;
 }
 
 .userEmail {
   display: block;
-  margin-top: 8px;
-  font-size: 16px;
+  font-size: 13px;
+  color: #8c8c8c;
 }
 
 .actionButtons {
-  width: 100%;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   gap: 12px;
+  margin-bottom: 24px;
+}
+
+.editButton {
+  background: #f5f5f5;
+  border-color: #d9d9d9;
+}
+
+.editButton:hover {
+  background: #e6e6e6;
+  border-color: #bfbfbf;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #595959;
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.detailItem:hover {
+  color: #137fec;
+}
+
+.detailIcon {
+  color: #8c8c8c;
+  font-size: 16px;
+}
+
+.socialCard {
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.socialLink {
+  color: #8c8c8c;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s;
+  padding: 8px;
+  display: inline-block;
+}
+
+.socialLink:hover {
+  color: #137fec;
+}
+
+/* Main Content */
+.profileMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.statCard {
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.2s;
+}
+
+.statCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.statHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.statLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: #8c8c8c;
+}
+
+.statIcon {
+  font-size: 20px;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(19, 127, 236, 0.1);
+}
+
+.statValue {
+  margin: 0 0 8px 0 !important;
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.2;
+}
+
+.statChange {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.statSubtext {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.tabsCard {
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: none;
+  padding: 0;
+}
+
+.profileTabs :global(.ant-tabs-nav) {
+  margin: 0;
+  padding: 0 24px;
+}
+
+.profileTabs :global(.ant-tabs-tab) {
+  padding: 16px 8px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.profileTabs :global(.ant-tabs-tab-active) {
+  font-weight: 600;
+}
+
+.tabContent {
+  background: #fff;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-top: none;
+  min-height: 500px;
+  padding: 24px;
+}
+
+/* Friends Content */
+.friendsContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.friendRequestsCard,
+.friendsListCard {
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.sectionTitle {
+  margin: 0 !important;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.friendRequestsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.friendRequestItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #fafafa;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.friendRequestInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.friendAvatar {
+  flex-shrink: 0;
+}
+
+.friendsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.friendCard {
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.2s;
+}
+
+.friendCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.friendCardContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.friendCardAvatar {
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.friendCardInfo {
+  width: 100%;
+  text-align: center;
 }
 
 /* Profile Form */
 .profileForm {
-  margin-top: 24px;
+  max-width: 600px;
 }
 
-.helperText {
-  font-size: 12px;
-  margin-top: 4px;
-  display: block;
-}
-
-/* Password Section */
-.passwordSection {
+/* Loading Container */
+.loadingContainer {
   display: flex;
   justify-content: center;
-  padding: 16px 0;
-}
-
-/* Responsive Design */
-@media (min-width: 768px) {
-  .headerSection {
-    flex-direction: row;
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .avatarSection {
-    margin-right: 24px;
-  }
-
-  .userInfo {
-    text-align: left;
-    flex: 1;
-  }
-
-  .actionButtons {
-    justify-content: flex-end;
-    width: auto;
-  }
-}
-
-@media (max-width: 767px) {
-  .container {
-    padding: 16px;
-  }
-
-  .profileCard {
-    border-radius: 4px;
-  }
-
-  .headerSection {
-    padding: 16px 0;
-  }
-
-  .avatar {
-    width: 100px !important;
-    height: 100px !important;
-  }
-
-  .userName {
-    font-size: 20px !important;
-  }
-
-  .userEmail {
-    font-size: 14px;
-  }
-
-  .actionButtons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .actionButtons button {
-    width: 100%;
-  }
-}
-
-/* Form Item Styling */
-:global(.profileForm .ant-form-item-label > label) {
-  font-weight: 500;
-  color: #262626;
-}
-
-:global(.profileForm .ant-input:disabled),
-:global(.profileForm .ant-input-disabled) {
-  background-color: #f5f5f5;
-  color: #000000;
-  cursor: not-allowed;
-}
-
-/* Ensure placeholder shows in disabled TextArea */
-:global(.profileForm textarea.ant-input[disabled]) {
-  -webkit-text-fill-color: #000000;
-}
-
-:global(.profileForm textarea.ant-input[disabled]::placeholder) {
-  color: #bfbfbf !important;
-  opacity: 1 !important;
-  -webkit-text-fill-color: #bfbfbf !important;
-}
-
-:global(.profileForm textarea.ant-input[disabled]:not(:focus):empty::before) {
-  content: attr(placeholder);
-  color: #bfbfbf;
-  pointer-events: none;
-}
-
-/* Card Header Customization */
-:global(.profileCard .ant-card-body) {
-  padding: 32px;
-}
-
-@media (max-width: 767px) {
-  :global(.profileCard .ant-card-body) {
-    padding: 20px;
-  }
+  align-items: center;
+  min-height: calc(100vh - 200px);
+  background-color: #f6f7f8;
 }
 
 /* Crop Modal Styles */
@@ -256,7 +421,7 @@
 
 .cropControls :global(.anticon) {
   font-size: 18px;
-  color: #1890ff;
+  color: #137fec;
 }
 
 .cropHint {
@@ -264,22 +429,170 @@
   padding: 8px 0;
 }
 
-@media (max-width: 767px) {
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .profileLayout {
+    flex-direction: column;
+  }
+
+  .profileSidebar {
+    max-width: 100%;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .profilePageContainer {
+    padding: 16px 8px;
+  }
+
+  .profileContent {
+    padding: 16px;
+  }
+
+  .avatar {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .userName {
+    font-size: 18px !important;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .friendsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .friendRequestItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .cropWrapper {
     height: 300px;
   }
-  
+
   .cropControls {
     padding: 0 8px;
   }
 }
 
-/* Password Modal Styles */
-.passwordModal :global(.ant-modal-wrap) {
-  z-index: 1000;
+/* Form Item Styling */
+:global(.profileForm .ant-form-item-label > label) {
+  font-weight: 500;
+  color: #262626;
 }
 
-.passwordModal :global(.ant-modal-mask) {
-  background-color: rgba(0, 0, 0, 0.45);
+:global(.profileForm .ant-input:disabled),
+:global(.profileForm .ant-input-disabled) {
+  background-color: #f5f5f5;
+  color: #000000;
+  cursor: not-allowed;
 }
 
+:global(.profileForm textarea.ant-input[disabled]) {
+  -webkit-text-fill-color: #000000;
+}
+
+:global(.profileForm textarea.ant-input[disabled]::placeholder) {
+  color: #bfbfbf !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #bfbfbf !important;
+}
+
+/* Force light mode - no dark mode support */
+.profileCard,
+.socialCard,
+.statCard,
+.tabsCard,
+.tabContent,
+.friendRequestsCard,
+.friendsListCard,
+.friendCard {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+  color: #1a1a1a !important;
+}
+
+.profileCard :global(.ant-card-body),
+.socialCard :global(.ant-card-body),
+.statCard :global(.ant-card-body),
+.tabsCard :global(.ant-card-body),
+.tabContent :global(.ant-card-body),
+.friendRequestsCard :global(.ant-card-body),
+.friendsListCard :global(.ant-card-body),
+.friendCard :global(.ant-card-body) {
+  background-color: #ffffff !important;
+  color: #1a1a1a !important;
+}
+
+.userName {
+  color: #1a1a1a !important;
+}
+
+.userTagline,
+.userEmail,
+.detailItem {
+  color: #8c8c8c !important;
+}
+
+.statValue {
+  color: #1a1a1a !important;
+}
+
+.sectionTitle {
+  color: #1a1a1a !important;
+}
+
+.friendRequestItem {
+  background-color: #fafafa !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Override Ant Design dark mode */
+.profilePageContainer :global(.ant-card) {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+.profilePageContainer :global(.ant-card-body) {
+  background-color: #ffffff !important;
+  color: #1a1a1a !important;
+}
+
+.profilePageContainer :global(.ant-tabs-tab) {
+  color: #595959 !important;
+}
+
+.profilePageContainer :global(.ant-tabs-tab-active) {
+  color: #137fec !important;
+}
+
+.profilePageContainer :global(.ant-tabs-ink-bar) {
+  background-color: #137fec !important;
+}
+
+.profilePageContainer :global(.ant-input),
+.profilePageContainer :global(.ant-input-affix-wrapper) {
+  background-color: #ffffff !important;
+  border-color: #d9d9d9 !important;
+  color: #1a1a1a !important;
+}
+
+.profilePageContainer :global(.ant-btn-default) {
+  background-color: #ffffff !important;
+  border-color: #d9d9d9 !important;
+  color: #1a1a1a !important;
+}
