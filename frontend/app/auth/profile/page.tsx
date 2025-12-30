@@ -373,10 +373,26 @@ export default function ProfilePage() {
 
   const handlePrivacyChange = async (key: 'showOverview' | 'showBlog' | 'showFriends', value: boolean) => {
     try {
+      // Update on backend first
+      const updatedUser = await updateProfile({ [key]: value });
+      
+      // Update local state
       const newSettings = { ...privacySettings, [key]: value };
       setPrivacySettings(newSettings);
-      // Update on backend
-      await updateProfile({ [key]: value });
+      
+      // Update user data if returned
+      if (updatedUser) {
+        setUser({ ...user, ...updatedUser });
+        // Update privacy settings from response
+        if (updatedUser.showOverview !== undefined) {
+          setPrivacySettings({
+            showOverview: updatedUser.showOverview ?? true,
+            showBlog: updatedUser.showBlog ?? true,
+            showFriends: updatedUser.showFriends ?? true,
+          });
+        }
+      }
+      
       messageApi.success('Đã cập nhật cài đặt quyền riêng tư');
     } catch (error: any) {
       console.error('Error updating privacy settings:', error);

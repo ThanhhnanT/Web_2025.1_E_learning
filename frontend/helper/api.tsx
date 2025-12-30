@@ -201,7 +201,14 @@ export const getUserProfile = async () => {
   }
 };
 
-export const updateProfile = async (data: { name?: string; phone?: string; bio?: string }) => {
+export const updateProfile = async (data: { 
+  name?: string; 
+  phone?: string; 
+  bio?: string;
+  showOverview?: boolean;
+  showBlog?: boolean;
+  showFriends?: boolean;
+}) => {
   try {
     return await patchAccess('users/profile', data);
   } catch (error) {

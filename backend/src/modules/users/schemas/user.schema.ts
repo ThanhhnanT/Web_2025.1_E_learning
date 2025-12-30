@@ -47,20 +47,19 @@ export class User {
   
   @Prop() 
   codeExpired: string
-
-  // Friends list - array of user IDs
+  
   @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
   friends: Types.ObjectId[];
 
   // Privacy settings
   @Prop({ type: Boolean, default: true })
-  showOverview: boolean; // Allow others to view overview/statistics
+  showOverview: boolean; 
 
   @Prop({ type: Boolean, default: true })
-  showBlog: boolean; // Allow others to view blog posts
+  showBlog: boolean; 
 
   @Prop({ type: Boolean, default: true })
-  showFriends: boolean; // Allow others to view friends list
+  showFriends: boolean; 
 
 }
 

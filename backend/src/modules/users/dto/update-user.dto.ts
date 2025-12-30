@@ -26,4 +26,19 @@ export class UpdateUserDto {
   @IsOptional()
   @IsBoolean()
   email_verified?: boolean;
+
+  @ApiProperty({ example: true, description: 'Allow others to view overview/statistics', required: false })
+  @IsOptional()
+  @IsBoolean()
+  showOverview?: boolean;
+
+  @ApiProperty({ example: true, description: 'Allow others to view blog posts', required: false })
+  @IsOptional()
+  @IsBoolean()
+  showBlog?: boolean;
+
+  @ApiProperty({ example: true, description: 'Allow others to view friends list', required: false })
+  @IsOptional()
+  @IsBoolean()
+  showFriends?: boolean;
 }

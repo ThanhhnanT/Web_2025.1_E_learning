@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException, OnModuleInit } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -18,7 +18,7 @@ import { computeEffectivePermissions, LEGACY_ROLE_MAP, ROLE_PRESETS } from './co
 import { UpdateRolePresetDto } from './dto/update-role-preset.dto';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit {
   constructor(
     @InjectModel(User.name) 
     private userModel: Model<User>,
@@ -144,6 +144,15 @@ export class UsersService {
     }
     if (updateUserDto.email_verified !== undefined) {
       updateData.email_verified = updateUserDto.email_verified;
+    }
+    if (updateUserDto.showOverview !== undefined) {
+      updateData.showOverview = updateUserDto.showOverview;
+    }
+    if (updateUserDto.showBlog !== undefined) {
+      updateData.showBlog = updateUserDto.showBlog;
+    }
+    if (updateUserDto.showFriends !== undefined) {
+      updateData.showFriends = updateUserDto.showFriends;
     }
 
     const updatedUser = await this.userModel.findByIdAndUpdate(
@@ -361,48 +370,71 @@ export class UsersService {
     return {
       statusCode: 201,
     }
-  }
+  };
   
-verifyEmail = async (verifyDto: VerifyDto) => {
-  const { email, codeId } = verifyDto;
+  verifyEmail = async (verifyDto: VerifyDto) => {
+    const { email, codeId } = verifyDto;
 
-  try {
-    const user = await this.userModel.findOne({ email });
+    try {
+      const user = await this.userModel.findOne({ email });
 
-    if (!user) {
+      if (!user) {
+        return {
+          statusCode: 404,
+          message: 'User not found',
+        };
+      }
+
+      if (user.codeId !== codeId) {
+        return {
+          statusCode: 400,
+          message: 'Mã xác nhận không đúng',
+        };
+      }
+
+      await this.userModel.updateOne(
+        { email },
+        { email_verified: true, codeId: null }
+      );
+
       return {
-        statusCode: 404,
-        message: 'User not found',
+        statusCode: 200,
+        id: user.id,
+        email: user.email,
+      };
+    } catch (error) {
+      return {
+        statusCode: 500,
+        message: 'Internal server error',
+        error: error.message,
       };
     }
+  };
 
-    if (user.codeId !== codeId) {
-      return {
-        statusCode: 400,
-        message: 'Mã xác nhận không đúng',
-      };
+  async onModuleInit() {
+    // Migration: Add privacy settings to existing users
+    try {
+      const result = await this.userModel.updateMany(
+        {
+          $or: [
+            { showOverview: { $exists: false } },
+            { showBlog: { $exists: false } },
+            { showFriends: { $exists: false } },
+          ],
+        },
+        {
+          $set: {
+            showOverview: true,
+            showBlog: true,
+            showFriends: true,
+          },
+        },
+      );
+      if (result.modifiedCount > 0) {
+        console.log(`Migration: Updated ${result.modifiedCount} users with privacy settings`);
+      }
+    } catch (error) {
+      console.error('Error migrating privacy settings:', error);
     }
-
-    await this.userModel.updateOne(
-      { email },
-      { email_verified: true, codeId: null }
-    );
-
-    return {
-      statusCode: 200,
-      id: user.id,
-      email: user.email,
-    };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      message: 'Internal server error',
-      error: error.message,
-    };
   }
-};
-
-
-
-  
 }
