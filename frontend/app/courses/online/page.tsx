@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Card, Row, Col, Typography, Tabs, Spin, Empty, Image } from 'antd';
+import { Card, Row, Col, Typography, Tabs, Spin, Empty, Image, Avatar } from 'antd';
 import { PlayCircleOutlined, UserOutlined, BookOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import { getAllCourses } from '@/service/courses';
@@ -146,6 +146,13 @@ export default function CoursesOnlinePage() {
                           preview={false}
                           fallback="/image.png"
                         />
+                        {course.avatar && (
+                          <img 
+                            src={course.avatar} 
+                            alt={course.title}
+                            className={styles.overlayAvatar}
+                          />
+                        )}
                         <div className={styles.playOverlay}>
                           <PlayCircleOutlined className={styles.playIcon} />
                         </div>

@@ -9,8 +9,8 @@ interface PostDetailModalProps {
   currentUser: User;
   open: boolean;
   onClose: () => void;
-  onAddComment: (postId: string, content: string) => void;
-  onReplyComment: (postId: string, parentCommentId: string, content: string) => void;
+  onAddComment: (postId: string, content: string, imageFile?: File) => void;
+  onReplyComment: (postId: string, parentCommentId: string, content: string, imageFile?: File) => void;
   onReactComment: (postId: string, commentId: string, emoji: string) => void;
   comments?: Comment[];
 }

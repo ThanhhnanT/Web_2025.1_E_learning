@@ -75,15 +75,36 @@ const BlogPage: React.FC = () => {
     const userId = user.id || user._id?.toString() || '';
     const userName = user.name || 'Unknown User';
     const userAvatar = user.avatar_url || user.avatar || '';
+    const commentId = apiComment.id || apiComment._id?.toString() || '';
+
+    // Ensure content is a string and not an ID
+    let content = '';
+    if (apiComment.content !== undefined && apiComment.content !== null) {
+      content = String(apiComment.content);
+    }
+    
+    // Validate that content is not an ID (check against comment ID, user ID, or parent ID)
+    const parentId = apiComment.parentId ? String(apiComment.parentId) : '';
+    if (content === commentId || content === userId || content === parentId || 
+        content === user._id?.toString() || content === user.id) {
+      console.warn('Comment content appears to be an ID, setting to empty:', {
+        content,
+        commentId,
+        userId,
+        parentId,
+        apiComment
+      });
+      content = '';
+    }
 
     return {
-      id: apiComment.id || apiComment._id?.toString() || '',
+      id: commentId,
       user: {
         id: userId,
         name: userName,
         avatar: userAvatar,
       },
-      content: apiComment.content || '',
+      content: content,
       createdAt: apiComment.createdAt || new Date().toISOString(),
       replies: apiComment.replies ? apiComment.replies.map(convertApiCommentToComment) : [],
       reactions: apiComment.reactions || {},
@@ -262,39 +283,94 @@ const BlogPage: React.FC = () => {
     const handleCommentCreated = (data: { postId: string; comment: any }) => {
       try {
         const newComment = convertApiCommentToComment(data.comment);
+        const parentId = data.comment.parentId;
         
-        if (selectedPost?.id === data.postId) {
-          setSelectedPostComments((prev) => [...prev, newComment]);
-          // Update selectedPost commentsCount
-          setSelectedPost((prev) =>
-            prev ? { ...prev, commentsCount: (prev.commentsCount || 0) + 1 } : null
-          );
-        }
-        
-        // Update posts list - increment commentsCount
-        setPosts((prev) =>
-          prev.map((p) =>
-            p.id === data.postId
-              ? {
-                  ...p,
-                  commentsCount: (p.commentsCount || 0) + 1,
-                  comments: [...(p.comments || []), newComment],
+        // If this is a reply (has parentId), add it to the parent comment's replies array
+        if (parentId) {
+          if (selectedPost?.id === data.postId) {
+            setSelectedPostComments((prev) =>
+              prev.map((c) => {
+                // Check if this comment is the parent or if any of its replies contain the parent
+                if (c.id === parentId) {
+                  return { ...c, replies: [...(c.replies || []), newComment] };
                 }
-              : p
-          )
-        );
-        
-        // Update preview comments - add to preview if less than 2
-        setPostPreviewComments((prev) => {
-          const currentPreview = prev[data.postId] || [];
-          if (currentPreview.length < 2) {
-            return {
-              ...prev,
-              [data.postId]: [...currentPreview, newComment],
-            };
+                // Recursively check replies
+                const findAndUpdateParent = (comment: Comment): Comment => {
+                  if (comment.id === parentId) {
+                    return { ...comment, replies: [...(comment.replies || []), newComment] };
+                  }
+                  if (comment.replies && comment.replies.length > 0) {
+                    return {
+                      ...comment,
+                      replies: comment.replies.map(findAndUpdateParent),
+                    };
+                  }
+                  return comment;
+                };
+                return findAndUpdateParent(c);
+              })
+            );
           }
-          return prev;
-        });
+          
+          // Update posts list - add reply to parent comment
+          setPosts((prev) =>
+            prev.map((p) => {
+              if (p.id === data.postId) {
+                const updateCommentWithReply = (comment: Comment): Comment => {
+                  if (comment.id === parentId) {
+                    return { ...comment, replies: [...(comment.replies || []), newComment] };
+                  }
+                  if (comment.replies && comment.replies.length > 0) {
+                    return {
+                      ...comment,
+                      replies: comment.replies.map(updateCommentWithReply),
+                    };
+                  }
+                  return comment;
+                };
+                return {
+                  ...p,
+                  comments: (p.comments || []).map(updateCommentWithReply),
+                };
+              }
+              return p;
+            })
+          );
+        } else {
+          // This is a top-level comment
+          if (selectedPost?.id === data.postId) {
+            setSelectedPostComments((prev) => [...prev, newComment]);
+            // Update selectedPost commentsCount
+            setSelectedPost((prev) =>
+              prev ? { ...prev, commentsCount: (prev.commentsCount || 0) + 1 } : null
+            );
+          }
+          
+          // Update posts list - increment commentsCount
+          setPosts((prev) =>
+            prev.map((p) =>
+              p.id === data.postId
+                ? {
+                    ...p,
+                    commentsCount: (p.commentsCount || 0) + 1,
+                    comments: [...(p.comments || []), newComment],
+                  }
+                : p
+            )
+          );
+          
+          // Update preview comments - add to preview if less than 2
+          setPostPreviewComments((prev) => {
+            const currentPreview = prev[data.postId] || [];
+            if (currentPreview.length < 2) {
+              return {
+                ...prev,
+                [data.postId]: [...currentPreview, newComment],
+              };
+            }
+            return prev;
+          });
+        }
       } catch (error) {
         console.error('Error converting comment from socket:', error, data);
       }
@@ -698,15 +774,21 @@ const BlogPage: React.FC = () => {
                 })()}
 
                 <Tooltip title="Bình luận">
-                  <Button 
-                    type="text" 
-                    icon={<CommentOutlined />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
                   >
-                    {post.commentsCount || 0} bình luận
-                  </Button>
+                    <Button 
+                      type="text" 
+                      icon={<CommentOutlined />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePostClick(post);
+                      }}
+                    >
+                      {post.commentsCount || 0} bình luận
+                    </Button>
+                  </div>
                 </Tooltip>
               </div>
 
@@ -812,8 +894,8 @@ const BlogPage: React.FC = () => {
         }}
         post={selectedPost}
         currentUser={currentUser || { id: 'guest', name: 'Guest', avatar: '' }}
-        onAddComment={(content, imageFile) => handleAddComment(selectedPost?.id || '', content, imageFile)}
-        onReplyComment={(parentId, content, imageFile) => handleReplyComment(selectedPost?.id || '', parentId, content, imageFile)}
+        onAddComment={handleAddComment}
+        onReplyComment={handleReplyComment}
         onReactComment={handleReactComment}
         comments={selectedPostComments}
       />

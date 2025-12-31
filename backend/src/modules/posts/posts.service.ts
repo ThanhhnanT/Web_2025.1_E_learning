@@ -442,9 +442,15 @@ export class PostsService {
 
         // Map userId to user for frontend compatibility
         const user = (comment as any).userId || {};
+        // Ensure content is explicitly extracted and is a string
+        const content = typeof comment.content === 'string' ? comment.content : String(comment.content || '');
+        const commentAny = comment as any;
         return {
-          ...comment,
           id: comment._id.toString(),
+          content: content,
+          createdAt: commentAny.createdAt || new Date(),
+          updatedAt: commentAny.updatedAt || new Date(),
+          imageUrl: comment.imageUrl,
           user: {
             id: user._id?.toString() || user.id || '',
             name: user.name || '',
@@ -480,9 +486,15 @@ export class PostsService {
         );
         // Map userId to user for frontend compatibility
         const user = (reply as any).userId || {};
+        // Ensure content is explicitly extracted and is a string
+        const content = typeof reply.content === 'string' ? reply.content : String(reply.content || '');
+        const replyAny = reply as any;
         return {
-          ...reply,
           id: reply._id.toString(),
+          content: content,
+          createdAt: replyAny.createdAt || new Date(),
+          updatedAt: replyAny.updatedAt || new Date(),
+          imageUrl: reply.imageUrl,
           user: {
             id: user._id?.toString() || user.id || '',
             name: user.name || '',
@@ -631,9 +643,16 @@ export class PostsService {
         console.warn(`User ${userId} not found when populating comment`);
       }
 
+      // Ensure content is explicitly extracted and is a string
+      const content = typeof populatedComment.content === 'string' ? populatedComment.content : String(populatedComment.content || '');
+      const populatedCommentAny = populatedComment as any;
       const result = {
-        ...populatedComment,
         id: populatedComment._id.toString(),
+        content: content,
+        createdAt: populatedCommentAny.createdAt || new Date(),
+        updatedAt: populatedCommentAny.updatedAt || new Date(),
+        imageUrl: populatedComment.imageUrl,
+        parentId: populatedCommentAny.parentId ? populatedCommentAny.parentId.toString() : undefined,
         user: {
           id: userData._id?.toString() || userData.id || userId,
           name: userData.name || 'Unknown User',
@@ -688,9 +707,15 @@ export class PostsService {
 
     // Map userId to user for frontend compatibility
     const user = (updatedComment as any).userId || {};
+    // Ensure content is explicitly extracted and is a string
+    const content = typeof updatedComment.content === 'string' ? updatedComment.content : String(updatedComment.content || '');
+    const updatedCommentAny = updatedComment as any;
     const result = {
-      ...updatedComment,
       id: updatedComment._id.toString(),
+      content: content,
+      createdAt: updatedCommentAny.createdAt || new Date(),
+      updatedAt: updatedCommentAny.updatedAt || new Date(),
+      imageUrl: updatedComment.imageUrl,
       user: {
         id: user._id?.toString() || user.id || '',
         name: user.name || '',
