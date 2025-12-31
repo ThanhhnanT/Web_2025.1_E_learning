@@ -40,6 +40,7 @@ export interface Message {
   };
   type: 'text' | 'image' | 'file' | 'link';
   content: string;
+  fileName?: string;
   read: boolean;
   readAt?: string;
   createdAt: string;
@@ -68,7 +69,38 @@ export const createMessage = async (
   conversationId: string,
   content: string,
   type: 'text' | 'image' | 'file' | 'link' = 'text',
+  file?: File,
 ): Promise<Message> => {
+  if (file) {
+    // Upload file using FormData
+    const formData = new FormData();
+    formData.append('conversationId', conversationId);
+    formData.append('content', content || '');
+    formData.append('type', type);
+    formData.append('file', file);
+    
+    const API_DOMAIN = process.env.API || 'http://localhost:8888/';
+    const token = localStorage.getItem('access_token') || document.cookie
+      .split('; ')
+      .find(row => row.startsWith('access_token='))
+      ?.split('=')[1];
+    
+    const response = await fetch(`${API_DOMAIN}chats/messages`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to send message');
+    }
+    
+    return await response.json();
+  }
+  
   return await postAccess('chats/messages', { conversationId, content, type });
 };
 
@@ -76,11 +108,13 @@ export const createMessage = async (
 export const getMessages = async (
   conversationId: string,
   page: number = 1,
-  limit: number = 50,
+  limit: number = 10,
+  beforeDate?: Date,
 ): Promise<Message[]> => {
   const params: any = {};
   if (page) params.page = page.toString();
   if (limit) params.limit = limit.toString();
+  if (beforeDate) params.beforeDate = beforeDate.toISOString();
   return await getAccess(`chats/conversations/${conversationId}/messages`, params);
 };
 

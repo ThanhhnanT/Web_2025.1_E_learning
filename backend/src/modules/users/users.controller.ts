@@ -132,6 +132,44 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Upload cover image' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @Post('profile/cover-image')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCoverImage(@Request() req: any, @UploadedFile() file: any) {
+    if (!file) {
+      throw new BadRequestException('File không được tìm thấy');
+    }
+
+    // Validate file type
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      throw new BadRequestException('Chỉ chấp nhận file ảnh (JPEG, PNG, JPG, GIF, WEBP)');
+    }
+
+    // Validate file size (max 10MB for cover images)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      throw new BadRequestException('Kích thước file không được vượt quá 10MB');
+    }
+
+    const userId = req.user._id || req.user.id;
+    return this.usersService.updateCoverImage(userId, file);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Đổi mật khẩu' })
   @Patch('profile/password')
   async changePassword(@Request() req: any, @Body() changePasswordDto: ChangePasswordDto) {

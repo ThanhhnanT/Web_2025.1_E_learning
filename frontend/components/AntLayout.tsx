@@ -13,8 +13,7 @@ import {
   ReadOutlined, 
   ShoppingCartOutlined,
   UserOutlined,
-  LogoutOutlined,
-  BarChartOutlined
+  LogoutOutlined
 } from "@ant-design/icons";
 import Image from "next/image";
 import Link from "next/link";
@@ -104,9 +103,10 @@ function UserMenuClient({ onOpenModal }: { onOpenModal: () => void }) {
         if (timeoutId) {
           clearTimeout(timeoutId);
         }
-        // Only log non-401 errors to avoid spam
-        if (error?.response?.status !== 401) {
-          console.error('Error fetching user profile for avatar:', error);
+        // Only log non-401 and non-network errors to avoid spam
+        // Network errors are already logged in api.tsx
+        if (error?.response?.status && error?.response?.status !== 401) {
+          console.error('Error fetching user profile for avatar:', error.response?.data || error.message);
         }
         // Keep avatar as null if fetch fails
       }
@@ -160,11 +160,6 @@ function UserMenuClient({ onOpenModal }: { onOpenModal: () => void }) {
       icon: <UserOutlined />
     },
     { 
-      key: "statistics", 
-      label: "Thống kê",
-      icon: <BarChartOutlined />
-    },
-    { 
       key: "logout", 
       label: "Đăng xuất",
       icon: <LogoutOutlined />
@@ -175,9 +170,6 @@ function UserMenuClient({ onOpenModal }: { onOpenModal: () => void }) {
     switch (key) {
       case "profile":
         router.push("/auth/profile");
-        break;
-      case "statistics":
-        router.push("/statistics");
         break;
       case "logout":
         logoutUser();

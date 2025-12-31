@@ -24,6 +24,9 @@ export class User {
   @Prop({ type: String })
   avatar_url: string;
 
+  @Prop({ type: String })
+  cover_image_url: string;
+
   @Prop({ type: Boolean, default: false })
   email_verified: boolean;
 

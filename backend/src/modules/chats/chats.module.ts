@@ -8,6 +8,7 @@ import { Message, MessageSchema } from './schema/message.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from '@/auth/auth.module';
+import { UsersModule } from '@/modules/users/users.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AuthModule } from '@/auth/auth.module';
     JwtModule,
     ConfigModule,
     AuthModule,
+    UsersModule, // Import UsersModule to use CloudinaryService
   ],
   controllers: [ChatsController],
   providers: [ChatsService, ChatsGateway],

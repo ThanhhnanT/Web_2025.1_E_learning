@@ -162,8 +162,11 @@ const BlogPage: React.FC = () => {
               name: profile.name,
               avatar: profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile.name)}`,
             });
-          } catch (err) {
-            console.warn("Không lấy được profile, dùng fallback", err);
+          } catch (err: any) {
+            // Only log if it's not a network error
+            if (err?.response) {
+              console.warn("Không lấy được profile, dùng fallback", err.response?.data || err.message);
+            }
             setCurrentUser({ id: userId, name: 'User', avatar: '' });
           }
         } else {
@@ -516,9 +519,10 @@ const BlogPage: React.FC = () => {
     try {
       await addComment(postId, { content }, imageFile);
       // Socket event will update the UI
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding comment:', error);
-      message.error('Không thể thêm bình luận');
+      const errorMessage = error?.response?.data?.message || error?.message || 'Không thể thêm bình luận';
+      message.error(errorMessage);
     }
   };
 
@@ -531,9 +535,10 @@ const BlogPage: React.FC = () => {
     try {
       await replyComment(postId, parentId, { content }, imageFile);
       // Socket event will update the UI
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error replying comment:', error);
-      message.error('Không thể trả lời bình luận');
+      const errorMessage = error?.response?.data?.message || error?.message || 'Không thể trả lời bình luận';
+      message.error(errorMessage);
     }
   };
 

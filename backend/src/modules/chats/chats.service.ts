@@ -10,6 +10,7 @@ import { Conversation } from './schema/conversation.schema';
 import { Message, MessageType } from './schema/message.schema';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { CreateMessageDto } from './dto/create-message.dto';
+import { CloudinaryService } from '@/modules/users/cloudinary.service';
 
 @Injectable()
 export class ChatsService {
@@ -18,18 +19,23 @@ export class ChatsService {
     private conversationModel: Model<Conversation>,
     @InjectModel(Message.name)
     private messageModel: Model<Message>,
+    private cloudinaryService: CloudinaryService,
   ) {}
 
   async createOrGetConversation(createDto: CreateConversationDto, userId: string) {
     const { participantId } = createDto;
 
-    if (userId === participantId) {
+    // Normalize userId to string
+    const userIdStr = userId?.toString() || userId;
+    const participantIdStr = participantId?.toString() || participantId;
+
+    if (userIdStr === participantIdStr) {
       throw new BadRequestException('Cannot create conversation with yourself');
     }
 
     // Check if conversation already exists
     const existingConversation = await this.conversationModel.findOne({
-      participants: { $all: [new Types.ObjectId(userId), new Types.ObjectId(participantId)] },
+      participants: { $all: [new Types.ObjectId(userIdStr), new Types.ObjectId(participantIdStr)] },
       deletedAt: null,
     });
 
@@ -43,7 +49,7 @@ export class ChatsService {
 
     // Create new conversation
     const conversation = await this.conversationModel.create({
-      participants: [new Types.ObjectId(userId), new Types.ObjectId(participantId)],
+      participants: [new Types.ObjectId(userIdStr), new Types.ObjectId(participantIdStr)],
     });
 
     return this.conversationModel
@@ -101,10 +107,20 @@ export class ChatsService {
       throw new NotFoundException('Conversation not found');
     }
 
+    // Normalize userId to string for comparison
+    const userIdStr = userId?.toString();
+    
     // Check if user is a participant
-    const isParticipant = conversation.participants.some(
-      (p: any) => p._id.toString() === userId,
-    );
+    // Handle both populated (object with _id) and non-populated (ObjectId) participants
+    const isParticipant = conversation.participants.some((p: any) => {
+      if (!p) return false;
+      // If populated, p will have _id
+      if (p._id) {
+        return p._id.toString() === userIdStr;
+      }
+      // If not populated, p is ObjectId
+      return p.toString() === userIdStr;
+    });
 
     if (!isParticipant) {
       throw new ForbiddenException('You are not a participant of this conversation');
@@ -114,7 +130,7 @@ export class ChatsService {
   }
 
   async createMessage(createDto: CreateMessageDto, userId: string) {
-    const { conversationId, content, type = MessageType.TEXT } = createDto;
+    const { conversationId, content = '', type = MessageType.TEXT } = createDto;
 
     // Verify conversation exists and user is participant
     const conversation = await this.conversationModel.findById(conversationId);
@@ -123,8 +139,11 @@ export class ChatsService {
       throw new NotFoundException('Conversation not found');
     }
 
+    // Normalize userId to string for comparison
+    const userIdStr = userId?.toString();
+    
     const isParticipant = conversation.participants.some(
-      (id) => id.toString() === userId,
+      (id) => id?.toString() === userIdStr,
     );
 
     if (!isParticipant) {
@@ -152,7 +171,7 @@ export class ChatsService {
       .lean();
   }
 
-  async getMessages(conversationId: string, userId: string, page = 1, limit = 50) {
+  async getMessages(conversationId: string, userId: string, page = 1, limit = 10, beforeDate?: Date) {
     // Verify conversation exists and user is participant
     const conversation = await this.conversationModel.findById(conversationId);
 
@@ -160,28 +179,118 @@ export class ChatsService {
       throw new NotFoundException('Conversation not found');
     }
 
+    // Normalize userId to string for comparison
+    const userIdStr = userId?.toString();
+
     const isParticipant = conversation.participants.some(
-      (id) => id.toString() === userId,
+      (id) => id?.toString() === userIdStr,
     );
 
     if (!isParticipant) {
       throw new ForbiddenException('You are not a participant of this conversation');
     }
 
-    const skip = (page - 1) * limit;
+    // Build query - optimized for loading from the end (newest first)
+    const query: any = {
+      conversationId: new Types.ObjectId(conversationId),
+      deletedAt: null,
+    };
 
+    // If beforeDate is provided, load messages before this date (for pagination)
+    if (beforeDate) {
+      query.createdAt = { $lt: beforeDate };
+    }
+
+    // Use cursor-based pagination for better performance
+    // Load newest messages first (createdAt: -1 uses the compound index efficiently)
     const messages = await this.messageModel
-      .find({
-        conversationId: new Types.ObjectId(conversationId),
-        deletedAt: null,
-      })
+      .find(query)
       .populate('senderId', 'name email avatar_url')
-      .sort({ createdAt: -1 })
-      .skip(skip)
+      .sort({ createdAt: -1 }) // Sort by newest first (uses index: conversationId: 1, createdAt: -1)
       .limit(limit)
       .lean();
 
-    return messages.reverse(); // Return in chronological order
+    // Return in reverse order (oldest to newest) for display
+    // This way newest messages appear at the bottom
+    return messages.reverse();
+  }
+
+  async createMessageWithFile(createDto: CreateMessageDto, userId: string, file: Express.Multer.File) {
+    const { conversationId, content, type } = createDto;
+
+    // Verify conversation exists and user is participant
+    const conversation = await this.conversationModel.findById(conversationId);
+
+    if (!conversation || conversation.deletedAt) {
+      throw new NotFoundException('Conversation not found');
+    }
+
+    // Normalize userId to string for comparison
+    const userIdStr = userId?.toString();
+    
+    const isParticipant = conversation.participants.some(
+      (id) => id?.toString() === userIdStr,
+    );
+
+    if (!isParticipant) {
+      throw new ForbiddenException('You are not a participant of this conversation');
+    }
+
+    // Determine message type based on file
+    let messageType = type;
+    let fileUrl = '';
+
+    if (file) {
+      // Validate file type
+      const isImage = file.mimetype.startsWith('image/');
+      const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+      const maxImageSize = 5 * 1024 * 1024; // 5MB
+      const maxFileSize = 10 * 1024 * 1024; // 10MB
+
+      if (isImage) {
+        if (!allowedImageTypes.includes(file.mimetype)) {
+          throw new BadRequestException('Chỉ chấp nhận file ảnh (JPEG, PNG, JPG, GIF, WEBP)');
+        }
+        if (file.size > maxImageSize) {
+          throw new BadRequestException('Kích thước ảnh không được vượt quá 5MB');
+        }
+        messageType = MessageType.IMAGE;
+        // Upload image to Cloudinary
+        fileUrl = await this.cloudinaryService.uploadImage(file, 'chat_images');
+      } else {
+        if (file.size > maxFileSize) {
+          throw new BadRequestException('Kích thước file không được vượt quá 10MB');
+        }
+        messageType = MessageType.FILE;
+        // Upload file to Cloudinary (as raw file)
+        fileUrl = await this.cloudinaryService.uploadImage(file, 'chat_files');
+      }
+    }
+
+    // Use file URL as content if it's an image or file
+    const messageContent = fileUrl || content || '';
+
+    // Create message
+    const message = await this.messageModel.create({
+      conversationId: new Types.ObjectId(conversationId),
+      senderId: new Types.ObjectId(userId),
+      content: messageContent,
+      type: messageType,
+      fileName: file ? file.originalname : undefined,
+      read: false,
+    });
+
+    // Update conversation last message
+    const isImageMessage = messageType === MessageType.IMAGE;
+    conversation.lastMessage = isImageMessage ? '[Ảnh]' : (messageType === MessageType.FILE ? '[File]' : content);
+    conversation.lastMessageAt = new Date();
+    conversation.lastMessageBy = new Types.ObjectId(userId);
+    await conversation.save();
+
+    return this.messageModel
+      .findById(message._id)
+      .populate('senderId', 'name email avatar_url')
+      .lean();
   }
 
   async markMessagesAsRead(conversationId: string, userId: string) {
@@ -192,26 +301,33 @@ export class ChatsService {
       throw new NotFoundException('Conversation not found');
     }
 
+    // Normalize userId to string for comparison
+    const userIdStr = userId?.toString();
+
     const isParticipant = conversation.participants.some(
-      (id) => id.toString() === userId,
+      (id) => id?.toString() === userIdStr,
     );
 
     if (!isParticipant) {
       throw new ForbiddenException('You are not a participant of this conversation');
     }
 
-    // Mark all messages from other participants as read
-    await this.messageModel.updateMany(
-      {
+    // Mark only the latest unread message from other participants as read
+    // Find the latest unread message
+    const latestUnreadMessage = await this.messageModel
+      .findOne({
         conversationId: new Types.ObjectId(conversationId),
         senderId: { $ne: new Types.ObjectId(userId) },
         read: false,
-      },
-      {
-        read: true,
-        readAt: new Date(),
-      },
-    );
+      })
+      .sort({ createdAt: -1 })
+      .exec();
+
+    if (latestUnreadMessage) {
+      latestUnreadMessage.read = true;
+      latestUnreadMessage.readAt = new Date();
+      await latestUnreadMessage.save();
+    }
 
     return { message: 'Messages marked as read' };
   }

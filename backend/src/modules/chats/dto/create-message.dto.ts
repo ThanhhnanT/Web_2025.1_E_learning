@@ -6,9 +6,9 @@ export class CreateMessageDto {
   @IsMongoId()
   conversationId: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  content: string;
+  content?: string;
 
   @IsOptional()
   @IsEnum(MessageType)

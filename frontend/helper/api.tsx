@@ -100,37 +100,85 @@ export const getAccess = async (path: string, params: object = {}) => {
       });
       console.error(`Full error response:`, JSON.stringify(e.response.data, null, 2));
     } else if (e?.request) {
-      console.error(`API GET Network Error [${path}]:`, {
-        message: e.message,
-        url: `${API_DOMAIN}${path}`,
-        request: e.request
-      });
+      // Network error - server not reachable
+      console.error(`API GET Network Error [${path}]:`, e.message || 'Network request failed');
+      // Don't log the full request object as it's not useful
     } else {
-      console.error(`API GET Error [${path}]:`, {
-        message: e.message,
-        error: e
-      });
+      console.error(`API GET Error [${path}]:`, e.message || 'Unknown error');
     }
     throw e; // Re-throw để component có thể handle error
   }
 };
 
 
-export const postAccess = async (path: string, data: object) => {
+export const postAccess = async (path: string, data: object, options: AxiosRequestConfig = {}) => {
   try {
-    const tokenHeader = await getTokenHeader();
-    const res = await axios.post(API_DOMAIN + path, data, { ...config, headers: { ...config.headers, ...tokenHeader } });
+    const tokenHeader = getTokenHeader();
+    // If data is FormData, don't set Content-Type header (let browser set it with boundary)
+    const isFormData = data instanceof FormData;
+    let headers: any;
+    
+    if (isFormData) {
+      // For FormData, only include token and remove Content-Type from options.headers
+      const { 'Content-Type': _, ...otherOptionsHeaders } = options.headers || {};
+      headers = { ...tokenHeader, ...otherOptionsHeaders };
+    } else {
+      headers = { ...config.headers, ...tokenHeader, ...options.headers };
+    }
+    
+    const res = await axios.post(API_DOMAIN + path, data, { 
+      ...config, 
+      ...options,
+      headers
+    });
     return res.data;
-  } catch (error) {
-    console.log('API Error:', error);
-    throw error;
+  } catch (error: any) {
+    // Log more details for debugging
+    if (error?.response) {
+      console.error(`API POST Error [${path}]:`, {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+        url: error.config?.url || `${API_DOMAIN}${path}`,
+        message: error.message
+      });
+      console.error(`Full error response:`, JSON.stringify(error.response.data, null, 2));
+    } else if (error?.request) {
+      console.error(`API POST Network Error [${path}]:`, {
+        message: error.message,
+        url: `${API_DOMAIN}${path}`,
+        request: error.request
+      });
+    } else {
+      console.error(`API POST Error [${path}]:`, {
+        message: error.message,
+        error: error
+      });
+    }
+    throw error; // Re-throw để component có thể handle error
   }
 };
 
-export const patchAccess = async (path: string, data: object) => {
+export const patchAccess = async (path: string, data: object, options: AxiosRequestConfig = {}) => {
   try {
-    const tokenHeader = await getTokenHeader();
-    const res = await axios.patch(API_DOMAIN + path, data, { ...config, headers: { ...config.headers, ...tokenHeader } });
+    const tokenHeader = getTokenHeader();
+    // If data is FormData, don't set Content-Type header (let browser set it with boundary)
+    const isFormData = data instanceof FormData;
+    let headers: any;
+    
+    if (isFormData) {
+      // For FormData, only include token and remove Content-Type from options.headers
+      const { 'Content-Type': _, ...otherOptionsHeaders } = options.headers || {};
+      headers = { ...tokenHeader, ...otherOptionsHeaders };
+    } else {
+      headers = { ...config.headers, ...tokenHeader, ...options.headers };
+    }
+    
+    const res = await axios.patch(API_DOMAIN + path, data, { 
+      ...config, 
+      ...options,
+      headers
+    });
     return res.data;
   } catch (e: any) {
     // Log more details for debugging
@@ -195,8 +243,11 @@ export const deleteAccess = async (path: string) => {
 export const getUserProfile = async () => {
   try {
     return await getAccess('auth/profile');
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
+  } catch (error: any) {
+    // Only log if it's not a network error (those are already logged in getAccess)
+    if (error?.response) {
+      console.error('Error fetching user profile:', error.response?.data || error.message);
+    }
     throw error;
   }
 };
@@ -232,6 +283,25 @@ export const uploadAvatar = async (file: File) => {
     return res.data;
   } catch (error) {
     console.error('Error uploading avatar:', error);
+    throw error;
+  }
+};
+
+export const uploadCoverImage = async (file: File) => {
+  try {
+    const tokenHeader = await getTokenHeader();
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const res = await axios.post(API_DOMAIN + 'users/profile/cover-image', formData, {
+      headers: {
+        ...tokenHeader,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error('Error uploading cover image:', error);
     throw error;
   }
 };

@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { Card, Avatar, List, Input, Empty, Spin, message, Button, Space } from 'antd';
 import { UserOutlined, SearchOutlined, MessageOutlined, UserDeleteOutlined } from '@ant-design/icons';
 import { getFriends, removeFriend, type Friend } from '@/service/friends';
-import { createOrGetConversation } from '@/service/chats';
-import { useRouter } from 'next/navigation';
+import { createOrGetConversation, getConversationById, type Conversation } from '@/service/chats';
+import ChatPopup from '@/components/ChatPopup';
+import { getUserProfile } from '@/helper/api';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/vi';
@@ -17,10 +18,23 @@ export default function FriendsPage() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
-  const router = useRouter();
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [showChatPopup, setShowChatPopup] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string>('');
 
   useEffect(() => {
-    loadFriends();
+    const fetchData = async () => {
+      try {
+        const profile = await getUserProfile();
+        if (profile?._id) {
+          setCurrentUserId(profile._id);
+        }
+        await loadFriends();
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
   }, []);
 
   const loadFriends = async () => {
@@ -38,8 +52,20 @@ export default function FriendsPage() {
 
   const handleStartChat = async (friendId: string) => {
     try {
-      await createOrGetConversation(friendId);
-      router.push('/chats');
+      const conversation = await createOrGetConversation(friendId);
+      
+      // Fetch the conversation again to ensure we have the latest data with all participants
+      // This helps avoid "not a participant" errors
+      try {
+        const refreshedConversation = await getConversationById(conversation._id);
+        setSelectedConversation(refreshedConversation);
+      } catch (refreshError) {
+        // If refresh fails, use the original conversation
+        console.warn('Failed to refresh conversation, using original:', refreshError);
+        setSelectedConversation(conversation);
+      }
+      
+      setShowChatPopup(true);
     } catch (error: any) {
       message.error(error?.response?.data?.message || 'Không thể bắt đầu cuộc trò chuyện');
     }
@@ -146,6 +172,17 @@ export default function FriendsPage() {
             )}
           />
         </Card>
+      )}
+
+      {showChatPopup && selectedConversation && currentUserId && (
+        <ChatPopup
+          conversation={selectedConversation}
+          currentUserId={currentUserId}
+          onClose={() => {
+            setShowChatPopup(false);
+            setSelectedConversation(null);
+          }}
+        />
       )}
     </div>
   );

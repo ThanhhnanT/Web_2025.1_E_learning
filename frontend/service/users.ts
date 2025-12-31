@@ -7,6 +7,7 @@ export interface User {
   phone?: string;
   bio?: string;
   avatar_url?: string;
+  cover_image_url?: string;
   email_verified: boolean;
   role: 'administrator' | 'editor' | 'viewer' | 'support';
   createdAt?: string;

@@ -1,7 +1,7 @@
-// Theme colors
+
 export const THEME_COLORS = {
   primary: '#1890ff',
-  success: '#1890ff', // Using primary blue for success/correct answers
+  success: '#1890ff', 
   error: '#ff4d4f',
   warning: '#faad14',
   text: {

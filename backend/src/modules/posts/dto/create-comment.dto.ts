@@ -19,5 +19,10 @@ export class CreateCommentDto {
   @IsString()
   @IsOptional()
   parentId?: string;
+
+  // Allow image field in DTO to prevent validation error when FileInterceptor is used
+  // This field is ignored in service, actual file is handled via @UploadedFile()
+  @IsOptional()
+  image?: any;
 }
 

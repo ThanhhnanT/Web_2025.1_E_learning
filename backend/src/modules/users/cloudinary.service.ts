@@ -29,6 +29,12 @@ export class CloudinaryService implements OnModuleInit {
           { width: 400, height: 400, crop: 'fill', gravity: 'face' },
           { quality: 'auto' },
         ];
+      } else if (folder === 'cover_images') {
+        // For cover images, use 3:1 aspect ratio (1200x400px)
+        options.transformation = [
+          { width: 1200, height: 400, crop: 'fill' },
+          { quality: 'auto' },
+        ];
       } else {
         // For posts, just optimize quality and limit size
         options.transformation = [

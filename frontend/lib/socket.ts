@@ -112,29 +112,59 @@ class ChatSocketManager {
 
   connect() {
     if (this.socket?.connected) {
+      console.log('Chat socket already connected:', this.socket.id);
       return this.socket;
     }
 
     const token = Cookies.get('access_token');
     
+    if (!token) {
+      console.error('No access token found for chat socket');
+      return null;
+    }
+
+    console.log('Connecting to chat socket:', `${SOCKET_URL}/chats`);
     this.socket = io(`${SOCKET_URL}/chats`, {
       transports: ['websocket', 'polling'],
-      auth: token ? { token: `Bearer ${token}` } : {},
+      auth: { token },
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
     });
 
     this.socket.on('connect', () => {
       console.log('Chat socket connected:', this.socket?.id);
+      
+      // Re-register all listeners when connected
+      this.listeners.forEach((callbacks, event) => {
+        callbacks.forEach((callback) => {
+          console.log(`[ChatSocket] Re-registering listener for event '${event}' after connection`);
+          this.socket?.on(event, callback as any);
+        });
+      });
     });
 
-    this.socket.on('disconnect', () => {
-      console.log('Chat socket disconnected');
+    this.socket.on('disconnect', (reason) => {
+      console.log('Chat socket disconnected:', reason);
     });
 
     this.socket.on('connect_error', (error) => {
       console.error('Chat socket connection error:', error);
     });
 
-    // Re-register all listeners
+    this.socket.on('reconnect', (attemptNumber) => {
+      console.log('Chat socket reconnected after', attemptNumber, 'attempts');
+      
+      // Re-register all listeners when reconnected
+      this.listeners.forEach((callbacks, event) => {
+        callbacks.forEach((callback) => {
+          console.log(`[ChatSocket] Re-registering listener for event '${event}' after reconnect`);
+          this.socket?.on(event, callback as any);
+        });
+      });
+    });
+
+    // Register listeners that were added before connection
     this.listeners.forEach((callbacks, event) => {
       callbacks.forEach((callback) => {
         this.socket?.on(event, callback as any);
@@ -159,7 +189,10 @@ class ChatSocketManager {
     this.listeners.get(event)?.add(callback);
 
     if (this.socket) {
+      console.log(`[ChatSocket] Registering listener for event '${event}'`);
       this.socket.on(event, callback as any);
+    } else {
+      console.warn(`[ChatSocket] Cannot register listener for '${event}': socket not available, will register when connected`);
     }
   }
 
@@ -178,8 +211,14 @@ class ChatSocketManager {
   }
 
   emit(event: string, data?: any) {
-    if (this.socket) {
+    if (this.socket && this.socket.connected) {
+      console.log(`[ChatSocket] Emitting event '${event}' with data:`, data);
       this.socket.emit(event, data);
+    } else {
+      console.warn(`[ChatSocket] Cannot emit '${event}': socket not connected`, {
+        socketExists: !!this.socket,
+        connected: this.socket?.connected
+      });
     }
   }
 

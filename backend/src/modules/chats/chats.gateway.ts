@@ -36,7 +36,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleConnection(client: Socket) {
     try {
-      const token = client.handshake.auth?.token || client.handshake.headers?.authorization?.replace('Bearer ', '');
+      let token = client.handshake.auth?.token || client.handshake.headers?.authorization;
       
       if (!token) {
         this.logger.warn(`Client ${client.id} connected without token`);
@@ -44,6 +44,11 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
+      // Remove 'Bearer ' prefix if present
+      if (token.startsWith('Bearer ')) {
+        token = token.replace('Bearer ', '');
+      }
+      
       const secret = this.configService.get<string>('JWT_SECRET') || 'default_secret_key';
       const payload = this.jwtService.verify(token, { secret });
       
@@ -86,6 +91,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const userId = client.data?.userId;
     if (!userId) {
+      this.logger.warn(`Client ${client.id} tried to join conversation without userId`);
       return { success: false, error: 'Unauthorized' };
     }
 
@@ -93,10 +99,13 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // Verify user is participant
       await this.chatsService.getConversationById(conversationId, userId);
       client.join(`conversation:${conversationId}`);
-      this.logger.log(`User ${userId} joined conversation ${conversationId}`);
+      this.logger.log(`User ${userId} joined conversation ${conversationId} (socket: ${client.id})`);
+      // Emit confirmation back to client
+      client.emit('joined:conversation', { conversationId, success: true });
       return { success: true, conversationId };
     } catch (error) {
-      this.logger.error(`Error joining conversation:`, error);
+      this.logger.error(`Error joining conversation ${conversationId} for user ${userId}:`, error);
+      client.emit('joined:conversation', { conversationId, success: false, error: error.message });
       return { success: false, error: error.message };
     }
   }
@@ -111,9 +120,54 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return { success: true, conversationId };
   }
 
+  @SubscribeMessage('typing')
+  handleTyping(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { conversationId: string; isTyping: boolean },
+  ) {
+    const userId = client.data?.userId;
+    if (!userId) {
+      this.logger.warn(`Client ${client.id} tried to send typing without userId`);
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    const { conversationId, isTyping } = data;
+    
+    // Broadcast typing status to all other participants in the conversation
+    // Exclude the sender by emitting to the room (which includes all participants)
+    // The frontend will filter out its own typing status
+    this.server.to(`conversation:${conversationId}`).emit('typing', {
+      userId,
+      conversationId,
+      isTyping,
+    });
+
+    return { success: true };
+  }
+
   // Emit new message to conversation room
   emitNewMessage(conversationId: string, message: any) {
+    this.logger.log(`Emitting new message to conversation ${conversationId}:`, {
+      messageId: message._id,
+      senderId: message.senderId?._id || message.senderId,
+      content: message.content?.substring(0, 50),
+    });
+    
+    // Get room size for debugging (safely)
+    try {
+      const adapter = this.server?.sockets?.adapter;
+      if (adapter) {
+        const room = adapter.rooms?.get(`conversation:${conversationId}`);
+        const roomSize = room ? room.size : 0;
+        this.logger.log(`Room conversation:${conversationId} has ${roomSize} clients`);
+      }
+    } catch (error) {
+      this.logger.warn('Could not get room size:', error);
+    }
+    
+    // Emit message to all clients in the conversation room
     this.server.to(`conversation:${conversationId}`).emit('message:new', message);
+    this.logger.log(`Message emitted to conversation:${conversationId}`);
   }
 
   // Emit message read status

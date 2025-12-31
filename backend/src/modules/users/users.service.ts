@@ -184,6 +184,26 @@ export class UsersService implements OnModuleInit {
     return updatedUser;
   }
 
+  async updateCoverImage(userId: string, file: any) {
+    const user = await this.userModel.findById(userId);
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Upload image to Cloudinary with cover_images folder
+    const coverImageUrl = await this.cloudinaryService.uploadImage(file, 'cover_images');
+
+    // Update user's cover_image_url
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      { cover_image_url: coverImageUrl },
+      { new: true }
+    ).select('-password');
+
+    return updatedUser;
+  }
+
   async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
     const user = await this.userModel.findById(userId);
     

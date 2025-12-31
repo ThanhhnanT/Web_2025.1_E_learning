@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import AntLayout from "./AntLayout";
+import PageTitle from "./PageTitle";
 
 export default function LayoutWrapper({
   children,
@@ -12,10 +13,20 @@ export default function LayoutWrapper({
   
   // Don't wrap admin routes with AntLayout
   if (pathname?.startsWith("/admin")) {
-    return <>{children}</>;
+    return (
+      <>
+        <PageTitle />
+        {children}
+      </>
+    );
   }
 
   // Wrap all other routes with AntLayout
-  return <AntLayout>{children}</AntLayout>;
+  return (
+    <>
+      <PageTitle />
+      <AntLayout>{children}</AntLayout>
+    </>
+  );
 }
 

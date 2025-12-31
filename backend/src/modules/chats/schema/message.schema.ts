@@ -24,6 +24,9 @@ export class Message {
   @Prop({ type: String, required: true })
   content: string;
 
+  @Prop({ type: String })
+  fileName?: string;
+
   @Prop({ type: Boolean, default: false })
   read: boolean;
 

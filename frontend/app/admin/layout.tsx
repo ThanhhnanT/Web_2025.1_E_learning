@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import AdminLayout from "@/components/AdminLayout";
 import { checkAdminAuth, isAdmin, redirectToAdminLogin } from "@/lib/adminHelper";
+import PageTitle from "@/components/PageTitle";
 
 export default function AdminLayoutWrapper({
   children,
@@ -15,10 +16,20 @@ export default function AdminLayoutWrapper({
 
   // Don't protect the login page
   if (pathname === "/admin/login") {
-    return <>{children}</>;
+    return (
+      <>
+        <PageTitle />
+        {children}
+      </>
+    );
   }
 
   // For other admin routes, use AdminLayout which handles protection
-  return <AdminLayout>{children}</AdminLayout>;
+  return (
+    <>
+      <PageTitle />
+      <AdminLayout>{children}</AdminLayout>
+    </>
+  );
 }
 

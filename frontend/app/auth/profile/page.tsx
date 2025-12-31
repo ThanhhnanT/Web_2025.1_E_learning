@@ -58,11 +58,13 @@ import {
   RiseOutlined
 } from '@ant-design/icons';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getUserProfile, updateProfile, uploadAvatar, changePassword } from '@/helper/api';
+import { getUserProfile, updateProfile, uploadAvatar, uploadCoverImage, changePassword } from '@/helper/api';
 import { getUserById } from '@/service/users';
 import { getFriends, getUserFriends, getFriendRequests, acceptFriendRequest, rejectFriendRequest, checkFriendshipStatus, sendFriendRequest, removeFriend } from '@/service/friends';
 import { getUserStatistics } from '@/service/statistics';
 import { getPosts } from '@/service/posts';
+import { createOrGetConversation, getConversationById, type Conversation } from '@/service/chats';
+import ChatPopup from '@/components/ChatPopup';
 import StatisticsOverview from '@/app/statistics/components/StatisticsOverview';
 import TestStatistics from '@/app/statistics/components/TestStatistics';
 import CourseStatistics from '@/app/statistics/components/CourseStatistics';
@@ -83,6 +85,7 @@ interface UserProfile {
   phone?: string;
   bio?: string;
   avatar_url?: string;
+  cover_image_url?: string;
   location?: string;
   website?: string;
   createdAt?: string;
@@ -176,6 +179,11 @@ export default function ProfilePage() {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const [isCoverImageUpload, setIsCoverImageUpload] = useState(false);
+  
+  // Chat popup states
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [showChatPopup, setShowChatPopup] = useState(false);
 
   useEffect(() => {
     fetchUserProfile();
@@ -231,8 +239,11 @@ export default function ProfilePage() {
         console.log('Is own profile:', !userId || currentUser._id === userId);
         setCurrentUserId(currentUser._id);
       }
-    } catch (error) {
-      console.error('Error fetching current user:', error);
+    } catch (error: any) {
+      // Only log if it's not a network error (those are already logged in api.tsx)
+      if (error?.response) {
+        console.error('Error fetching current user:', error.response?.data || error.message);
+      }
     }
   };
 
@@ -274,11 +285,15 @@ export default function ProfilePage() {
         form.setFieldsValue(formValues);
       }
     } catch (error: any) {
-      console.error('Error fetching profile:', error);
+      // Only log if it's not a network error (those are already logged in api.tsx)
+      if (error?.response) {
+        console.error('Error fetching profile:', error.response?.data || error.message);
+      }
       if (error?.response?.status === 401) {
         messageApi.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
         router.push('/auth/login');
-      } else {
+      } else if (error?.response) {
+        // Only show error message if it's a response error (not network error)
         messageApi.error('Không thể tải thông tin hồ sơ');
       }
     } finally {
@@ -552,6 +567,56 @@ export default function ProfilePage() {
     }
   };
 
+  const handleStartChat = async (targetUserId?: string) => {
+    // Determine the target user ID - use provided targetUserId, or userId from query param, or user._id if viewing own profile
+    const chatTargetUserId = targetUserId || userId || user?._id;
+    
+    if (!chatTargetUserId || !currentUserId) {
+      console.error('Cannot start chat: chatTargetUserId =', chatTargetUserId, 'currentUserId =', currentUserId);
+      messageApi.warning('Không thể xác định người dùng để nhắn tin');
+      return;
+    }
+
+    // Don't allow chatting with yourself
+    if (chatTargetUserId === currentUserId) {
+      messageApi.warning('Bạn không thể nhắn tin với chính mình');
+      return;
+    }
+
+    try {
+      console.log('Starting chat with user:', chatTargetUserId);
+      const conversation = await createOrGetConversation(chatTargetUserId);
+      console.log('Conversation created:', conversation);
+      
+      // Use the conversation directly - it should already have participants
+      // The backend creates conversation with participants immediately
+      setSelectedConversation(conversation);
+      setShowChatPopup(true);
+      console.log('Chat popup should now be visible');
+      
+      // Refresh conversation after a short delay to ensure participants are populated
+      // This helps avoid "not a participant" errors
+      setTimeout(async () => {
+        try {
+          const refreshedConversation = await getConversationById(conversation._id);
+          console.log('Conversation refreshed with participants:', refreshedConversation);
+          if (refreshedConversation) {
+            setSelectedConversation(refreshedConversation);
+          }
+        } catch (refreshError: any) {
+          // If refresh fails with 403, the conversation might not be ready yet
+          // But we'll let the popup handle retries
+          if (refreshError?.response?.status !== 403) {
+            console.warn('Failed to refresh conversation:', refreshError);
+          }
+        }
+      }, 800);
+    } catch (error: any) {
+      console.error('Error starting chat:', error);
+      messageApi.error(error?.response?.data?.message || 'Không thể bắt đầu cuộc trò chuyện');
+    }
+  };
+
   const beforeUpload = (file: File) => {
     const isImage = file.type.startsWith('image/');
     if (!isImage) {
@@ -568,6 +633,33 @@ export default function ProfilePage() {
     reader.onload = () => {
       setImageSrc(reader.result as string);
       setOriginalFile(file);
+      setIsCoverImageUpload(false);
+      setCropModalVisible(true);
+      setZoom(1);
+      setCrop({ x: 0, y: 0 });
+    };
+    reader.readAsDataURL(file);
+    
+    return Upload.LIST_IGNORE;
+  };
+
+  const beforeUploadCoverImage = (file: File) => {
+    const isImage = file.type.startsWith('image/');
+    if (!isImage) {
+      messageApi.error('Chỉ chấp nhận file ảnh!');
+      return Upload.LIST_IGNORE;
+    }
+    const isLt10M = file.size / 1024 / 1024 < 10;
+    if (!isLt10M) {
+      messageApi.error('Kích thước ảnh không được vượt quá 10MB!');
+      return Upload.LIST_IGNORE;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageSrc(reader.result as string);
+      setOriginalFile(file);
+      setIsCoverImageUpload(true);
       setCropModalVisible(true);
       setZoom(1);
       setCrop({ x: 0, y: 0 });
@@ -647,29 +739,45 @@ export default function ProfilePage() {
         lastModified: Date.now(),
       });
 
-      const result = await uploadAvatar(file);
-      
-      if (result?.avatar_url) {
-        setUser((prevUser) => ({
-          ...prevUser,
-          avatar_url: result.avatar_url,
-        }));
-        messageApi.success('Cập nhật ảnh đại diện thành công!');
+      if (isCoverImageUpload) {
+        // Upload cover image
+        const result = await uploadCoverImage(file);
         
-        window.dispatchEvent(new CustomEvent('avatarUpdated', {
-          detail: { avatar_url: result.avatar_url }
-        }));
+        if (result?.cover_image_url) {
+          setUser((prevUser) => ({
+            ...prevUser,
+            cover_image_url: result.cover_image_url,
+          }));
+          messageApi.success('Cập nhật ảnh bìa thành công!');
+        } else {
+          throw new Error('Upload failed: No cover image URL returned');
+        }
       } else {
-        throw new Error('Upload failed: No avatar URL returned');
+        // Upload avatar
+        const result = await uploadAvatar(file);
+        
+        if (result?.avatar_url) {
+          setUser((prevUser) => ({
+            ...prevUser,
+            avatar_url: result.avatar_url,
+          }));
+          messageApi.success('Cập nhật ảnh đại diện thành công!');
+          
+          window.dispatchEvent(new CustomEvent('avatarUpdated', {
+            detail: { avatar_url: result.avatar_url }
+          }));
+        } else {
+          throw new Error('Upload failed: No avatar URL returned');
+        }
       }
     } catch (error: any) {
-      console.error('Error uploading cropped avatar:', error);
+      console.error('Error uploading cropped image:', error);
       if (error?.response?.data?.message) {
         messageApi.error(error.response.data.message);
       } else if (error?.message) {
         messageApi.error(error.message);
       } else {
-        messageApi.error('Upload ảnh thất bại. Vui lòng thử lại.');
+        messageApi.error(`Upload ảnh ${isCoverImageUpload ? 'bìa' : 'đại diện'} thất bại. Vui lòng thử lại.`);
       }
     } finally {
       setUploading(false);
@@ -679,6 +787,7 @@ export default function ProfilePage() {
       setCroppedAreaPixels(null);
       setZoom(1);
       setCrop({ x: 0, y: 0 });
+      setIsCoverImageUpload(false);
     }
   };
 
@@ -689,6 +798,7 @@ export default function ProfilePage() {
     setCroppedAreaPixels(null);
     setZoom(1);
     setCrop({ x: 0, y: 0 });
+    setIsCoverImageUpload(false);
   };
 
   const handleChangePassword = async () => {
@@ -913,7 +1023,30 @@ export default function ProfilePage() {
         <aside className={styles.profileSidebar}>
           <Card className={styles.profileCard}>
             {/* Cover Image */}
-            <div className={styles.coverImage}></div>
+            <div 
+              className={styles.coverImage}
+              style={{
+                backgroundImage: user?.cover_image_url ? `url(${user.cover_image_url})` : undefined,
+              }}
+            >
+              {isOwnProfile && (
+                <Upload
+                  beforeUpload={beforeUploadCoverImage}
+                  showUploadList={false}
+                  accept="image/*"
+                >
+                  <div className={styles.coverImageOverlay}>
+                    <Button 
+                      type="primary" 
+                      icon={<CameraOutlined />}
+                      className={styles.coverImageUploadButton}
+                    >
+                      {user?.cover_image_url ? 'Chỉnh sửa ảnh bìa' : 'Thêm ảnh bìa'}
+                    </Button>
+                  </div>
+                </Upload>
+              )}
+            </div>
             
             <div className={styles.profileContent}>
               {/* Avatar */}
@@ -926,7 +1059,7 @@ export default function ProfilePage() {
                   >
                     <div className={styles.avatarWrapper}>
                       <Avatar
-                        size={96}
+                        size={110}
                         src={user?.avatar_url}
                         icon={!user?.avatar_url && <UserOutlined />}
                         className={styles.avatar}
@@ -939,7 +1072,7 @@ export default function ProfilePage() {
                 ) : (
                   <div className={styles.avatarWrapper}>
                     <Avatar
-                      size={96}
+                      size={110}
                       src={user?.avatar_url}
                       icon={!user?.avatar_url && <UserOutlined />}
                       className={styles.avatar}
@@ -991,6 +1124,7 @@ export default function ProfilePage() {
                           icon={<MessageOutlined />}
                           block
                           type="primary"
+                          onClick={() => handleStartChat()}
                         >
                           Nhắn tin
                         </Button>
@@ -1015,6 +1149,7 @@ export default function ProfilePage() {
                             <Button
                               icon={<MessageOutlined />}
                               block
+                              onClick={() => handleStartChat()}
                             >
                               Nhắn tin
                             </Button>
@@ -1067,6 +1202,7 @@ export default function ProfilePage() {
                         <Button
                           icon={<MessageOutlined />}
                           block
+                          onClick={() => handleStartChat()}
                         >
                           Nhắn tin
                         </Button>
@@ -1309,7 +1445,7 @@ export default function ProfilePage() {
                                 type="text"
                                 onClick={(e) => {
                                   e.stopPropagation(); // Prevent card click
-                                  // TODO: Navigate to chat or open chat modal
+                                  handleStartChat(friend._id);
                                 }}
                               >
                                 Nhắn tin
@@ -1501,7 +1637,7 @@ export default function ProfilePage() {
       {/* Image Crop Modal */}
       {cropModalVisible && (
         <Modal
-          title="Chỉnh sửa ảnh đại diện"
+          title={isCoverImageUpload ? "Chỉnh sửa ảnh bìa" : "Chỉnh sửa ảnh đại diện"}
           open={cropModalVisible}
           onCancel={handleCropCancel}
           onOk={handleCropComplete}
@@ -1520,6 +1656,7 @@ export default function ProfilePage() {
             setCroppedAreaPixels(null);
             setZoom(1);
             setCrop({ x: 0, y: 0 });
+            setIsCoverImageUpload(false);
           }}
         >
           <div className={styles.cropContainer}>
@@ -1528,11 +1665,11 @@ export default function ProfilePage() {
                 image={imageSrc}
                 crop={crop}
                 zoom={zoom}
-                aspect={1}
+                aspect={isCoverImageUpload ? 3 : 1}
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
                 onCropComplete={onCropComplete}
-                cropShape="round"
+                cropShape={isCoverImageUpload ? "rect" : "round"}
                 showGrid={false}
               />
             </div>
@@ -1555,6 +1692,17 @@ export default function ProfilePage() {
             </div>
           </div>
         </Modal>
+      )}
+
+      {showChatPopup && selectedConversation && currentUserId && (
+        <ChatPopup
+          conversation={selectedConversation}
+          currentUserId={currentUserId as string}
+          onClose={() => {
+            setShowChatPopup(false);
+            setSelectedConversation(null);
+          }}
+        />
       )}
     </div>
   );

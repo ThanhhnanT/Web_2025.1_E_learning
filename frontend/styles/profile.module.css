@@ -36,10 +36,46 @@
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
+.profileCard :global(.ant-card-body) {
+  padding: 0 !important;
+}
+
 .coverImage {
-  height: 96px;
-  background: linear-gradient(135deg, rgba(19, 127, 236, 0.8) 0%, rgba(139, 92, 246, 0.8) 100%);
+  height: 140px;
   width: 100%;
+  background: linear-gradient(135deg, rgba(19, 127, 236, 0.8) 0%, rgba(139, 92, 246, 0.8) 100%);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  margin: 0;
+  border-radius: 12px 12px 0 0;
+}
+
+.coverImage:hover .coverImageOverlay {
+  opacity: 1;
+}
+
+.coverImageOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.coverImageUploadButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
 }
 
 .profileContent {
@@ -50,8 +86,9 @@
 .avatarSection {
   display: flex;
   justify-content: center;
-  margin-top: -48px;
+  margin-top: -70px;
   margin-bottom: 16px;
+  /* border: 1px solid #fff; */
 }
 
 .avatarWrapper {
@@ -60,8 +97,9 @@
 }
 
 .avatar {
-  border: 4px solid #fff;
+  border: 50px solid #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
 }
 
 .avatarEditButton {
