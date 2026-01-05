@@ -25,6 +25,25 @@ export class Payment {
 
   @Prop({ type: Date })
   paymentDate: Date;
+
+  // New fields for payment gateway integration
+  @Prop({ type: String, required: true, enum: ['stripe', 'vnpay', 'momo'] })
+  paymentGateway: string;
+
+  @Prop({ type: String })
+  gatewayTransactionId: string;
+
+  @Prop({ type: String })
+  gatewayPaymentIntent: string;
+
+  @Prop({ type: Object })
+  metadata: Record<string, any>;
+
+  @Prop({ type: String })
+  refundReason: string;
+
+  @Prop({ type: Date })
+  refundedAt: Date;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

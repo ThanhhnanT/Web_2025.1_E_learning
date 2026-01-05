@@ -423,8 +423,8 @@ export default function UsersManagementPage() {
             initialValue="user"
           >
             <Select>
-              <Option value="user">Người dùng</Option>
-              <Option value="admin">Quản trị viên</Option>
+              <Option value="viewer">Người dùng</Option>
+              <Option value="administrator">Quản trị viên</Option>
             </Select>
           </Form.Item>
           <Form.Item style={{ marginBottom: 0, marginTop: 24 }}>

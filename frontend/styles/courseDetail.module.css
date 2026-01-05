@@ -30,6 +30,14 @@
   overflow: hidden;
 }
 
+.videoWrapper :global(.plyr) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .videoPlayer {
   position: absolute;
   top: 0;
@@ -37,6 +45,11 @@
   width: 100%;
   height: 100%;
   border: none;
+}
+
+.videoPlayer :global(video) {
+  width: 100%;
+  height: 100%;
 }
 
 .videoPlaceholder {
@@ -92,9 +105,22 @@
 
 .moduleHeader {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   width: 100%;
+}
+
+.moduleInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.moduleMeta {
+  font-size: 12px;
+}
+
+.lockedText {
+  color: rgba(0, 0, 0, 0.45) !important;
 }
 
 .lessonsList {
@@ -125,6 +151,24 @@
   background: #e6f7ff;
   border-color: #1890ff;
   box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+}
+
+.lessonItem.currentLesson {
+  background: #e6f7ff;
+  border-left: 4px solid #1890ff;
+  padding-left: 12px;
+  position: relative;
+}
+
+.lessonItem.lockedLesson {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background: #fafafa;
+}
+
+.lessonItem.lockedLesson:hover {
+  transform: none;
+  background: #fafafa;
 }
 
 .lessonContent {

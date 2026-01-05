@@ -21,6 +21,9 @@ export interface Course {
   totalStudents?: number;
   totalModules?: number;
   tags?: string[];
+  numReview?: number;
+  category?: 'HSK' | 'TOEIC' | 'IELTS';
+  averageRating?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -39,7 +42,13 @@ export interface CourseModule {
 export interface LessonContent {
   video_url?: string;
   text_content?: string;
-  quiz_data?: unknown;
+  questions?: Array<{
+    question: string;
+    options: string[];
+    correctAnswer: number;
+    points: number;
+  }>;
+  passingScore?: number;
   [key: string]: unknown;
 }
 

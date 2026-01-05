@@ -1,0 +1,262 @@
+.reviewSection {
+  margin-top: 24px;
+}
+
+.ratingSummary {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.ratingValue {
+  text-align: center;
+}
+
+.ratingValue :global(.ant-typography) {
+  margin: 0;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ratingStars {
+  font-size: 20px;
+  margin-top: 8px;
+}
+
+.ratingCount {
+  display: block;
+  margin-top: 10px !important;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 12px !important;
+  font-size: 14px !important;
+}
+
+.ratingCount :global(.ant-typography) {
+  font-size: 10px !important;
+}
+
+.ratingDistribution {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ratingBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ratingBarLabel {
+  width: 60px;
+}
+
+.ratingBarProgress {
+  flex: 1;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ratingBarFill {
+  height: 100%;
+  background: #faad14;
+  transition: width 0.3s;
+}
+
+.ratingBarCount {
+  width: 40px;
+  text-align: right;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.reviewForm {
+  margin-top: 24px;
+}
+
+.reviewItem {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.reviewAvatar {
+  flex-shrink: 0;
+}
+
+.reviewContent {
+  flex: 1;
+}
+
+.reviewHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.reviewAuthor {
+  font-weight: 600;
+}
+
+.reviewRating {
+  font-size: 14px;
+}
+
+.reviewDate {
+  margin-left: auto;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.reviewText {
+  color: rgba(0, 0, 0, 0.85);
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.userReviewCard {
+  margin-top: 24px;
+  background: #f6ffed;
+  border-color: #b7eb8f;
+}
+
+.reviewsList {
+  margin-top: 24px;
+}
+
+.reviewsList :global(.ant-list-item) {
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.reviewsList :global(.ant-list-item:last-child) {
+  border-bottom: none;
+}
+
+/* Reviews Carousel */
+.reviewsCarousel {
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+}
+
+.reviewsCarouselTrack {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+  will-change: transform;
+}
+
+.reviewSlide {
+  min-width: 100%;
+  flex-shrink: 0;
+  padding: 0 8px;
+}
+
+.reviewBubble {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 24px;
+  padding: 24px;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.reviewBubble:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.reviewBubbleHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.reviewBubbleInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reviewBubbleContent {
+  margin-bottom: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  min-height: 60px;
+}
+
+.reviewText {
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.85);
+  word-break: break-word;
+}
+
+.carouselIndicators {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 16px;
+}
+
+.carouselDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: #d9d9d9;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.carouselDot:hover {
+  background: #bfbfbf;
+  transform: scale(1.2);
+}
+
+.carouselDotActive {
+  background: #1890ff;
+  width: 24px;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .ratingSummary {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .ratingValue :global(.ant-typography) {
+    font-size: 36px;
+  }
+
+  .ratingDistribution {
+    width: 100%;
+  }
+
+  .reviewItem {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .reviewHeader {
+    flex-wrap: wrap;
+  }
+
+  .reviewDate {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+

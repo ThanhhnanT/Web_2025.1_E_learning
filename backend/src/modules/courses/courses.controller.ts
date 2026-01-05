@@ -30,13 +30,33 @@ export class CoursesController {
 
   @ApiOperation({ 
     summary: 'Lấy danh sách tất cả khóa học',
-    description: 'Lấy danh sách tất cả các khóa học. API này là public.'
+    description: 'Lấy danh sách tất cả các khóa học với các bộ lọc tùy chọn. API này là public.'
   })
+  @ApiQuery({ name: 'category', required: false, enum: ['HSK', 'TOEIC', 'IELTS'], description: 'Lọc theo danh mục' })
+  @ApiQuery({ name: 'difficulty', required: false, description: 'Lọc theo mức độ (Beginner, Intermediate, Advanced)' })
+  @ApiQuery({ name: 'minPrice', required: false, type: Number, description: 'Giá tối thiểu' })
+  @ApiQuery({ name: 'maxPrice', required: false, type: Number, description: 'Giá tối đa' })
+  @ApiQuery({ name: 'isFree', required: false, type: Boolean, description: 'Chỉ lấy khóa học miễn phí' })
+  @ApiQuery({ name: 'search', required: false, description: 'Tìm kiếm theo tiêu đề hoặc mô tả' })
   @ApiResponse({ status: 200, description: 'Lấy danh sách khóa học thành công' })
   @Public()
   @Get()
-  findAll() {
-    return this.coursesService.findAll();
+  findAll(
+    @Query('category') category?: 'HSK' | 'TOEIC' | 'IELTS',
+    @Query('difficulty') difficulty?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+    @Query('isFree') isFree?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.coursesService.findAll({
+      category,
+      difficulty,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      isFree: isFree === 'true',
+      search,
+    });
   }
 
   @ApiOperation({ 

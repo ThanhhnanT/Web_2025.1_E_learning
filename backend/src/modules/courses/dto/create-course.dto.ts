@@ -91,5 +91,15 @@ export class CreateCourseDto {
   @IsArray()
   @IsString({ each: true })
   tags?: string[];
+
+  @ApiProperty({ 
+    description: 'Danh mục khóa học',
+    enum: ['HSK', 'TOEIC', 'IELTS'],
+    example: 'IELTS',
+    required: false
+  })
+  @IsOptional()
+  @IsEnum(['HSK', 'TOEIC', 'IELTS'])
+  category?: 'HSK' | 'TOEIC' | 'IELTS';
 }
 

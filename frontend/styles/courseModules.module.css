@@ -1,0 +1,397 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+/* Page Header */
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.backButton {
+  align-self: flex-start;
+  margin-bottom: 8px;
+}
+
+.headerContent {
+  flex: 1;
+}
+
+.courseTitle {
+  margin-bottom: 8px !important;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.courseDescription {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.65);
+  margin-bottom: 0;
+}
+
+.continueButton {
+  align-self: flex-start;
+  height: 48px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+}
+
+@media (min-width: 768px) {
+  .pageHeader {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .backButton {
+    margin-bottom: 0;
+  }
+
+  .continueButton {
+    align-self: flex-end;
+  }
+}
+
+/* Progress Section */
+.progressCard {
+  margin-bottom: 32px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.progressContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.progressInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.progressLabel {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.progressPercentage {
+  margin: 0 !important;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.progressBadge {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 16px;
+}
+
+.progressBar {
+  margin-top: 16px;
+}
+
+.progressBar :global(.ant-progress-bg) {
+  transition: width 1s ease-out;
+}
+
+/* Modules List */
+.modulesList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modulesCollapse {
+  background: transparent;
+  border: none;
+}
+
+.modulesCollapse :global(.ant-collapse-item) {
+  border: 1px solid #d9d9d9;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.modulesCollapse :global(.ant-collapse-item):hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.modulesCollapse :global(.ant-collapse-item-active) {
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.15);
+}
+
+.modulesCollapse :global(.ant-collapse-header) {
+  padding: 20px 24px !important;
+  background: transparent;
+  border-radius: 12px;
+}
+
+.modulesCollapse :global(.ant-collapse-content) {
+  border-top: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.modulesCollapse :global(.ant-collapse-content-box) {
+  padding: 0 !important;
+}
+
+/* Module Panel */
+.modulePanel {
+  transition: all 0.3s ease;
+}
+
+.modulePanel.lockedPanel {
+  opacity: 0.75;
+  background: #f5f5f5;
+}
+
+.modulePanel.inProgressPanel {
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+}
+
+.moduleHeader {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.moduleInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.moduleMeta {
+  font-size: 12px;
+}
+
+/* Module Status Icons */
+.completedIcon {
+  color: #52c41a;
+  font-size: 20px;
+}
+
+.lockedIcon {
+  color: #d9d9d9;
+  font-size: 18px;
+}
+
+.progressCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progressCircle :global(.ant-progress-circle) {
+  font-size: 10px;
+}
+
+.progressCircle :global(.ant-progress-text) {
+  font-size: 10px !important;
+  font-weight: 700;
+}
+
+.lockedText {
+  color: rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Lessons List */
+.lessonsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.lessonItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fff;
+}
+
+.lessonItem:last-child {
+  border-bottom: none;
+}
+
+.lessonItem:hover:not(.lockedLesson) {
+  background: #f5f5f5;
+  padding-left: 28px;
+}
+
+.lessonItem.currentLesson {
+  background: #e6f7ff;
+  border-left: 4px solid #1890ff;
+  padding-left: 20px;
+  position: relative;
+}
+
+.lessonItem.currentLesson::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(to right, rgba(24, 144, 255, 0.1), transparent);
+}
+
+.lessonItem.lockedLesson {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background: #fafafa;
+}
+
+.lessonItem.completedLesson:not(.currentLesson) {
+  opacity: 0.8;
+}
+
+.lessonContent {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.lessonContent :global(.anticon) {
+  font-size: 20px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.lessonInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.lessonTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lessonMeta {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lessonStatus {
+  display: flex;
+  align-items: center;
+  margin-left: 16px;
+}
+
+.lessonStatus :global(.anticon) {
+  font-size: 20px;
+}
+
+.lessonStatus :global(.anticon.completedIcon) {
+  color: #52c41a;
+}
+
+.lessonStatus :global(.anticon.lockedIcon) {
+  color: #d9d9d9;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .courseTitle {
+    font-size: 24px;
+  }
+
+  .progressContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .modulesCollapse :global(.ant-collapse-header) {
+    padding: 16px !important;
+  }
+
+  .lessonItem {
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .lessonItem.currentLesson {
+    padding-left: 16px;
+  }
+
+  .lessonStatus {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+
+  .lessonContent {
+    width: 100%;
+  }
+}
+
+/* Dark mode support (if needed) */
+@media (prefers-color-scheme: dark) {
+  .progressCard {
+    background: #1f1f1f;
+    border-color: #434343;
+  }
+
+  .modulesCollapse :global(.ant-collapse-item) {
+    background: #1f1f1f;
+    border-color: #434343;
+  }
+
+  .modulesCollapse :global(.ant-collapse-content) {
+    background: #141414;
+  }
+
+  .lessonItem {
+    background: #1f1f1f;
+    border-bottom-color: #434343;
+  }
+
+  .lessonItem:hover:not(.lockedLesson) {
+    background: #262626;
+  }
+
+  .lessonItem.currentLesson {
+    background: #111b26;
+  }
+
+  .lessonItem.lockedLesson {
+    background: #141414;
+  }
+}
+

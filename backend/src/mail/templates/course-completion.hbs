@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Completed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .trophy-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        h1 {
+            color: #FF9800;
+            margin: 0;
+        }
+        .content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .course-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #FF9800;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .congratulations {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #FF9800;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        .button-container {
+            text-align: center;
+        }
+        .next-steps {
+            background-color: #fff3e0;
+            padding: 15px;
+            border-left: 4px solid #FF9800;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="trophy-icon">🏆</div>
+            <h1>Congratulations!</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hi {{userName}},</p>
+            
+            <div class="congratulations">
+                <h2 style="margin: 0;">You Did It! 🎉</h2>
+                <p style="margin: 10px 0 0 0;">You've successfully completed the course!</p>
+            </div>
+            
+            <div class="course-name">{{courseName}}</div>
+            
+            <p>This is a significant achievement and a testament to your dedication and hard work. You've gained valuable knowledge and skills that will serve you well.</p>
+            
+            <div class="next-steps">
+                <strong>🎯 What's Next?</strong>
+                <ul>
+                    <li>Apply what you've learned in real projects</li>
+                    <li>Share your knowledge with others</li>
+                    <li>Explore more advanced courses</li>
+                    <li>Leave a review to help other students</li>
+                </ul>
+            </div>
+            
+            <div class="button-container">
+                <a href="{{frontendUrl}}/courses" class="button">Explore More Courses</a>
+            </div>
+            
+            <p>We're proud of your achievement and look forward to supporting you in your continued learning journey!</p>
+        </div>
+        
+        <div class="footer">
+            <p>Keep Learning, Keep Growing! 🌟</p>
+            <p>&copy; 2025 E-Learning Platform. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+

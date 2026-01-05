@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Course } from './schema/course.schema';
 import { Module as CourseModule } from './schema/module.schema';
 import { Lesson } from './schema/lesson.schema';
+import { Comment } from '../comments/schema/comment.schema';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { CreateModuleDto } from './dto/create-module.dto';
@@ -11,12 +12,22 @@ import { UpdateModuleDto } from './dto/update-module.dto';
 import { CreateLessonDto } from './dto/create-lesson.dto';
 import { UpdateLessonDto } from './dto/update-lesson.dto';
 
+interface CourseFilterOptions {
+  category?: 'HSK' | 'TOEIC' | 'IELTS';
+  difficulty?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  isFree?: boolean;
+  search?: string;
+}
+
 @Injectable()
 export class CoursesService {
   constructor(
     @InjectModel(Course.name) private courseModel: Model<Course>,
     @InjectModel(CourseModule.name) private moduleModel: Model<CourseModule>,
     @InjectModel(Lesson.name) private lessonModel: Model<Lesson>,
+    @InjectModel(Comment.name) private commentModel: Model<Comment>,
   ) {}
 
   // Course methods
@@ -25,11 +36,76 @@ export class CoursesService {
     return newCourse;
   }
 
-  async findAll() {
-    return await this.courseModel
-      .find()
+  async findAll(filters?: CourseFilterOptions) {
+    const query: any = {};
+
+    // Category filter
+    if (filters?.category) {
+      query.category = filters.category;
+    }
+
+    // Difficulty filter
+    if (filters?.difficulty) {
+      query.level = { $regex: filters.difficulty, $options: 'i' };
+    }
+
+    // Price filters
+    if (filters?.isFree) {
+      query.price = 0;
+    } else {
+      if (filters?.minPrice !== undefined) {
+        query.price = { ...query.price, $gte: filters.minPrice };
+      }
+      if (filters?.maxPrice !== undefined) {
+        query.price = { ...query.price, $lte: filters.maxPrice };
+      }
+    }
+
+    // Search filter
+    if (filters?.search) {
+      query.$or = [
+        { title: { $regex: filters.search, $options: 'i' } },
+        { description: { $regex: filters.search, $options: 'i' } },
+      ];
+    }
+
+    const courses = await this.courseModel
+      .find(query)
       .populate('instructor', 'name email')
       .exec();
+
+    // Calculate average ratings for each course
+    const coursesWithRatings = await Promise.all(
+      courses.map(async (course) => {
+        const ratingResult = await this.commentModel.aggregate([
+          {
+            $match: {
+              courseId: course._id,
+              deletedAt: null,
+              rating: { $exists: true, $ne: null },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              averageRating: { $avg: '$rating' },
+            },
+          },
+        ]);
+
+        const averageRating =
+          ratingResult.length > 0
+            ? Math.round(ratingResult[0].averageRating * 10) / 10
+            : 0;
+
+        return {
+          ...course.toObject(),
+          averageRating,
+        };
+      }),
+    );
+
+    return coursesWithRatings;
   }
 
   async findOne(id: string) {
@@ -60,7 +136,13 @@ export class CoursesService {
   }
 
   async findAllModules(courseId?: string) {
-    const query = courseId ? { courseId } : {};
+    const query: any = {};
+    if (courseId) {
+      // Convert string to ObjectId for proper comparison
+      query.courseId = Types.ObjectId.isValid(courseId) 
+        ? new Types.ObjectId(courseId) 
+        : courseId;
+    }
     return await this.moduleModel
       .find(query)
       .sort({ order: 1 })
@@ -104,7 +186,13 @@ export class CoursesService {
   }
 
   async findAllLessons(moduleId?: string) {
-    const query = moduleId ? { moduleId, deletedAt: null } : { deletedAt: null };
+    const query: any = { deletedAt: null };
+    if (moduleId) {
+      // Convert string to ObjectId for proper comparison
+      query.moduleId = Types.ObjectId.isValid(moduleId) 
+        ? new Types.ObjectId(moduleId) 
+        : moduleId;
+    }
     return await this.lessonModel
       .find(query)
       .sort({ order: 1 })

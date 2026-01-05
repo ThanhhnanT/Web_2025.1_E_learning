@@ -1,0 +1,385 @@
+.container {
+  width: 100%;
+  background-color: #f6f7f8;
+  padding: 40px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.contentWrapper {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Main Card */
+.mainCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.mainCard :global(.ant-card-body) {
+  padding: 32px;
+}
+
+/* Heading Section */
+.headingSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.divider {
+  height: 1px;
+  background-color: #e5e7eb;
+  margin: 32px 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(19, 127, 236, 0.1);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  width: fit-content;
+  align-self: center;
+}
+
+.badgeIcon {
+  color: #137fec;
+  font-size: 16px;
+}
+
+.badgeText {
+  color: #137fec;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mainTitle {
+  font-size: 48px !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+  margin-bottom: 0 !important;
+  color: #111827 !important;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: #6b7280;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* Form Card */
+.formCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.formCard :global(.ant-card-head) {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 20px 24px;
+}
+
+.formCard :global(.ant-card-head-title) {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.formCard :global(.ant-card-body) {
+  padding: 32px;
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.formSection:last-of-type {
+  margin-bottom: 0;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.labelText {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.textArea {
+  border-radius: 8px !important;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  padding: 16px;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.textArea :global(.ant-input) {
+  border-radius: 1px !important;
+}
+
+.textArea:focus,
+.textArea:hover {
+  border-color: #137fec;
+  box-shadow: 0 0 0 2px rgba(19, 127, 236, 0.1);
+}
+
+.hint {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* Proficiency Container */
+.proficiencyContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.proficiencyContainer .labelText {
+  text-align: left;
+  width: 100%;
+}
+
+/* Proficiency Group */
+.proficiencyGroup {
+  display: inline-flex;
+  background-color: #f3f4f6;
+  padding: 4px;
+  border-radius: 20px;
+  width: fit-content;
+  margin-top: 60px;
+}
+
+.proficiencyGroup :global(.ant-radio-button-wrapper) {
+  flex: 0 0 auto;
+  text-align: center;
+  border: none;
+  border-radius: 6px;
+  height: 44px;
+  line-height: 44px;
+  padding: 0 20px;
+  background: transparent;
+  color: #6b7280;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.proficiencyGroup :global(.ant-radio-button-wrapper-checked) {
+  background: white;
+  color: #137fec;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.proficiencyGroup :global(.ant-radio-button-wrapper:not(:first-child)::before) {
+  display: none;
+}
+
+/* Slider Section */
+.sliderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.hoursTag {
+  background-color: rgba(19, 127, 236, 0.1);
+  color: #137fec;
+  font-weight: 700;
+  padding: 4px 12px;
+  border: none;
+  border-radius: 6px;
+}
+
+.sliderContainer {
+  padding: 8px 0;
+}
+
+.slider {
+  margin: 0;
+}
+
+.slider :global(.ant-slider-track) {
+  background-color: #137fec;
+}
+
+.slider :global(.ant-slider-handle) {
+  border-color: #137fec;
+  box-shadow: 0 0 0 2px rgba(19, 127, 236, 0.1);
+}
+
+.slider :global(.ant-slider-rail) {
+  background-color: #e2e8f0;
+}
+
+.sliderLabels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+  margin-top: 4px;
+}
+
+.sliderLabel {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* Action Area */
+.actionArea {
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.generateButton {
+  min-width: 300px;
+  height: 56px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(19, 127, 236, 0.2);
+  background: linear-gradient(135deg, #137fec 0%, #0d6efd 100%);
+  border: none;
+}
+
+.generateButton:hover {
+  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+  box-shadow: 0 6px 16px rgba(19, 127, 236, 0.3);
+  transform: translateY(-1px);
+}
+
+.actionHint {
+  font-size: 14px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+/* Inspiration Section */
+.inspirationSection {
+  margin-top: 32px;
+}
+
+.inspirationTitle {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  margin-bottom: 16px !important;
+  padding: 0 8px;
+}
+
+.pathCard {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s;
+}
+
+.pathCard:hover {
+  border-color: rgba(19, 127, 236, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pathCard :global(.ant-card-body) {
+  padding: 16px;
+}
+
+.pathImage {
+  width: 100%;
+  height: 128px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.pathMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.pathWeeks {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.pathTitle {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  margin-bottom: 8px !important;
+  transition: color 0.2s;
+}
+
+.pathCard:hover .pathTitle {
+  color: #137fec !important;
+}
+
+.pathDescription {
+  font-size: 14px;
+  color: #6b7280;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 16px;
+  }
+
+  .mainTitle {
+    font-size: 32px !important;
+  }
+
+  .subtitle {
+    font-size: 16px;
+  }
+
+  .formCard {
+    padding: 24px;
+  }
+
+  .headingSection {
+    text-align: left;
+  }
+
+  .badge {
+    align-self: flex-start;
+  }
+
+  .generateButton {
+    width: 100%;
+    min-width: auto;
+  }
+}
+

@@ -11,8 +11,8 @@ export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   @ApiOperation({ 
-    summary: 'Tạo comment mới',
-    description: 'Tạo một comment mới cho bài test. Yêu cầu authentication.'
+    summary: 'Tạo comment/review mới',
+    description: 'Tạo một comment mới cho bài test hoặc review cho khóa học. Yêu cầu authentication. Nếu là review cho course, cần có rating (1-5).'
   })
   @ApiBearerAuth()
   @ApiBody({ type: CreateCommentDto })
@@ -56,6 +56,30 @@ export class CommentsController {
   @Get('user/:userId')
   findByUserId(@Param('userId') userId: string) {
     return this.commentsService.findByUserId(userId);
+  }
+
+  @ApiOperation({ 
+    summary: 'Lấy reviews/comments theo courseId',
+    description: 'Lấy tất cả reviews/comments của một khóa học cụ thể. API này là public, không cần authentication.'
+  })
+  @ApiParam({ name: 'courseId', description: 'ID của khóa học', example: '507f1f77bcf86cd799439011' })
+  @ApiResponse({ status: 200, description: 'Lấy reviews theo courseId thành công' })
+  @Public()
+  @Get('course/:courseId')
+  findByCourseId(@Param('courseId') courseId: string) {
+    return this.commentsService.findByCourseId(courseId);
+  }
+
+  @ApiOperation({ 
+    summary: 'Lấy đánh giá trung bình và số lượng reviews của khóa học',
+    description: 'Lấy điểm đánh giá trung bình và tổng số reviews của một khóa học. API này là public, không cần authentication.'
+  })
+  @ApiParam({ name: 'courseId', description: 'ID của khóa học', example: '507f1f77bcf86cd799439011' })
+  @ApiResponse({ status: 200, description: 'Lấy đánh giá trung bình thành công' })
+  @Public()
+  @Get('course/:courseId/rating')
+  getCourseRating(@Param('courseId') courseId: string) {
+    return this.commentsService.getCourseAverageRating(courseId);
   }
 
   @ApiOperation({ 

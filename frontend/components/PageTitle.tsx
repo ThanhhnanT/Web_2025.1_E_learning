@@ -16,7 +16,7 @@ const getPageTitle = (pathname: string, titleParam?: string | null): string => {
   const titleMap: Record<string, string> = {
     "/": "Trang chủ",
     "/about": "Giới thiệu",
-    "/courses/online": "Chương trình học",
+    "/courses/online": "Khóa học trực tuyến",
     "/tests": "Đề thi online",
     "/flashcards": "Flashcards",
     "/posts": "Blog",

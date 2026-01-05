@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .success-icon {
+            font-size: 48px;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+        h1 {
+            color: #4CAF50;
+            margin: 0;
+        }
+        .content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        .button-container {
+            text-align: center;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="success-icon">✓</div>
+            <h1>Payment Successful!</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hi {{userName}},</p>
+            
+            <p>Great news! Your payment has been processed successfully.</p>
+            
+            <p><strong>Course:</strong> {{courseName}}</p>
+            <div class="amount">{{amount}} VND</div>
+            
+            <p>You now have full access to the course content. Start learning right away!</p>
+            
+            <div class="button-container">
+                <a href="{{frontendUrl}}/courses/{{courseId}}" class="button">Access Course</a>
+            </div>
+            
+            <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Thank you for choosing our platform!</p>
+            <p>&copy; 2025 E-Learning Platform. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+

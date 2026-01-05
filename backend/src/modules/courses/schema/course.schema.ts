@@ -40,6 +40,12 @@ export class Course {
 
   @Prop({ type: [String], default: [] })
   tags: Array<string>;
+
+  @Prop({ type: Number, default: 0, min: 0 })
+  numReview: number; // Number of reviews (calculated from comments)
+
+  @Prop({ type: String, enum: ['HSK', 'TOEIC', 'IELTS'] })
+  category?: string; // Course category
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course);
