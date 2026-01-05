@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Payment } from './schema/payment.schema';
@@ -11,7 +11,7 @@ import { VNPayService } from './services/vnpay.service';
 import { MomoService } from './services/momo.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Course } from '../courses/schema/course.schema';
-import { User } from '../users/schema/user.schema';
+import { User } from '../users/schemas/user.schema';
 
 @Injectable()
 export class PaymentsService {
@@ -26,7 +26,6 @@ export class PaymentsService {
     private vnpayService: VNPayService,
     private momoService: MomoService,
     private mailerService: MailerService,
-    @Inject(forwardRef(() => 'EnrollmentsService')) private enrollmentsService: any,
   ) {}
 
   async create(createPaymentDto: CreatePaymentDto) {
@@ -211,21 +210,6 @@ export class PaymentsService {
       await payment.save();
 
       this.logger.log(`Payment ${paymentId} completed successfully`);
-
-      // Create enrollment
-      if (this.enrollmentsService && this.enrollmentsService.createEnrollment) {
-        try {
-          await this.enrollmentsService.createEnrollment(
-            payment.userId,
-            payment.courseId,
-            payment._id,
-          );
-          this.logger.log(`Enrollment created for payment ${paymentId}`);
-        } catch (enrollmentError) {
-          this.logger.error('Error creating enrollment:', enrollmentError);
-          // Don't fail the payment completion if enrollment fails
-        }
-      }
 
       // Send payment success email
       const user: any = payment.userId;

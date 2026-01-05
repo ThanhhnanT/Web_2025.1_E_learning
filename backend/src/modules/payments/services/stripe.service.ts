@@ -14,7 +14,7 @@ export class StripeService {
       return;
     }
     this.stripe = new Stripe(secretKey, {
-      apiVersion: '2024-12-18.acacia',
+      apiVersion: '2023-10-16',
     });
   }
 
@@ -30,7 +30,7 @@ export class StripeService {
     savePaymentMethod: boolean = false,
   ) {
     try {
-      const session = await this.stripe.checkout.sessions.create({
+      const sessionData: any = {
         payment_method_types: ['card'],
         line_items: [
           {
@@ -59,15 +59,14 @@ export class StripeService {
             userId,
           },
         },
-      });
+      };
 
       if (savePaymentMethod) {
         // For saving payment methods, we need to set up a customer and future usage
-        session.payment_intent_data = {
-          ...session.payment_intent_data,
-          setup_future_usage: 'off_session',
-        };
+        sessionData.payment_intent_data.setup_future_usage = 'off_session';
       }
+
+      const session = await this.stripe.checkout.sessions.create(sessionData);
 
       return {
         sessionId: session.id,
@@ -187,7 +186,7 @@ export class StripeService {
       type: 'payment_method.attached',
       paymentMethodId: paymentMethod.id,
       customerId: paymentMethod.customer,
-      type: paymentMethod.type,
+      methodType: paymentMethod.type,
       card: paymentMethod.card ? {
         brand: paymentMethod.card.brand,
         last4: paymentMethod.card.last4,
@@ -208,7 +207,7 @@ export class StripeService {
 
       return {
         id: paymentMethod.id,
-        type: paymentMethod.type,
+        methodType: paymentMethod.type,
         card: paymentMethod.card ? {
           brand: paymentMethod.card.brand,
           last4: paymentMethod.card.last4,

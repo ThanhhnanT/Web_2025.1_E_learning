@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Enrollment } from './schema/enrollment.schema';
 import { Course } from '../courses/schema/course.schema';
-import { User } from '../users/schema/user.schema';
+import { User } from '../users/schemas/user.schema';
 import { Payment } from '../payments/schema/payment.schema';
 import { MailerService } from '@nestjs-modules/mailer';
 

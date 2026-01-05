@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
-import * as querystring from 'querystring';
+import { stringify } from 'querystring';
 
 @Injectable()
 export class VNPayService {
@@ -73,12 +73,16 @@ export class VNPayService {
 
       vnpParams = this.sortObject(vnpParams);
 
-      const signData = querystring.stringify(vnpParams, { encode: false });
+      const signData = Object.keys(vnpParams)
+        .map(key => `${key}=${vnpParams[key]}`)
+        .join('&');
       const secureHash = this.createSignature(signData, secretKey);
 
       vnpParams['vnp_SecureHash'] = secureHash;
 
-      const paymentUrl = vnpUrl + '?' + querystring.stringify(vnpParams, { encode: false });
+      const paymentUrl = vnpUrl + '?' + Object.keys(vnpParams)
+        .map(key => `${key}=${encodeURIComponent(vnpParams[key])}`)
+        .join('&');
 
       return paymentUrl;
     } catch (error) {
@@ -102,7 +106,9 @@ export class VNPayService {
       delete queryParams['vnp_SecureHashType'];
 
       const sortedParams = this.sortObject(queryParams);
-      const signData = querystring.stringify(sortedParams, { encode: false });
+      const signData = Object.keys(sortedParams)
+        .map(key => `${key}=${sortedParams[key]}`)
+        .join('&');
       const checkSum = this.createSignature(signData, secretKey);
 
       if (secureHash === checkSum) {
@@ -168,7 +174,9 @@ export class VNPayService {
 
       vnpParams = this.sortObject(vnpParams);
 
-      const signData = querystring.stringify(vnpParams, { encode: false });
+      const signData = Object.keys(vnpParams)
+        .map(key => `${key}=${vnpParams[key]}`)
+        .join('&');
       const secureHash = this.createSignature(signData, secretKey);
 
       vnpParams['vnp_SecureHash'] = secureHash;

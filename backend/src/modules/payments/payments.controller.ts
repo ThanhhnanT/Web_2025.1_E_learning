@@ -8,7 +8,8 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth, A
 import { StripeService } from './services/stripe.service';
 import { VNPayService } from './services/vnpay.service';
 import { MomoService } from './services/momo.service';
-import { Request, Response } from 'express';
+import { EnrollmentsService } from '../enrollments/enrollments.service';
+import type { Request, Response } from 'express';
 
 @ApiTags('Payments')
 @Controller('payments')
@@ -18,6 +19,7 @@ export class PaymentsController {
     private readonly stripeService: StripeService,
     private readonly vnpayService: VNPayService,
     private readonly momoService: MomoService,
+    private readonly enrollmentsService: EnrollmentsService,
   ) {}
 
   @ApiOperation({ 
@@ -145,26 +147,42 @@ export class PaymentsController {
       if (result) {
         // Process based on event type
         if (result.type === 'checkout.completed' || result.type === 'payment.succeeded') {
-          const { metadata } = result;
+          const metadata = (result as any).metadata;
+          const paymentIntentId = (result as any).paymentIntentId;
+          const sessionId = (result as any).sessionId;
+          
           if (metadata?.userId && metadata?.courseId) {
             // Find payment by session ID or payment intent ID
             const payment = await this.paymentsService.findByTransactionId(
-              result.paymentIntentId || result.sessionId
+              paymentIntentId || sessionId
             );
             
             if (payment) {
               await this.paymentsService.completePayment(
                 payment._id.toString(),
-                result.paymentIntentId
+                paymentIntentId
               );
+              
+              // Create enrollment after successful payment
+              try {
+                await this.enrollmentsService.createEnrollment(
+                  payment.userId,
+                  payment.courseId,
+                  payment._id,
+                );
+              } catch (enrollmentError) {
+                console.error('Error creating enrollment:', enrollmentError);
+              }
             }
           }
         } else if (result.type === 'payment.failed') {
-          const payment = await this.paymentsService.findByTransactionId(result.paymentIntentId);
+          const paymentIntentId = (result as any).paymentIntentId;
+          const errorMessage = (result as any).errorMessage;
+          const payment = await this.paymentsService.findByTransactionId(paymentIntentId);
           if (payment) {
             await this.paymentsService.handleFailedPayment(
               payment._id.toString(),
-              result.errorMessage || 'Payment failed'
+              errorMessage || 'Payment failed'
             );
           }
         }
@@ -200,6 +218,18 @@ export class PaymentsController {
               payment._id.toString(),
               transactionNo
             );
+            
+            // Create enrollment
+            try {
+              await this.enrollmentsService.createEnrollment(
+                payment.userId,
+                payment.courseId,
+                payment._id,
+              );
+            } catch (enrollmentError) {
+              console.error('Error creating enrollment:', enrollmentError);
+            }
+            
             res.json({ RspCode: '00', Message: 'Success' });
           } else {
             // Payment failed
@@ -245,6 +275,18 @@ export class PaymentsController {
               payment._id.toString(),
               transId.toString()
             );
+            
+            // Create enrollment
+            try {
+              await this.enrollmentsService.createEnrollment(
+                payment.userId,
+                payment.courseId,
+                payment._id,
+              );
+            } catch (enrollmentError) {
+              console.error('Error creating enrollment:', enrollmentError);
+            }
+            
             res.json({ resultCode: 0, message: 'Success' });
           } else {
             // Payment failed

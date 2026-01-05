@@ -4,7 +4,7 @@ import { EnrollmentsService } from './enrollments.service';
 import { EnrollmentsController } from './enrollments.controller';
 import { Enrollment, EnrollmentSchema } from './schema/enrollment.schema';
 import { Course, CourseSchema } from '../courses/schema/course.schema';
-import { User, UserSchema } from '../users/schema/user.schema';
+import { User, UserSchema } from '../users/schemas/user.schema';
 
 @Module({
   imports: [
