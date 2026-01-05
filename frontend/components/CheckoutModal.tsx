@@ -31,27 +31,27 @@ export default function CheckoutModal({ open, onClose, course, onSuccess }: Chec
   const gateways = [
     {
       value: 'stripe',
-      label: 'Credit/Debit Card',
+      label: 'Thẻ tín dụng/Ghi nợ',
       icon: <CreditCardOutlined style={{ fontSize: '24px' }} />,
-      description: 'Pay with Visa, Mastercard, or other cards',
+      description: 'Thanh toán bằng Visa, Mastercard hoặc các thẻ khác',
     },
     {
       value: 'vnpay',
       label: 'VNPay',
       icon: <BankOutlined style={{ fontSize: '24px' }} />,
-      description: 'Internet Banking & ATM Cards',
+      description: 'Internet Banking & Thẻ ATM',
     },
     {
       value: 'momo',
-      label: 'MoMo E-Wallet',
+      label: 'Ví điện tử MoMo',
       icon: <MobileOutlined style={{ fontSize: '24px' }} />,
-      description: 'Pay with MoMo digital wallet',
+      description: 'Thanh toán qua ví MoMo',
     },
   ];
 
   const handlePayment = async () => {
     if (!agreedToTerms) {
-      message.warning('Please agree to the terms and conditions');
+      message.warning('Vui lòng đồng ý với điều khoản và điều kiện');
       return;
     }
 
@@ -86,7 +86,7 @@ export default function CheckoutModal({ open, onClose, course, onSuccess }: Chec
       }
     } catch (error: any) {
       console.error('Payment error:', error);
-      message.error(error?.response?.data?.message || 'Failed to create payment. Please try again.');
+      message.error(error?.response?.data?.message || 'Tạo thanh toán thất bại. Vui lòng thử lại.');
       setLoading(false);
     }
   };
@@ -110,7 +110,7 @@ export default function CheckoutModal({ open, onClose, course, onSuccess }: Chec
       }}
     >
       <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 600 }}>Complete Your Purchase</h2>
+        <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 600 }}>Hoàn tất thanh toán</h2>
       </div>
 
       {/* Course Summary */}
@@ -140,7 +140,7 @@ export default function CheckoutModal({ open, onClose, course, onSuccess }: Chec
           <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>{course.title}</h3>
           {course.instructor && (
             <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
-              By {course.instructor.name || 'Instructor'}
+              Giảng viên: {course.instructor.name || 'N/A'}
             </p>
           )}
         </div>
@@ -154,7 +154,7 @@ export default function CheckoutModal({ open, onClose, course, onSuccess }: Chec
       {/* Payment Gateway Selection */}
       <div style={{ marginBottom: '24px' }}>
         <h3 style={{ marginBottom: '16px', fontSize: '16px', fontWeight: 600 }}>
-          Select Payment Method
+          Chọn phương thức thanh toán
         </h3>
         <Radio.Group
           value={selectedGateway}
@@ -207,7 +207,7 @@ export default function CheckoutModal({ open, onClose, course, onSuccess }: Chec
             checked={savePaymentMethod}
             onChange={(e) => setSavePaymentMethod(e.target.checked)}
           >
-            Save this payment method for future purchases
+            Lưu phương thức thanh toán cho các lần mua sau
           </Checkbox>
         </div>
       )}
@@ -218,13 +218,13 @@ export default function CheckoutModal({ open, onClose, course, onSuccess }: Chec
           checked={agreedToTerms}
           onChange={(e) => setAgreedToTerms(e.target.checked)}
         >
-          I agree to the{' '}
+          Tôi đồng ý với{' '}
           <a href="/terms" target="_blank" rel="noopener noreferrer">
-            Terms and Conditions
+            Điều khoản và Điều kiện
           </a>{' '}
-          and{' '}
+          và{' '}
           <a href="/privacy" target="_blank" rel="noopener noreferrer">
-            Privacy Policy
+            Chính sách bảo mật
           </a>
         </Checkbox>
       </div>
@@ -234,7 +234,7 @@ export default function CheckoutModal({ open, onClose, course, onSuccess }: Chec
       {/* Total and Action Button */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <div style={{ fontSize: '14px', color: '#666' }}>Total Amount</div>
+          <div style={{ fontSize: '14px', color: '#666' }}>Tổng thanh toán</div>
           <div style={{ fontSize: '28px', fontWeight: 600, color: '#1890ff' }}>
             {formatPrice(course.price)}
           </div>
@@ -247,7 +247,7 @@ export default function CheckoutModal({ open, onClose, course, onSuccess }: Chec
           disabled={!agreedToTerms || loading}
           style={{ minWidth: '180px', height: '48px', fontSize: '16px' }}
         >
-          {loading ? 'Processing...' : 'Proceed to Payment'}
+          {loading ? 'Đang xử lý...' : 'Tiến hành thanh toán'}
         </Button>
       </div>
 
@@ -262,7 +262,7 @@ export default function CheckoutModal({ open, onClose, course, onSuccess }: Chec
           color: '#0050b3',
         }}
       >
-        🔒 Your payment information is secure and encrypted. We never store your card details.
+        🔒 Thông tin thanh toán của bạn được bảo mật và mã hóa. Chúng tôi không bao giờ lưu trữ thông tin thẻ của bạn.
       </div>
     </Modal>
   );

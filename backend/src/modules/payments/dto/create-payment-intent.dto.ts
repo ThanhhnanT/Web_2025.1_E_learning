@@ -43,7 +43,11 @@ export class CreatePaymentIntentDto {
     required: false
   })
   @IsOptional()
-  @IsUrl()
+  @IsUrl({
+    require_protocol: true,
+    require_tld: false, // Allow localhost and IPs without TLD
+    protocols: ['http', 'https'],
+  })
   returnUrl?: string;
 
   @ApiProperty({ 
@@ -52,7 +56,11 @@ export class CreatePaymentIntentDto {
     required: false
   })
   @IsOptional()
-  @IsUrl()
+  @IsUrl({
+    require_protocol: true,
+    require_tld: false, // Allow localhost and IPs without TLD
+    protocols: ['http', 'https'],
+  })
   cancelUrl?: string;
 }
 

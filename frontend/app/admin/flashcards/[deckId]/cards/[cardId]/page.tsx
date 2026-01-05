@@ -150,7 +150,7 @@ export default function CardDetailPage() {
                   size="small"
                   title="Hình ảnh"
                   styles={{ body: { padding: 12 } }}
-                  bordered
+                  variant="outlined"
                 >
                   <div style={{ width: "100%", aspectRatio: "4 / 3", border: "1px solid #e5e7eb", borderRadius: 8, overflow: "hidden" }}>
                     {formValues.image ? (
@@ -178,7 +178,7 @@ export default function CardDetailPage() {
                   size="small"
                   title="Audio"
                   styles={{ body: { padding: 12 } }}
-                  bordered
+                  variant="outlined"
                 >
                   <div style={{ marginBottom: 8 }}>
                     {formValues.audio ? (

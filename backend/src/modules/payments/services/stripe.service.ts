@@ -28,8 +28,17 @@ export class StripeService {
     courseName: string,
     customerEmail: string,
     savePaymentMethod: boolean = false,
+    returnUrl?: string,
+    cancelUrl?: string,
   ) {
     try {
+      // Use provided URLs or fallback to FRONTEND_URL from config
+      const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:3000';
+      const successUrl = returnUrl 
+        ? `${returnUrl}?session_id={CHECKOUT_SESSION_ID}` 
+        : `${frontendUrl}/payment/result?session_id={CHECKOUT_SESSION_ID}`;
+      const cancelUrlFinal = cancelUrl || `${frontendUrl}/payment/result?canceled=true`;
+
       const sessionData: any = {
         payment_method_types: ['card'],
         line_items: [
@@ -46,8 +55,8 @@ export class StripeService {
           },
         ],
         mode: 'payment',
-        success_url: `${this.configService.get('FRONTEND_URL')}/payment/result?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${this.configService.get('FRONTEND_URL')}/payment/result?canceled=true`,
+        success_url: successUrl,
+        cancel_url: cancelUrlFinal,
         customer_email: customerEmail,
         metadata: {
           courseId,

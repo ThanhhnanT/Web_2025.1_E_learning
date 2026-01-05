@@ -499,7 +499,7 @@ export default function AdminTestsPage() {
   return (
     <Space direction="vertical" size="large" style={{ width: "100%" }}>
       <Card
-        bordered={false}
+        variant="borderless"
         style={{ borderRadius: 12 }}
         title={
           <Space>

@@ -1,100 +1,68 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Successful</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .container {
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .success-icon {
-            font-size: 48px;
-            color: #4CAF50;
-            margin-bottom: 15px;
-        }
-        h1 {
-            color: #4CAF50;
-            margin: 0;
-        }
-        .content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        .amount {
-            font-size: 24px;
-            font-weight: bold;
-            color: #4CAF50;
-            text-align: center;
-            margin: 20px 0;
-        }
-        .button {
-            display: inline-block;
-            padding: 12px 30px;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin: 20px auto;
-            text-align: center;
-        }
-        .button-container {
-            text-align: center;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #666;
-            font-size: 14px;
-        }
-    </style>
+    <title>Thanh toán thành công - E-learning</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="success-icon">✓</div>
-            <h1>Payment Successful!</h1>
+
+<body
+    style="margin: 0; padding: 0; min-width: 100%; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; background-color: #FAFAFA; color: #222222;">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <!-- Header -->
+        <div style="background-color: #52c41a; padding: 24px; color: #ffffff;">
+            <h1
+                style="font-size: 24px; font-weight: 700; line-height: 1.25; margin-top: 0; margin-bottom: 15px; text-align: center;">
+                ✅ Thanh toán thành công!</h1>
         </div>
-        
-        <div class="content">
-            <p>Hi {{userName}},</p>
+
+        <!-- Body -->
+        <div style="padding: 24px; background-color: #ffffff;">
+            <p style="margin-top: 0; margin-bottom: 24px;">Xin chào <strong>{{userName}}</strong>,</p>
             
-            <p>Great news! Your payment has been processed successfully.</p>
-            
-            <p><strong>Course:</strong> {{courseName}}</p>
-            <div class="amount">{{amount}} VND</div>
-            
-            <p>You now have full access to the course content. Start learning right away!</p>
-            
-            <div class="button-container">
-                <a href="{{frontendUrl}}/courses/{{courseId}}" class="button">Access Course</a>
+            <p style="margin-top: 0; margin-bottom: 24px;">
+                Cảm ơn bạn đã thanh toán thành công! Bạn đã được ghi danh vào khóa học:
+            </p>
+
+            <div style="background-color: #f0f5ff; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                <h2 style="font-size: 18px; font-weight: 700; margin-top: 0; margin-bottom: 8px; color: #1890ff;">
+                    📚 {{courseName}}
+                </h2>
+                <p style="margin: 0; color: #52c41a; font-weight: 600;">
+                    Số tiền: {{amount}} VNĐ
+                </p>
             </div>
-            
-            <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+
+            <p style="margin-top: 0; margin-bottom: 24px;">
+                Bạn có thể bắt đầu học ngay bây giờ. Tất cả các bài học đã được mở khóa cho bạn.
+            </p>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="{{frontendUrl}}/courses"
+                    style="display: inline-block; padding: 12px 32px; background-color: #1890ff; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                    Vào học ngay
+                </a>
+            </div>
+
+            <p style="margin-top: 24px; margin-bottom: 0; font-size: 14px; color: #666;">
+                Chúc bạn học tập hiệu quả! 🎓
+            </p>
         </div>
-        
-        <div class="footer">
-            <p>Thank you for choosing our platform!</p>
-            <p>&copy; 2025 E-Learning Platform. All rights reserved.</p>
+
+        <!-- Footer -->
+        <div style="background-color: #f6f6f6; padding: 24px;">
+            <p style="margin-top: 0; margin-bottom: 12px; font-size: 14px; color: #666;">
+                Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi tại 
+                <a href="mailto:support@elearning.com" style="color: #1890ff; text-decoration: none;">
+                    support@elearning.com
+                </a>
+            </p>
+            <p style="margin: 0; font-size: 12px; color: #999; text-align: center;">
+                © 2026 E-learning Platform. All rights reserved.
+            </p>
         </div>
     </div>
 </body>
-</html>
 
+</html>

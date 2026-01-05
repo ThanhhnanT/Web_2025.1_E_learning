@@ -30,50 +30,90 @@ export default function PaymentResultPage() {
       // Check if payment was canceled
       if (searchParams.get('canceled') === 'true') {
         setPaymentStatus('failed');
-        setError('Payment was canceled');
+        setError('Thanh toán đã bị hủy');
         setLoading(false);
         return;
       }
 
-      // Determine gateway based on query params
-      let gateway: string | null = null;
-      if (searchParams.get('session_id')) {
-        gateway = 'stripe';
-      } else if (searchParams.get('vnp_TxnRef')) {
-        gateway = 'vnpay';
-      } else if (searchParams.get('orderId')) {
-        gateway = 'momo';
+      // Handle Stripe payment
+      const sessionId = searchParams.get('session_id');
+      if (sessionId) {
+        try {
+          // Call new verify endpoint for Stripe
+          const result = await paymentService.verifyStripeSession(sessionId);
+          
+          if (result.success) {
+            setPaymentStatus('success');
+            setPaymentData({
+              ...result.payment,
+              courseId: result.courseId || result.payment?.courseId,
+            });
+            message.success('Thanh toán thành công!');
+          } else {
+            setPaymentStatus('pending');
+            setError(result.message || 'Payment is being processed');
+          }
+          setLoading(false);
+          return;
+        } catch (err: any) {
+          console.error('Stripe verification error:', err);
+          setPaymentStatus('failed');
+          setError(err?.response?.data?.message || 'Không thể xác minh thanh toán');
+          setLoading(false);
+          return;
+        }
       }
 
-      if (!gateway) {
-        setError('Unable to determine payment gateway');
-        setPaymentStatus('failed');
+      // Handle VNPay
+      if (searchParams.get('vnp_TxnRef')) {
+        const queryParams: Record<string, string> = {};
+        searchParams.forEach((value, key) => {
+          queryParams[key] = value;
+        });
+
+        const result = await paymentService.verifyPaymentReturn('vnpay', queryParams);
+        
+        if (result.success) {
+          setPaymentStatus('success');
+          setPaymentData(result.payment || result.data);
+          message.success('Thanh toán thành công!');
+        } else {
+          setPaymentStatus('failed');
+          setError(result.message || 'Xác minh thanh toán thất bại');
+        }
         setLoading(false);
         return;
       }
 
-      // Convert URLSearchParams to object
-      const queryParams: Record<string, string> = {};
-      searchParams.forEach((value, key) => {
-        queryParams[key] = value;
-      });
+      // Handle MoMo
+      if (searchParams.get('orderId')) {
+        const queryParams: Record<string, string> = {};
+        searchParams.forEach((value, key) => {
+          queryParams[key] = value;
+        });
 
-      // Verify payment with backend
-      const result = await paymentService.verifyPaymentReturn(gateway, queryParams);
-
-      if (result.success) {
-        setPaymentStatus('success');
-        setPaymentData(result.payment || result.data);
-        message.success('Payment completed successfully!');
-      } else {
-        setPaymentStatus('failed');
-        setError(result.message || 'Payment verification failed');
+        const result = await paymentService.verifyPaymentReturn('momo', queryParams);
+        
+        if (result.success) {
+          setPaymentStatus('success');
+          setPaymentData(result.payment || result.data);
+          message.success('Thanh toán thành công!');
+        } else {
+          setPaymentStatus('failed');
+          setError(result.message || 'Xác minh thanh toán thất bại');
+        }
+        setLoading(false);
+        return;
       }
+
+      // No recognized payment gateway
+      setError('Không thể xác định cổng thanh toán');
+      setPaymentStatus('failed');
+      setLoading(false);
     } catch (err: any) {
       console.error('Payment verification error:', err);
       setPaymentStatus('failed');
-      setError(err?.response?.data?.message || 'An error occurred while verifying payment');
-    } finally {
+      setError(err?.response?.data?.message || 'Đã xảy ra lỗi khi xác minh thanh toán');
       setLoading(false);
     }
   };
@@ -98,7 +138,7 @@ export default function PaymentResultPage() {
         }}
       >
         <Spin indicator={<LoadingOutlined style={{ fontSize: 64 }} spin />} />
-        <p style={{ fontSize: '18px', color: '#666' }}>Verifying your payment...</p>
+        <p style={{ fontSize: '18px', color: '#666' }}>Đang xác minh thanh toán...</p>
       </div>
     );
   }
@@ -116,14 +156,36 @@ export default function PaymentResultPage() {
         <Result
           status="success"
           icon={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
-          title="Payment Successful!"
-          subTitle="Thank you for your purchase. You now have full access to the course."
+          title="Thanh toán thành công!"
+          subTitle="Cảm ơn bạn đã mua khóa học. Bạn có thể truy cập khóa học ngay bây giờ."
           extra={[
-            <Button type="primary" key="course" size="large" onClick={() => router.push(`/courses/${paymentData?.courseId?._id || paymentData?.courseId}`)}>
-              Access Course
+            <Button 
+              type="primary" 
+              key="course" 
+              size="large" 
+              onClick={() => {
+                // Extract courseId from various possible locations
+                const courseId = 
+                  paymentData?.courseId?._id || 
+                  paymentData?.courseId || 
+                  (typeof paymentData?.courseId === 'string' ? paymentData.courseId : null);
+                
+                console.log('Navigating to course:', courseId);
+                console.log('Payment data:', paymentData);
+                
+                if (courseId) {
+                  // Add payment_success query param to trigger enrollment recheck
+                  router.push(`/courses/${courseId}?payment_success=true`);
+                } else {
+                  message.error('Không tìm thấy thông tin khóa học');
+                  router.push('/courses');
+                }
+              }}
+            >
+              Vào học ngay
             </Button>,
             <Button key="home" size="large" onClick={() => router.push('/courses')}>
-              Browse More Courses
+              Xem thêm khóa học
             </Button>,
           ]}
         />
@@ -133,14 +195,14 @@ export default function PaymentResultPage() {
         <Result
           status="error"
           icon={<CloseCircleOutlined style={{ color: '#ff4d4f' }} />}
-          title="Payment Failed"
-          subTitle={error || 'Your payment could not be processed. Please try again.'}
+          title="Thanh toán thất bại"
+          subTitle={error || 'Thanh toán không thể được xử lý. Vui lòng thử lại.'}
           extra={[
             <Button type="primary" key="retry" size="large" onClick={() => router.back()}>
-              Try Again
+              Thử lại
             </Button>,
             <Button key="home" size="large" onClick={() => router.push('/courses')}>
-              Back to Courses
+              Quay lại khóa học
             </Button>,
           ]}
         />
@@ -150,14 +212,14 @@ export default function PaymentResultPage() {
         <Result
           status="warning"
           icon={<ClockCircleOutlined style={{ color: '#faad14' }} />}
-          title="Payment Pending"
-          subTitle="Your payment is being processed. This may take a few minutes."
+          title="Đang xử lý thanh toán"
+          subTitle="Thanh toán của bạn đang được xử lý. Quá trình này có thể mất vài phút."
           extra={[
             <Button type="primary" key="refresh" size="large" onClick={() => window.location.reload()}>
-              Refresh Status
+              Làm mới trạng thái
             </Button>,
             <Button key="home" size="large" onClick={() => router.push('/')}>
-              Go to Home
+              Về trang chủ
             </Button>,
           ]}
         />
@@ -165,30 +227,30 @@ export default function PaymentResultPage() {
 
       {paymentData && paymentStatus === 'success' && (
         <Card
-          title="Payment Details"
+          title="Chi tiết thanh toán"
           style={{ marginTop: '32px' }}
-          bordered={false}
+          variant="borderless"
         >
           <Descriptions column={1} bordered>
-            <Descriptions.Item label="Transaction ID">
+            <Descriptions.Item label="Mã giao dịch">
               {paymentData.transactionId || 'N/A'}
             </Descriptions.Item>
-            <Descriptions.Item label="Course">
+            <Descriptions.Item label="Khóa học">
               {paymentData.courseId?.title || 'N/A'}
             </Descriptions.Item>
-            <Descriptions.Item label="Amount">
+            <Descriptions.Item label="Số tiền">
               {formatAmount(paymentData.amount || 0)}
             </Descriptions.Item>
-            <Descriptions.Item label="Payment Method">
+            <Descriptions.Item label="Phương thức thanh toán">
               {paymentService.getGatewayLabel(paymentData.paymentGateway || '')}
             </Descriptions.Item>
-            <Descriptions.Item label="Status">
+            <Descriptions.Item label="Trạng thái">
               <span style={{ color: '#52c41a', fontWeight: 600 }}>
                 {paymentService.getStatusLabel(paymentData.status || 'completed')}
               </span>
             </Descriptions.Item>
             {paymentData.paymentDate && (
-              <Descriptions.Item label="Payment Date">
+              <Descriptions.Item label="Ngày thanh toán">
                 {new Date(paymentData.paymentDate).toLocaleString('vi-VN')}
               </Descriptions.Item>
             )}
@@ -204,7 +266,7 @@ export default function PaymentResultPage() {
           fontSize: '14px',
         }}
       >
-        <p>Need help? Contact our support team at support@elearning.com</p>
+        <p>Cần hỗ trợ? Liên hệ với chúng tôi tại support@elearning.com</p>
       </div>
     </div>
   );

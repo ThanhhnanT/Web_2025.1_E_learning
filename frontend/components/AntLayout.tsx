@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Layout, Menu, Button, Dropdown, Avatar } from "antd";
+import React, { useState, useEffect, useRef } from "react";
+import { Layout, Menu, Button, Dropdown, Avatar, App } from "antd";
 import type { MenuProps } from "antd";
 import { 
   MenuOutlined, 
@@ -37,7 +37,7 @@ const { Header, Content, Footer } = Layout;
 const style = commonStyle()
 
 // Component client-only cho User menu
-function UserMenuClient({ onOpenModal }: { onOpenModal: () => void }) {
+function UserMenuClient({ onOpenModal, onCloseSubmenu }: { onOpenModal: () => void; onCloseSubmenu?: () => void }) {
   const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
@@ -160,6 +160,11 @@ function UserMenuClient({ onOpenModal }: { onOpenModal: () => void }) {
       icon: <UserOutlined />
     },
     { 
+      key: "my-courses", 
+      label: "Khóa học của tôi",
+      icon: <BookOutlined />
+    },
+    { 
       key: "logout", 
       label: "Đăng xuất",
       icon: <LogoutOutlined />
@@ -167,9 +172,16 @@ function UserMenuClient({ onOpenModal }: { onOpenModal: () => void }) {
   ];
 
   const handleMenuClick = ({ key }: { key: string }) => {
+    // Đóng submenu khi click vào item trong dropdown
+    if (onCloseSubmenu) {
+      onCloseSubmenu();
+    }
     switch (key) {
       case "profile":
         router.push("/auth/profile");
+        break;
+      case "my-courses":
+        router.push("/my-courses");
         break;
       case "logout":
         logoutUser();
@@ -181,13 +193,27 @@ function UserMenuClient({ onOpenModal }: { onOpenModal: () => void }) {
   };
 
   return isAuthenticated ? (
-    <Dropdown menu={{ items: userMenu, onClick: handleMenuClick }} placement="bottomRight" arrow>
-      <Avatar 
-        src={userAvatar || undefined} 
-        icon={!userAvatar && <UserOutlined />}
-        style={{ cursor: "pointer" }} 
-      />
-    </Dropdown>
+    <div 
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+      onMouseDown={(e) => {
+        e.stopPropagation();
+      }}
+    >
+      <Dropdown 
+        menu={{ items: userMenu, onClick: handleMenuClick }} 
+        placement="bottomRight" 
+        arrow 
+        trigger={['click']}
+      >
+        <Avatar 
+          src={userAvatar || undefined} 
+          icon={!userAvatar && <UserOutlined />}
+          style={{ cursor: "pointer" }}
+        />
+      </Dropdown>
+    </div>
   ) : (
     <Button
       type="primary"
@@ -205,6 +231,8 @@ export default function AntLayout({ children }: { children: React.ReactNode }) {
   const [isMobile, setIsMobile] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [verifyModalOpen, setVerifyModalOpen] = useState(false);
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
+  const previousOpenKeysRef = useRef<string[]>([]);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -257,26 +285,28 @@ export default function AntLayout({ children }: { children: React.ReactNode }) {
           }}
         >
           <MessageProvider>
-      <Layout style={{ minHeight: "100vh" }}>
-              <Header className={`${styles.header} ${skeletonStyles.headerSkeleton}`} style={{ background: "#ffffff" }}>
-                <div className={skeletonStyles.headerLogoSkeleton} />
-                <div className={skeletonStyles.headerMenuSkeleton}>
-                  <div className={skeletonStyles.headerButtonSkeleton} />
-                </div>
-              </Header>
-        <Content className={styles.container}></Content>
-              <Footer className={skeletonStyles.footerSkeleton}>
-                <div className={skeletonStyles.footerContent}>
-                  <div className={skeletonStyles.footerLogoSkeleton} />
-                  <div className={skeletonStyles.footerTextSkeleton}>
-                    <div className={skeletonStyles.footerTitleSkeleton} />
-                    <div className={skeletonStyles.footerLinkSkeleton} />
-                    <div className={skeletonStyles.footerLinkSkeleton} />
+            <App>
+              <Layout style={{ minHeight: "100vh" }}>
+                <Header className={`${styles.header} ${skeletonStyles.headerSkeleton}`} style={{ background: "#ffffff" }}>
+                  <div className={skeletonStyles.headerLogoSkeleton} />
+                  <div className={skeletonStyles.headerMenuSkeleton}>
+                    <div className={skeletonStyles.headerButtonSkeleton} />
                   </div>
-                </div>
-                <div className={skeletonStyles.footerCopyrightSkeleton} />
-              </Footer>
-      </Layout>
+                </Header>
+                <Content className={styles.container}></Content>
+                <Footer className={skeletonStyles.footerSkeleton}>
+                  <div className={skeletonStyles.footerContent}>
+                    <div className={skeletonStyles.footerLogoSkeleton} />
+                    <div className={skeletonStyles.footerTextSkeleton}>
+                      <div className={skeletonStyles.footerTitleSkeleton} />
+                      <div className={skeletonStyles.footerLinkSkeleton} />
+                      <div className={skeletonStyles.footerLinkSkeleton} />
+                    </div>
+                  </div>
+                  <div className={skeletonStyles.footerCopyrightSkeleton} />
+                </Footer>
+              </Layout>
+            </App>
           </MessageProvider>
         </ConfigProvider>
       </AntdRegistry>
@@ -305,7 +335,7 @@ export default function AntLayout({ children }: { children: React.ReactNode }) {
     },
     { 
       key: "courses", 
-      label: <Link href="/courses/online"><span style={{ fontWeight: "bold" }}>Chương trình học</span></Link>,
+      label: <Link href="/courses"><span style={{ fontWeight: "bold" }}>Chương trình học</span></Link>,
       icon: <BookOutlined />
     },
     { 
@@ -338,7 +368,15 @@ export default function AntLayout({ children }: { children: React.ReactNode }) {
       ),
       icon: <ShoppingCartOutlined />
     },
-    { key: "user", label: <UserMenuClient onOpenModal={() => setAuthModalOpen(true)} /> },
+    { 
+      key: "user", 
+      label: (
+        <UserMenuClient 
+          onOpenModal={() => setAuthModalOpen(true)}
+          onCloseSubmenu={() => setOpenKeys([])}
+        />
+      )
+    },
   ];
 
   const dropdownMenu = { items: menuItems };
@@ -364,8 +402,9 @@ export default function AntLayout({ children }: { children: React.ReactNode }) {
         }}
       >
         <MessageProvider>
-          <RouteTransitionProvider>
-            <Layout style={{ minHeight: "100vh" }}>
+          <App>
+            <RouteTransitionProvider>
+              <Layout style={{ minHeight: "100vh" }}>
               {/* HEADER */}
               <Header className={`${styles.header} ${skeletonStyles.headerSkeleton}`} style={{ background: "#ffffff" }}>
                 <Link href="/" style={{ display: "flex", alignItems: "center", height: "100%" }}>
@@ -392,6 +431,25 @@ export default function AntLayout({ children }: { children: React.ReactNode }) {
                     mode="horizontal"
                     selectedKeys={[selectedKey]}
                     items={menuItems}
+                    triggerSubMenuAction="click"
+                    openKeys={openKeys}
+                    onOpenChange={(keys) => {
+                      previousOpenKeysRef.current = openKeys;
+                      setOpenKeys(keys);
+                    }}
+                    onClick={({ key, domEvent }) => {
+                      // Nếu click vào menu item "user", giữ submenu mở
+                      if (key === "user") {
+                        domEvent.stopPropagation();
+                        // Khôi phục openKeys trước đó
+                        setTimeout(() => {
+                          setOpenKeys(previousOpenKeysRef.current);
+                        }, 0);
+                      } else {
+                        // Đóng tất cả submenu khi click vào menu item khác
+                        setOpenKeys([]);
+                      }
+                    }}
                     style={{
                       flex: 1,
                       justifyContent: "flex-end",
@@ -424,7 +482,8 @@ export default function AntLayout({ children }: { children: React.ReactNode }) {
                 }
               }}
             />
-          </RouteTransitionProvider>
+            </RouteTransitionProvider>
+          </App>
         </MessageProvider>
       </ConfigProvider>
     </AntdRegistry>

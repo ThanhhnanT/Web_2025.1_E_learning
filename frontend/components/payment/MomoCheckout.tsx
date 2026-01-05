@@ -41,12 +41,12 @@ export default function MomoCheckout({ paymentData }: MomoCheckoutProps) {
       key: 'qr',
       label: (
         <span>
-          <QrcodeOutlined /> QR Code
+          <QrcodeOutlined /> Mã QR
         </span>
       ),
       children: (
         <div style={{ textAlign: 'center', padding: '24px' }}>
-          <h4 style={{ marginBottom: '16px' }}>Scan with MoMo App</h4>
+          <h4 style={{ marginBottom: '16px' }}>Quét mã QR bằng ứng dụng MoMo</h4>
           {paymentData.payUrl ? (
             <>
               <div
@@ -61,15 +61,15 @@ export default function MomoCheckout({ paymentData }: MomoCheckoutProps) {
                 <QRCode value={paymentData.payUrl} size={200} />
               </div>
               <div style={{ marginTop: '16px', color: '#666' }}>
-                <p>1. Open your MoMo app</p>
-                <p>2. Select "Scan QR"</p>
-                <p>3. Scan the code above to pay</p>
+                <p>1. Mở ứng dụng MoMo</p>
+                <p>2. Chọn "Quét mã QR"</p>
+                <p>3. Quét mã phía trên để thanh toán</p>
               </div>
             </>
           ) : (
             <Alert
-              message="QR Code not available"
-              description="Please use one of the other payment methods"
+              message="Mã QR không khả dụng"
+              description="Vui lòng sử dụng một trong các phương thức thanh toán khác"
               type="warning"
             />
           )}
@@ -80,7 +80,7 @@ export default function MomoCheckout({ paymentData }: MomoCheckoutProps) {
       key: 'app',
       label: (
         <span>
-          <MobileOutlined /> Open App
+          <MobileOutlined /> Mở ứng dụng
         </span>
       ),
       children: (
@@ -88,9 +88,9 @@ export default function MomoCheckout({ paymentData }: MomoCheckoutProps) {
           <div style={{ marginBottom: '24px' }}>
             <MobileOutlined style={{ fontSize: '64px', color: '#a50064' }} />
           </div>
-          <h4 style={{ marginBottom: '8px' }}>Pay with MoMo App</h4>
+          <h4 style={{ marginBottom: '8px' }}>Thanh toán bằng ứng dụng MoMo</h4>
           <p style={{ color: '#666', marginBottom: '24px' }}>
-            Click the button below to open MoMo app and complete your payment
+            Nhấn nút bên dưới để mở ứng dụng MoMo và hoàn tất thanh toán
           </p>
           <Button
             type="primary"
@@ -103,10 +103,10 @@ export default function MomoCheckout({ paymentData }: MomoCheckoutProps) {
               minWidth: '200px',
             }}
           >
-            Open MoMo App
+            Mở ứng dụng MoMo
           </Button>
           <p style={{ marginTop: '16px', fontSize: '12px', color: '#999' }}>
-            Don't have MoMo app? Download it from App Store or Google Play
+            Chưa có ứng dụng MoMo? Tải từ App Store hoặc Google Play
           </p>
         </div>
       ),
@@ -115,7 +115,7 @@ export default function MomoCheckout({ paymentData }: MomoCheckoutProps) {
       key: 'web',
       label: (
         <span>
-          <GlobalOutlined /> Web Payment
+          <GlobalOutlined /> Thanh toán Web
         </span>
       ),
       children: (
@@ -123,9 +123,9 @@ export default function MomoCheckout({ paymentData }: MomoCheckoutProps) {
           <div style={{ marginBottom: '24px' }}>
             <GlobalOutlined style={{ fontSize: '64px', color: '#a50064' }} />
           </div>
-          <h4 style={{ marginBottom: '8px' }}>Pay via MoMo Website</h4>
+          <h4 style={{ marginBottom: '8px' }}>Thanh toán qua Website MoMo</h4>
           <p style={{ color: '#666', marginBottom: '24px' }}>
-            Complete your payment on MoMo's secure payment page
+            Hoàn tất thanh toán trên trang thanh toán bảo mật của MoMo
           </p>
           <Button
             type="primary"
@@ -138,7 +138,7 @@ export default function MomoCheckout({ paymentData }: MomoCheckoutProps) {
               minWidth: '200px',
             }}
           >
-            Continue to MoMo
+            Tiếp tục đến MoMo
           </Button>
         </div>
       ),
@@ -157,10 +157,10 @@ export default function MomoCheckout({ paymentData }: MomoCheckoutProps) {
       <div style={{ marginBottom: '16px' }}>
         <h4 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>
           <MobileOutlined style={{ marginRight: '8px', color: '#a50064' }} />
-          MoMo Payment
+          Thanh toán MoMo
         </h4>
         <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
-          Choose your preferred payment method
+          Chọn phương thức thanh toán bạn muốn
         </p>
       </div>
 
@@ -168,7 +168,7 @@ export default function MomoCheckout({ paymentData }: MomoCheckoutProps) {
 
       <div style={{ marginTop: '16px', fontSize: '12px', color: '#999', textAlign: 'center' }}>
         <p>
-          🔒 Secured by MoMo - Vietnam's leading e-wallet
+          🔒 Bảo mật bởi MoMo - Ví điện tử hàng đầu Việt Nam
         </p>
       </div>
     </div>

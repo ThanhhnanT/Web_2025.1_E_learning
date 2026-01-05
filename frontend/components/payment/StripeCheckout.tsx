@@ -24,7 +24,7 @@ export default function StripeCheckout({ paymentData, onSuccess }: StripeCheckou
         window.location.href = paymentData.url!;
       }, 1000);
     } else {
-      setError('No payment URL received from server');
+      setError('Không nhận được URL thanh toán từ máy chủ');
       setLoading(false);
     }
   }, [paymentData]);
@@ -43,17 +43,17 @@ export default function StripeCheckout({ paymentData, onSuccess }: StripeCheckou
         <>
           <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
           <p style={{ marginTop: '16px', color: '#666' }}>
-            Redirecting to secure payment page...
+            Đang chuyển đến trang thanh toán bảo mật...
           </p>
           <p style={{ fontSize: '12px', color: '#999' }}>
-            Please do not close this window
+            Vui lòng không đóng cửa sổ này
           </p>
         </>
       )}
 
       {error && (
         <Alert
-          message="Payment Error"
+          message="Lỗi thanh toán"
           description={error}
           type="error"
           showIcon
@@ -63,7 +63,7 @@ export default function StripeCheckout({ paymentData, onSuccess }: StripeCheckou
 
       <div style={{ marginTop: '16px', fontSize: '12px', color: '#999' }}>
         <p>
-          🔒 Powered by Stripe - Your payment information is secure and encrypted
+          🔒 Cung cấp bởi Stripe - Thông tin thanh toán của bạn được bảo mật và mã hóa
         </p>
       </div>
     </div>

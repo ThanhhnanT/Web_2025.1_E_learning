@@ -1,114 +1,74 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to the Course</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .container {
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .welcome-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-        h1 {
-            color: #2196F3;
-            margin: 0;
-        }
-        .content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        .course-name {
-            font-size: 20px;
-            font-weight: bold;
-            color: #2196F3;
-            text-align: center;
-            margin: 20px 0;
-        }
-        .button {
-            display: inline-block;
-            padding: 12px 30px;
-            background-color: #2196F3;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin: 20px auto;
-            text-align: center;
-        }
-        .button-container {
-            text-align: center;
-        }
-        .tips {
-            background-color: #e3f2fd;
-            padding: 15px;
-            border-left: 4px solid #2196F3;
-            margin: 20px 0;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #666;
-            font-size: 14px;
-        }
-    </style>
+    <title>Chào mừng bạn đến với khóa học - E-learning</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="welcome-icon">🎓</div>
-            <h1>Welcome to Your New Course!</h1>
+
+<body
+    style="margin: 0; padding: 0; min-width: 100%; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; background-color: #FAFAFA; color: #222222;">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <!-- Header -->
+        <div style="background-color: #0070f3; padding: 24px; color: #ffffff;">
+            <h1
+                style="font-size: 24px; font-weight: 700; line-height: 1.25; margin-top: 0; margin-bottom: 15px; text-align: center;">
+                🎉 Chào mừng bạn đến với khóa học!</h1>
         </div>
-        
-        <div class="content">
-            <p>Hi {{userName}},</p>
+
+        <!-- Body -->
+        <div style="padding: 24px; background-color: #ffffff;">
+            <p style="margin-top: 0; margin-bottom: 24px;">Xin chào <strong>{{userName}}</strong>,</p>
             
-            <p>Congratulations! You've successfully enrolled in:</p>
-            
-            <div class="course-name">{{courseName}}</div>
-            
-            <p>Your learning journey begins now! You have full access to all course materials, videos, and resources.</p>
-            
-            <div class="tips">
-                <strong>💡 Tips for Success:</strong>
-                <ul>
-                    <li>Set aside regular time for learning</li>
-                    <li>Complete lessons in order for the best experience</li>
-                    <li>Don't hesitate to ask questions in the discussion forum</li>
-                    <li>Practice what you learn</li>
-                </ul>
+            <p style="margin-top: 0; margin-bottom: 24px;">
+                Chúc mừng! Bạn đã được ghi danh thành công vào khóa học:
+            </p>
+
+            <div style="background-color: #f0f5ff; padding: 20px; border-radius: 8px; margin-bottom: 24px; border-left: 4px solid #0070f3;">
+                <h2 style="font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 8px; color: #0070f3;">
+                    📚 {{courseName}}
+                </h2>
             </div>
-            
-            <div class="button-container">
-                <a href="{{frontendUrl}}/courses/{{courseId}}" class="button">Start Learning Now</a>
+
+            <p style="margin-top: 0; margin-bottom: 24px;">
+                Bạn đã sẵn sàng để bắt đầu hành trình học tập của mình! Tất cả nội dung khóa học đã được mở khóa và bạn có thể truy cập bất cứ lúc nào.
+            </p>
+
+            <div style="background-color: #f9f9f9; padding: 16px; border-radius: 6px; margin-bottom: 24px;">
+                <p style="margin: 0; font-size: 14px; color: #666;">
+                    💡 <strong>Mẹo học tập:</strong><br/>
+                    • Học đều đặn mỗi ngày để đạt hiệu quả tốt nhất<br/>
+                    • Hoàn thành các bài tập thực hành<br/>
+                    • Tham gia thảo luận cùng cộng đồng học viên
+                </p>
             </div>
-            
-            <p>We're excited to be part of your learning journey!</p>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="{{frontendUrl}}/courses"
+                    style="display: inline-block; padding: 14px 36px; background-color: #0070f3; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
+                    Bắt đầu học ngay
+                </a>
+            </div>
+
+            <p style="margin-top: 24px; margin-bottom: 0; font-size: 14px; color: #666;">
+                Chúc bạn có trải nghiệm học tập tuyệt vời! 🚀
+            </p>
         </div>
-        
-        <div class="footer">
-            <p>Happy Learning! 🚀</p>
-            <p>&copy; 2025 E-Learning Platform. All rights reserved.</p>
+
+        <!-- Footer -->
+        <div style="background-color: #f6f6f6; padding: 24px;">
+            <p style="margin-top: 0; margin-bottom: 12px; font-size: 14px; color: #666;">
+                Nếu bạn cần hỗ trợ, vui lòng liên hệ với chúng tôi tại 
+                <a href="mailto:support@elearning.com" style="color: #0070f3; text-decoration: none;">
+                    support@elearning.com
+                </a>
+            </p>
+            <p style="margin: 0; font-size: 12px; color: #999; text-align: center;">
+                © 2026 E-learning Platform. All rights reserved.
+            </p>
         </div>
     </div>
 </body>
-</html>
 
+</html>

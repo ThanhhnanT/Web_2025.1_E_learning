@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import Cookies from 'js-cookie';
 import {
   Typography,
   Card,
@@ -27,6 +28,8 @@ import {
   LockOutlined,
   FileTextOutlined,
   QuestionCircleOutlined,
+  ShoppingCartOutlined,
+  CheckCircleFilled,
 } from '@ant-design/icons';
 import { getCourseById, getModulesByCourseId, getLessonsByModuleId } from '@/service/courses';
 import type { Course, CourseModule, Lesson } from '@/types/course';
@@ -40,14 +43,15 @@ import {
   isLessonCompleted,
   isLessonLocked,
   getCurrentLesson,
+  markLessonComplete,
 } from '@/lib/courseProgress';
 import VideoPlayer from '@/components/VideoPlayer';
 import CourseReviewSection from '@/components/CourseReviewSection';
 import LessonContentRenderer from '@/components/LessonContentRenderer';
+import enrollmentService from '@/service/enrollmentService';
 import styles from '@/styles/courseDetail.module.css';
 
 const { Title, Text, Paragraph } = Typography;
-const { Panel } = Collapse;
 
 export default function CourseDetailPage() {
   const params = useParams();
@@ -62,12 +66,31 @@ export default function CourseDetailPage() {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [checkingEnrollment, setCheckingEnrollment] = useState(false);
+  const [enrollmentProgress, setEnrollmentProgress] = useState<{ completedCount: number; totalLessons: number } | null>(null);
+  const [enrollmentId, setEnrollmentId] = useState<string | null>(null);
 
   useEffect(() => {
     if (courseId) {
       fetchCourseData();
+      checkEnrollmentStatus();
     }
   }, [courseId]);
+
+  // Re-check enrollment when returning from payment
+  useEffect(() => {
+    const paymentSuccess = searchParams.get('payment_success');
+    const sessionId = searchParams.get('session_id');
+    
+    if (paymentSuccess === 'true' || sessionId) {
+      console.log('Payment detected - rechecking enrollment status');
+      // Wait a bit for backend to process
+      setTimeout(() => {
+        checkEnrollmentStatus();
+      }, 1000);
+    }
+  }, [searchParams]);
 
   // Helper function to get video URL from lesson content
   // Priority: 1. Direct video file (cloud storage), 2. YouTube/Vimeo
@@ -248,8 +271,8 @@ export default function CourseDetailPage() {
     return /youtube\.com|youtu\.be|vimeo\.com/i.test(url);
   };
 
-  const handleLessonClick = (lesson: Lesson, module: CourseModule) => {
-    if (isLessonLocked(lesson, lessonsByModule[module._id] || [], courseId, module)) {
+  const handleLessonClick = async (lesson: Lesson, module: CourseModule) => {
+    if (isLessonLocked(lesson, lessonsByModule[module._id] || [], courseId, module, isEnrolled)) {
       return; // Don't navigate if locked
     }
     
@@ -271,6 +294,22 @@ export default function CourseDetailPage() {
     
     // Update URL without reload
     router.push(`/courses/${courseId}?lessonId=${lesson._id}`, { scroll: false });
+
+    // Auto-mark lesson as complete if user is enrolled
+    if (isEnrolled && enrollmentId && !isLessonCompleted(courseId, lesson._id)) {
+      try {
+        await markLessonComplete(courseId, lesson._id, enrollmentId);
+        
+        // Refresh progress
+        const progress = await enrollmentService.getEnrollmentProgress(enrollmentId);
+        setEnrollmentProgress({
+          completedCount: progress.completedCount,
+          totalLessons: progress.totalLessons,
+        });
+      } catch (error) {
+        console.error('Error marking lesson as complete:', error);
+      }
+    }
   };
 
   const getLessonIcon = (lesson: Lesson) => {
@@ -287,7 +326,7 @@ export default function CourseDetailPage() {
   };
 
   const getModuleStatusIcon = (module: CourseModule, lessons: Lesson[]) => {
-    if (isModuleLocked(module, modules, lessonsByModule, courseId)) {
+    if (isModuleLocked(module, modules, lessonsByModule, courseId, isEnrolled)) {
       return <LockOutlined style={{ color: '#d9d9d9', fontSize: '18px' }} />;
     }
     if (isModuleCompleted(module._id, lessons, courseId)) {
@@ -310,10 +349,6 @@ export default function CourseDetailPage() {
     return null;
   };
 
-  const getCurrentLessonInModule = (module: CourseModule, lessons: Lesson[]): Lesson | null => {
-    const completedLessonIds = lessons.filter(l => isLessonCompleted(courseId, l._id)).map(l => l._id);
-    return lessons.find(l => !completedLessonIds.includes(l._id)) || null;
-  };
 
   const formatDuration = (minutes?: number) => {
     if (!minutes) return '';
@@ -330,6 +365,75 @@ export default function CourseDetailPage() {
     return typeof course.instructor === 'string'
       ? 'N/A'
       : course.instructor.name || 'N/A';
+  };
+
+  const checkEnrollmentStatus = async () => {
+    // Set timeout to ensure loading stops after 5 seconds max
+    const timeoutId = setTimeout(() => {
+      console.warn('Enrollment check timeout - stopping loading');
+      setCheckingEnrollment(false);
+      setIsEnrolled(false);
+    }, 5000);
+
+    try {
+      setCheckingEnrollment(true);
+      
+      // Check if user is logged in by checking for token
+      const token = Cookies.get('access_token');
+      
+      if (!token) {
+        // User not logged in, assume not enrolled
+        console.log('No token found - user not logged in');
+        setIsEnrolled(false);
+        setCheckingEnrollment(false);
+        clearTimeout(timeoutId);
+        return;
+      }
+      
+      console.log('Checking enrollment status for course:', courseId);
+      const { isEnrolled, enrollment, progress } = await enrollmentService.checkEnrollment(courseId);
+      console.log('Enrollment status:', isEnrolled);
+      setIsEnrolled(isEnrolled);
+      
+      if (isEnrolled && enrollment) {
+        setEnrollmentId(enrollment._id);
+        
+        // Get progress details
+        if (progress) {
+          setEnrollmentProgress({
+            completedCount: progress.completedCount,
+            totalLessons: progress.totalLessons,
+          });
+        } else if (enrollment.completedLessons) {
+          // Fallback: calculate from completedLessons if progress not available
+          // Wait for lessonsByModule to be loaded
+          if (Object.keys(lessonsByModule).length > 0) {
+            const totalLessons = Object.values(lessonsByModule).flat().length;
+            setEnrollmentProgress({
+              completedCount: enrollment.completedLessons.length,
+              totalLessons,
+            });
+          }
+        }
+      } else {
+        setEnrollmentId(null);
+        setEnrollmentProgress(null);
+      }
+      
+      clearTimeout(timeoutId);
+    } catch (error: any) {
+      console.error('Error checking enrollment:', error);
+      // If error (like 401, 403), assume not enrolled
+      setIsEnrolled(false);
+      clearTimeout(timeoutId);
+    } finally {
+      setCheckingEnrollment(false);
+    }
+  };
+
+  const handleEnrollFree = async () => {
+    // Implement free enrollment logic here
+    console.log('Free enrollment not yet implemented');
   };
 
   if (loading) {
@@ -431,6 +535,56 @@ export default function CourseDetailPage() {
                 <Text>{course.price === 0 ? 'Miễn phí' : `${course.price.toLocaleString()} VNĐ`}</Text>
               </Col>
             </Row>
+
+            <Divider />
+
+            {/* Purchase/Enrollment Section */}
+            {!isEnrolled && (
+              <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                {checkingEnrollment ? (
+                  <Spin tip="Đang kiểm tra trạng thái đăng ký...">
+                    <div style={{ minHeight: 60 }} />
+                  </Spin>
+                ) : (
+                  <div>
+                    <Title level={2} style={{ color: '#1890ff', marginBottom: 16 }}>
+                      {course.price === 0 ? 'Miễn phí' : `${course.price.toLocaleString()} VNĐ`}
+                    </Title>
+                    {course.price > 0 ? (
+                      <>
+                        <Button
+                          type="primary"
+                          size="large"
+                          icon={<ShoppingCartOutlined />}
+                          onClick={() => router.push(`/checkout/${courseId}`)}
+                          block
+                          style={{ height: 56, fontSize: 18, fontWeight: 600, marginBottom: 8 }}
+                        >
+                          Mua ngay
+                        </Button>
+           
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          type="primary"
+                          size="large"
+                          icon={<CheckCircleOutlined />}
+                          onClick={handleEnrollFree}
+                          block
+                          style={{ height: 56, fontSize: 18, fontWeight: 600 }}
+                        >
+                          Đăng ký miễn phí
+                        </Button>
+                        <Text type="secondary" style={{ display: 'block', marginTop: 8, fontSize: 12 }}>
+                          ⚡ Truy cập ngay lập tức
+                        </Text>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </Card>
 
           {/* Reviews Section */}
@@ -486,98 +640,91 @@ export default function CourseDetailPage() {
                 activeKey={expandedModules.length > 0 ? expandedModules : modules.map(m => m._id)}
                 onChange={(keys) => setExpandedModules(keys as string[])}
                 className={styles.lessonsCollapse}
-              >
-                {modules.map((module) => {
+                items={modules.map((module) => {
                   const lessons = lessonsByModule[module._id] || [];
-                  const isLocked = isModuleLocked(module, modules, lessonsByModule, courseId);
-                  const currentLessonInModule = getCurrentLessonInModule(module, lessons);
+                  const isLocked = isModuleLocked(module, modules, lessonsByModule, courseId, isEnrolled);
 
-                  const panelHeader = (
-                    <div className={styles.moduleHeader}>
-                      <Space size="middle">
-                        {getModuleStatusIcon(module, lessons)}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                          <Text strong={!isLocked} style={isLocked ? { color: 'rgba(0,0,0,0.45)' } : {}}>
-                            {module.title}
-                          </Text>
-                          <Text type="secondary" style={{ fontSize: 12 }}>
-                            {isModuleCompleted(module._id, lessons, courseId)
-                              ? `Hoàn thành • ${lessons.length} Bài học`
-                              : isModuleInProgress(module._id, lessons, courseId)
-                              ? `Đang học • ${lessons.length} Bài học`
-                              : isLocked
-                              ? `Đã khóa • ${lessons.length} Bài học`
-                              : `${lessons.length} Bài học`}
-                          </Text>
-                        </div>
-                      </Space>
-                    </div>
-                  );
+                  return {
+                    key: module._id,
+                    label: (
+                      <div className={styles.moduleHeader}>
+                        <Space size="middle">
+                          {getModuleStatusIcon(module, lessons)}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            <Text strong={!isLocked} style={isLocked ? { color: 'rgba(0,0,0,0.45)' } : {}}>
+                              {module.title}
+                            </Text>
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              {isModuleCompleted(module._id, lessons, courseId)
+                                ? `Hoàn thành • ${lessons.length} Bài học`
+                                : isModuleInProgress(module._id, lessons, courseId)
+                                ? `Đang học • ${lessons.length} Bài học`
+                                : isLocked
+                                ? `Đã khóa • ${lessons.length} Bài học`
+                                : `${lessons.length} Bài học`}
+                            </Text>
+                          </div>
+                        </Space>
+                      </div>
+                    ),
+                    collapsible: isLocked ? "disabled" : "header",
+                    children: lessons.length === 0 ? (
+                      <Empty description="Chưa có bài học" />
+                    ) : (
+                      <div className={styles.lessonsList}>
+                        {lessons.map((lesson) => {
+                          const lessonCompleted = isLessonCompleted(courseId, lesson._id);
+                          const lessonLocked = isLessonLocked(lesson, lessons, courseId, module, isEnrolled);
+                          const isViewing = selectedLesson?._id === lesson._id;
 
-                  return (
-                    <Panel
-                      key={module._id}
-                      header={panelHeader}
-                      disabled={isLocked}
-                    >
-                      {lessons.length === 0 ? (
-                        <Empty description="Chưa có bài học" />
-                      ) : (
-                        <div className={styles.lessonsList}>
-                          {lessons.map((lesson) => {
-                            const lessonCompleted = isLessonCompleted(courseId, lesson._id);
-                            const lessonLocked = isLessonLocked(lesson, lessons, courseId, module);
-                            const isCurrent = currentLessonInModule?._id === lesson._id && !lessonCompleted;
-
-                            return (
-                              <div
-                                key={lesson._id}
-                                className={`${styles.lessonItem} ${selectedLesson?._id === lesson._id ? styles.active : ''} ${isCurrent ? styles.currentLesson : ''} ${lessonLocked ? styles.lockedLesson : ''}`}
-                                onClick={() => !lessonLocked && handleLessonClick(lesson, module)}
-                                style={lessonLocked ? { cursor: 'not-allowed', opacity: 0.6 } : {}}
-                              >
-                                <div className={styles.lessonContent}>
-                                  <Space size="middle">
-                                    {getLessonIcon(lesson)}
-                                    <div className={styles.lessonInfo}>
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        <Text
-                                          strong={isCurrent || selectedLesson?._id === lesson._id}
-                                          style={lessonLocked ? { color: 'rgba(0,0,0,0.45)' } : {}}
-                                          delete={lessonCompleted && !isCurrent}
-                                        >
-                                          {lesson.title}
-                                        </Text>
-                                        {isCurrent && (
-                                          <Badge
-                                            count="HIỆN TẠI"
-                                            style={{ backgroundColor: '#1890ff' }}
-                                          />
-                                        )}
-                                      </div>
-                                      <Text type="secondary" className={styles.lessonDuration} style={{ fontSize: 12 }}>
-                                        {lesson.type === 'video' ? 'Video' : lesson.type === 'text' ? 'Reading' : 'Quiz'}
-                                        {lesson.duration && ` • ${formatDuration(lesson.duration)}`}
+                          return (
+                            <div
+                              key={lesson._id}
+                              className={`${styles.lessonItem} ${isViewing ? styles.active : ''} ${isViewing ? styles.currentLesson : ''} ${lessonLocked ? styles.lockedLesson : ''}`}
+                              onClick={() => !lessonLocked && handleLessonClick(lesson, module)}
+                              style={lessonLocked ? { cursor: 'not-allowed', opacity: 0.6 } : {}}
+                            >
+                              <div className={styles.lessonContent}>
+                                <Space size="middle">
+                                  {getLessonIcon(lesson)}
+                                  <div className={styles.lessonInfo}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                      <Text
+                                        strong={isViewing}
+                                        style={lessonLocked ? { color: 'rgba(0,0,0,0.45)' } : {}}
+                                        delete={lessonCompleted && !isViewing}
+                                      >
+                                        {lesson.title}
                                       </Text>
+                                      {isViewing && !lessonCompleted && (
+                                        <Badge
+                                          count="HIỆN TẠI"
+                                          style={{ backgroundColor: '#1890ff' }}
+                                        />
+                                      )}
                                     </div>
-                                  </Space>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                  {lessonCompleted ? (
-                                    <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 20 }} />
-                                  ) : lessonLocked ? (
-                                    <LockOutlined style={{ color: '#d9d9d9', fontSize: 18 }} />
-                                  ) : null}
-                                </div>
+                                    <Text type="secondary" className={styles.lessonDuration} style={{ fontSize: 12 }}>
+                                      {lesson.type === 'video' ? 'Video' : lesson.type === 'text' ? 'Reading' : 'Quiz'}
+                                      {lesson.duration && ` • ${formatDuration(lesson.duration)}`}
+                                    </Text>
+                                  </div>
+                                </Space>
                               </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </Panel>
-                  );
+                              <div style={{ display: 'flex', alignItems: 'center' }}>
+                                {lessonCompleted ? (
+                                  <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 20 }} />
+                                ) : lessonLocked ? (
+                                  <LockOutlined style={{ color: '#d9d9d9', fontSize: 18 }} />
+                                ) : null}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ),
+                  };
                 })}
-              </Collapse>
+              />
             )}
           </Card>
         </Col>

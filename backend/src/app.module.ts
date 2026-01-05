@@ -70,7 +70,7 @@ import { ChatsModule } from './modules/chats/chats.module';
           },
         },
         defaults: {
-          from: '"No Reply" <no-reply@localhost>',
+          from: `"${configService.get<string>('MAIL_SENDER_NAME') || 'Learnify'}" <${configService.get<string>('MAILDEV_INCOMING_USER') || 'Learnify@elearning.com'}>`,
         },
 
         // preview: true,

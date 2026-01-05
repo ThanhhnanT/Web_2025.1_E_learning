@@ -59,49 +59,7 @@ export class CoursesController {
     });
   }
 
-  @ApiOperation({ 
-    summary: 'Lấy chi tiết khóa học theo ID',
-    description: 'Lấy thông tin chi tiết của một khóa học cụ thể. API này là public.'
-  })
-  @ApiParam({ name: 'id', description: 'ID của khóa học', example: '507f1f77bcf86cd799439011' })
-  @ApiResponse({ status: 200, description: 'Lấy chi tiết khóa học thành công' })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy khóa học' })
-  @Public()
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.coursesService.findOne(id);
-  }
-
-  @ApiOperation({ 
-    summary: 'Cập nhật khóa học',
-    description: 'Cập nhật thông tin của một khóa học. Yêu cầu authentication.'
-  })
-  @ApiBearerAuth()
-  @ApiParam({ name: 'id', description: 'ID của khóa học cần cập nhật', example: '507f1f77bcf86cd799439011' })
-  @ApiBody({ type: UpdateCourseDto })
-  @ApiResponse({ status: 200, description: 'Cập nhật khóa học thành công' })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Chưa đăng nhập' })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy khóa học' })
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCourseDto: UpdateCourseDto) {
-    return this.coursesService.update(id, updateCourseDto);
-  }
-
-  @ApiOperation({ 
-    summary: 'Xóa khóa học',
-    description: 'Xóa một khóa học. Yêu cầu authentication.'
-  })
-  @ApiBearerAuth()
-  @ApiParam({ name: 'id', description: 'ID của khóa học cần xóa', example: '507f1f77bcf86cd799439011' })
-  @ApiResponse({ status: 200, description: 'Xóa khóa học thành công' })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Chưa đăng nhập' })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy khóa học' })
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.coursesService.remove(id);
-  }
-
-  // Module endpoints
+  // Module endpoints - MUST BE BEFORE :id route
   @ApiOperation({ 
     summary: 'Tạo module mới',
     description: 'Tạo một module mới cho khóa học. Yêu cầu authentication.'
@@ -235,6 +193,49 @@ export class CoursesController {
   @Delete('lessons/:id')
   removeLesson(@Param('id') id: string) {
     return this.coursesService.removeLesson(id);
+  }
+
+  // Course CRUD operations - MUST BE AFTER all specific routes
+  @ApiOperation({ 
+    summary: 'Lấy chi tiết khóa học theo ID',
+    description: 'Lấy thông tin chi tiết của một khóa học cụ thể. API này là public.'
+  })
+  @ApiParam({ name: 'id', description: 'ID của khóa học', example: '507f1f77bcf86cd799439011' })
+  @ApiResponse({ status: 200, description: 'Lấy chi tiết khóa học thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy khóa học' })
+  @Public()
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.coursesService.findOne(id);
+  }
+
+  @ApiOperation({ 
+    summary: 'Cập nhật khóa học',
+    description: 'Cập nhật thông tin của một khóa học. Yêu cầu authentication.'
+  })
+  @ApiBearerAuth()
+  @ApiParam({ name: 'id', description: 'ID của khóa học cần cập nhật', example: '507f1f77bcf86cd799439011' })
+  @ApiBody({ type: UpdateCourseDto })
+  @ApiResponse({ status: 200, description: 'Cập nhật khóa học thành công' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Chưa đăng nhập' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy khóa học' })
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateCourseDto: UpdateCourseDto) {
+    return this.coursesService.update(id, updateCourseDto);
+  }
+
+  @ApiOperation({ 
+    summary: 'Xóa khóa học',
+    description: 'Xóa một khóa học. Yêu cầu authentication.'
+  })
+  @ApiBearerAuth()
+  @ApiParam({ name: 'id', description: 'ID của khóa học cần xóa', example: '507f1f77bcf86cd799439011' })
+  @ApiResponse({ status: 200, description: 'Xóa khóa học thành công' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Chưa đăng nhập' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy khóa học' })
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.coursesService.remove(id);
   }
 }
 

@@ -1,7 +1,7 @@
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateCommentDto {
+export class CreatePostCommentDto {
   @ApiProperty({
     description: 'Nội dung bình luận',
     example: 'Đây là bình luận của tôi',

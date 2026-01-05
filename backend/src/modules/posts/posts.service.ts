@@ -14,8 +14,8 @@ import { CommentReaction } from './schema/comment-reaction.schema';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { UpdatePostStatusDto } from './dto/update-post-status.dto';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
+import { CreatePostCommentDto } from './dto/create-comment.dto';
+import { UpdatePostCommentDto } from './dto/update-comment.dto';
 import { CreateReactionDto } from './dto/create-reaction.dto';
 import { QueryPostsDto } from './dto/query-posts.dto';
 import { CloudinaryService } from '../users/cloudinary.service';
@@ -540,7 +540,7 @@ export class PostsService {
     return grouped;
   }
 
-  async createComment(postId: string, createCommentDto: CreateCommentDto, userId: string, file?: Express.Multer.File) {
+  async createComment(postId: string, createCommentDto: CreatePostCommentDto, userId: string, file?: Express.Multer.File) {
     try {
       // Validate userId
       if (!userId || !Types.ObjectId.isValid(userId)) {
@@ -678,7 +678,7 @@ export class PostsService {
   async updateComment(
     postId: string,
     commentId: string,
-    updateCommentDto: UpdateCommentDto,
+    updateCommentDto: UpdatePostCommentDto,
     userId: string,
   ) {
     const comment = await this.commentModel.findById(commentId);

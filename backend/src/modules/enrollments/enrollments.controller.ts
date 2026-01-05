@@ -21,16 +21,15 @@ export class EnrollmentsController {
   }
 
   @ApiOperation({ 
-    summary: 'Lấy chi tiết một enrollment',
-    description: 'Lấy thông tin chi tiết của một enrollment. Yêu cầu authentication.'
+    summary: 'Lấy thống kê enrollments của user',
+    description: 'Lấy các thống kê về enrollments của user. Yêu cầu authentication.'
   })
   @ApiBearerAuth()
-  @ApiParam({ name: 'id', description: 'ID của enrollment', example: '507f1f77bcf86cd799439011' })
-  @ApiResponse({ status: 200, description: 'Lấy enrollment thành công' })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy enrollment' })
-  @Get(':id')
-  async getEnrollmentById(@Param('id') id: string) {
-    return this.enrollmentsService.getEnrollmentById(id);
+  @ApiResponse({ status: 200, description: 'Lấy thống kê thành công' })
+  @Get('stats/me')
+  async getMyStats(@Req() req: any) {
+    const userId = req.user?.sub || req.user?.id;
+    return this.enrollmentsService.getEnrollmentStats(userId);
   }
 
   @ApiOperation({ 
@@ -44,6 +43,19 @@ export class EnrollmentsController {
   async checkEnrollment(@Param('courseId') courseId: string, @Req() req: any) {
     const userId = req.user?.sub || req.user?.id;
     return this.enrollmentsService.checkEnrollment(userId, courseId);
+  }
+
+  @ApiOperation({ 
+    summary: 'Lấy chi tiết một enrollment',
+    description: 'Lấy thông tin chi tiết của một enrollment. Yêu cầu authentication.'
+  })
+  @ApiBearerAuth()
+  @ApiParam({ name: 'id', description: 'ID của enrollment', example: '507f1f77bcf86cd799439011' })
+  @ApiResponse({ status: 200, description: 'Lấy enrollment thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy enrollment' })
+  @Get(':id')
+  async getEnrollmentById(@Param('id') id: string) {
+    return this.enrollmentsService.getEnrollmentById(id);
   }
 
   @ApiOperation({ 
@@ -63,15 +75,33 @@ export class EnrollmentsController {
   }
 
   @ApiOperation({ 
-    summary: 'Lấy thống kê enrollments của user',
-    description: 'Lấy các thống kê về enrollments của user. Yêu cầu authentication.'
+    summary: 'Đánh dấu lesson đã hoàn thành',
+    description: 'Đánh dấu một lesson là đã hoàn thành trong enrollment. Yêu cầu authentication.'
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 200, description: 'Lấy thống kê thành công' })
-  @Get('stats/me')
-  async getMyStats(@Req() req: any) {
-    const userId = req.user?.sub || req.user?.id;
-    return this.enrollmentsService.getEnrollmentStats(userId);
+  @ApiParam({ name: 'id', description: 'ID của enrollment' })
+  @ApiParam({ name: 'lessonId', description: 'ID của lesson' })
+  @ApiResponse({ status: 200, description: 'Đánh dấu lesson thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy enrollment' })
+  @Patch(':id/lessons/:lessonId/complete')
+  async markLessonComplete(
+    @Param('id') id: string,
+    @Param('lessonId') lessonId: string,
+  ) {
+    return this.enrollmentsService.markLessonComplete(id, lessonId);
+  }
+
+  @ApiOperation({ 
+    summary: 'Lấy thông tin progress của enrollment',
+    description: 'Lấy chi tiết tiến độ học tập (số lesson đã hoàn thành, tổng số lesson, phần trăm). Yêu cầu authentication.'
+  })
+  @ApiBearerAuth()
+  @ApiParam({ name: 'id', description: 'ID của enrollment' })
+  @ApiResponse({ status: 200, description: 'Lấy progress thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy enrollment' })
+  @Get(':id/progress')
+  async getEnrollmentProgress(@Param('id') id: string) {
+    return this.enrollmentsService.getEnrollmentProgress(id);
   }
 
   @ApiOperation({ 

@@ -20,7 +20,7 @@ import {
   ClockCircleOutlined,
   PlayCircleOutlined,
 } from '@ant-design/icons';
-import enrollmentService, { Enrollment, EnrollmentStats } from '../../service/enrollmentService';
+import enrollmentService, { Enrollment, EnrollmentStats, EnrollmentProgress } from '../../service/enrollmentService';
 import paymentService from '../../service/paymentService';
 
 export default function MyCoursesPage() {
@@ -29,10 +29,66 @@ export default function MyCoursesPage() {
   const [stats, setStats] = useState<EnrollmentStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
+  const [progressMap, setProgressMap] = useState<Record<string, EnrollmentProgress>>({});
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Refresh progress when lesson is marked complete or when page becomes visible
+  useEffect(() => {
+    const handleProgressUpdate = async () => {
+      // Get current enrollments from state
+      const currentEnrollments = enrollments;
+      if (currentEnrollments.length > 0) {
+        const progressPromises = currentEnrollments.map(async (enrollment) => {
+          try {
+            const progress = await enrollmentService.getEnrollmentProgress(enrollment._id);
+            return { enrollmentId: enrollment._id, progress };
+          } catch (error) {
+            console.error(`Error refreshing progress for enrollment ${enrollment._id}:`, error);
+            return { enrollmentId: enrollment._id, progress: null };
+          }
+        });
+
+        const progressResults = await Promise.all(progressPromises);
+        const newProgressMap: Record<string, EnrollmentProgress> = {};
+        progressResults.forEach(({ enrollmentId, progress }) => {
+          if (progress) {
+            newProgressMap[enrollmentId] = progress;
+          }
+        });
+        setProgressMap(newProgressMap);
+      }
+    };
+
+    // Listen for custom event when lesson is marked complete
+    const handleLessonComplete = () => {
+      handleProgressUpdate();
+    };
+
+    // Refresh when page becomes visible (user returns from course page)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleProgressUpdate();
+      }
+    };
+
+    // Refresh when window gains focus
+    const handleFocus = () => {
+      handleProgressUpdate();
+    };
+
+    window.addEventListener('lessonCompleted', handleLessonComplete);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('lessonCompleted', handleLessonComplete);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [enrollments]); // Refresh when enrollments change
 
   const fetchData = async () => {
     try {
@@ -43,6 +99,26 @@ export default function MyCoursesPage() {
       ]);
       setEnrollments(enrollmentsData);
       setStats(statsData);
+
+      // Fetch progress for each enrollment
+      const progressPromises = enrollmentsData.map(async (enrollment) => {
+        try {
+          const progress = await enrollmentService.getEnrollmentProgress(enrollment._id);
+          return { enrollmentId: enrollment._id, progress };
+        } catch (error) {
+          console.error(`Error fetching progress for enrollment ${enrollment._id}:`, error);
+          return { enrollmentId: enrollment._id, progress: null };
+        }
+      });
+
+      const progressResults = await Promise.all(progressPromises);
+      const newProgressMap: Record<string, EnrollmentProgress> = {};
+      progressResults.forEach(({ enrollmentId, progress }) => {
+        if (progress) {
+          newProgressMap[enrollmentId] = progress;
+        }
+      });
+      setProgressMap(newProgressMap);
     } catch (error) {
       console.error('Error fetching enrollments:', error);
     } finally {
@@ -52,7 +128,32 @@ export default function MyCoursesPage() {
 
   const filterEnrollments = (status?: string) => {
     if (!status || status === 'all') return enrollments;
-    return enrollments.filter((e) => e.status === status);
+    
+    return enrollments.filter((e) => {
+      // Calculate actual progress for this enrollment
+      const enrollmentProgress = progressMap[e._id];
+      let actualProgress = 0;
+      
+      if (enrollmentProgress && enrollmentProgress.totalLessons > 0) {
+        actualProgress = Math.round(
+          (enrollmentProgress.completedCount / enrollmentProgress.totalLessons) * 100
+        );
+      } else if (e.progress !== undefined) {
+        actualProgress = Math.round(Math.max(0, Math.min(100, e.progress || 0)));
+      }
+      
+      const isActuallyCompleted = actualProgress >= 100;
+      
+      if (status === 'completed') {
+        // For completed tab, only show if actually completed (progress >= 100)
+        return isActuallyCompleted;
+      }
+      // For active tab, show if not completed and not suspended
+      if (status === 'active') {
+        return !isActuallyCompleted && e.status !== 'suspended';
+      }
+      return e.status === status;
+    });
   };
 
   const formatDate = (date: string) => {
@@ -83,17 +184,17 @@ export default function MyCoursesPage() {
   const tabItems = [
     {
       key: 'all',
-      label: `All (${enrollments.length})`,
+      label: `Tất cả (${enrollments.length})`,
       children: null,
     },
     {
       key: 'active',
-      label: `Active (${stats?.active || 0})`,
+      label: `Đang học (${stats?.active || 0})`,
       children: null,
     },
     {
       key: 'completed',
-      label: `Completed (${stats?.completed || 0})`,
+      label: `Đã hoàn thành (${stats?.completed || 0})`,
       children: null,
     },
   ];
@@ -101,7 +202,7 @@ export default function MyCoursesPage() {
   return (
     <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
       <h1 style={{ fontSize: '32px', fontWeight: 600, marginBottom: '24px' }}>
-        <BookOutlined /> My Courses
+        <BookOutlined /> Khóa học của tôi
       </h1>
 
       {/* Statistics Cards */}
@@ -110,7 +211,7 @@ export default function MyCoursesPage() {
           <Col xs={24} sm={12} md={6}>
             <Card>
               <Statistic
-                title="Total Courses"
+                title="Tổng khóa học"
                 value={stats.total}
                 prefix={<BookOutlined />}
                 valueStyle={{ color: '#1890ff' }}
@@ -120,7 +221,7 @@ export default function MyCoursesPage() {
           <Col xs={24} sm={12} md={6}>
             <Card>
               <Statistic
-                title="Active"
+                title="Đang học"
                 value={stats.active}
                 prefix={<ClockCircleOutlined />}
                 valueStyle={{ color: '#faad14' }}
@@ -130,7 +231,7 @@ export default function MyCoursesPage() {
           <Col xs={24} sm={12} md={6}>
             <Card>
               <Statistic
-                title="Completed"
+                title="Đã hoàn thành"
                 value={stats.completed}
                 prefix={<TrophyOutlined />}
                 valueStyle={{ color: '#52c41a' }}
@@ -140,7 +241,7 @@ export default function MyCoursesPage() {
           <Col xs={24} sm={12} md={6}>
             <Card>
               <Statistic
-                title="Avg Progress"
+                title="Tiến độ trung bình"
                 value={stats.averageProgress}
                 suffix="%"
                 precision={1}
@@ -157,11 +258,17 @@ export default function MyCoursesPage() {
       {/* Courses List */}
       {filterEnrollments(activeTab === 'all' ? undefined : activeTab).length === 0 ? (
         <Empty
-          description={`No ${activeTab === 'all' ? '' : activeTab} courses found`}
+          description={
+            activeTab === 'all' 
+              ? 'Chưa có khóa học nào' 
+              : activeTab === 'active' 
+              ? 'Không có khóa học đang học' 
+              : 'Không có khóa học đã hoàn thành'
+          }
           style={{ marginTop: '48px' }}
         >
           <Button type="primary" onClick={() => router.push('/courses')}>
-            Browse Courses
+            Duyệt khóa học
           </Button>
         </Empty>
       ) : (
@@ -169,6 +276,30 @@ export default function MyCoursesPage() {
           {filterEnrollments(activeTab === 'all' ? undefined : activeTab).map((enrollment) => {
             const course = typeof enrollment.courseId === 'object' ? enrollment.courseId : null;
             if (!course) return null;
+
+            // Get progress from API - use progressPercentage if available, otherwise calculate
+            const enrollmentProgress = progressMap[enrollment._id];
+            let finalProgress = 0;
+            
+            if (enrollmentProgress) {
+              // Use progressPercentage from API if available
+              if (enrollmentProgress.progressPercentage !== undefined && enrollmentProgress.progressPercentage !== null) {
+                finalProgress = Math.round(Math.max(0, Math.min(100, enrollmentProgress.progressPercentage)));
+              } else if (enrollmentProgress.totalLessons > 0) {
+                // Calculate from completedCount / totalLessons if progressPercentage not available
+                finalProgress = Math.round(
+                  (enrollmentProgress.completedCount / enrollmentProgress.totalLessons) * 100
+                );
+              }
+            } else if (enrollment.progress !== undefined) {
+              // Fallback to enrollment.progress if API data not available
+              finalProgress = Math.round(Math.max(0, Math.min(100, enrollment.progress || 0)));
+            }
+            
+            // Determine actual status - only "completed" if progress is 100%
+            // Always use 'active' if progress < 100, regardless of enrollment.status
+            const actualStatus = finalProgress >= 100 ? 'completed' : 'active';
+            const isActuallyCompleted = finalProgress >= 100;
 
             return (
               <Col xs={24} sm={12} md={8} key={enrollment._id}>
@@ -202,7 +333,7 @@ export default function MyCoursesPage() {
                       onClick={() => handleContinueLearning(enrollment)}
                       key="continue"
                     >
-                      {enrollment.progress > 0 ? 'Continue' : 'Start Learning'}
+                      {finalProgress > 0 ? 'Tiếp tục học' : 'Bắt đầu học'}
                     </Button>,
                   ]}
                 >
@@ -210,22 +341,31 @@ export default function MyCoursesPage() {
                     title={course.title}
                     description={
                       <div>
-                        <Tag color={enrollmentService.getStatusColor(enrollment.status)}>
-                          {enrollmentService.getStatusLabel(enrollment.status)}
+                        <Tag color={enrollmentService.getStatusColor(actualStatus)}>
+                          {enrollmentService.getStatusLabel(actualStatus)}
                         </Tag>
                         <div style={{ marginTop: '12px' }}>
                           <Progress
-                            percent={enrollment.progress}
-                            strokeColor={enrollmentService.getProgressColor(enrollment.progress)}
+                            percent={finalProgress}
+                            strokeColor={{
+                              '0%': '#108ee9',
+                              '100%': '#87d068',
+                            }}
                             size="small"
+                            format={(percent) => `${percent}%`}
                           />
                         </div>
+                        {enrollmentProgress && enrollmentProgress.totalLessons > 0 && (
+                          <div style={{ marginTop: '4px', fontSize: '11px', color: '#999' }}>
+                            {enrollmentProgress.completedCount}/{enrollmentProgress.totalLessons} bài học đã hoàn thành
+                          </div>
+                        )}
                         <div style={{ marginTop: '8px', fontSize: '12px', color: '#999' }}>
-                          Enrolled: {formatDate(enrollment.enrolledAt)}
+                          Đã đăng ký: {formatDate(enrollment.enrolledAt)}
                         </div>
-                        {enrollment.completedAt && (
+                        {isActuallyCompleted && enrollment.completedAt && (
                           <div style={{ fontSize: '12px', color: '#52c41a' }}>
-                            Completed: {formatDate(enrollment.completedAt)}
+                            Hoàn thành: {formatDate(enrollment.completedAt)}
                           </div>
                         )}
                       </div>

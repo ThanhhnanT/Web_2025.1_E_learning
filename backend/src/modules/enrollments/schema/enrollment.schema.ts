@@ -25,6 +25,12 @@ export class Enrollment {
 
   @Prop({ type: String, enum: ['active', 'completed', 'suspended'], default: 'active' })
   status: string;
+
+  @Prop({ type: [String], default: [] })
+  completedLessons: string[];
+
+  @Prop({ type: String })
+  lastAccessedLessonId?: string;
 }
 
 export const EnrollmentSchema = SchemaFactory.createForClass(Enrollment);

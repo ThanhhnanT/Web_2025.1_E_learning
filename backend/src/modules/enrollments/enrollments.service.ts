@@ -5,7 +5,10 @@ import { Enrollment } from './schema/enrollment.schema';
 import { Course } from '../courses/schema/course.schema';
 import { User } from '../users/schemas/user.schema';
 import { Payment } from '../payments/schema/payment.schema';
+import { Module as CourseModule } from '../courses/schema/module.schema';
+import { Lesson } from '../courses/schema/lesson.schema';
 import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class EnrollmentsService {
@@ -15,7 +18,10 @@ export class EnrollmentsService {
     @InjectModel(Enrollment.name) private enrollmentModel: Model<Enrollment>,
     @InjectModel(Course.name) private courseModel: Model<Course>,
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(CourseModule.name) private moduleModel: Model<CourseModule>,
+    @InjectModel(Lesson.name) private lessonModel: Model<Lesson>,
     private mailerService: MailerService,
+    private configService: ConfigService,
   ) {}
 
   /**
@@ -76,12 +82,19 @@ export class EnrollmentsService {
       query.status = status;
     }
 
-    return await this.enrollmentModel
+    const enrollments = await this.enrollmentModel
       .find(query)
       .populate('courseId')
       .populate('paymentId')
       .sort({ enrolledAt: -1 })
       .exec();
+
+    // Auto-fix progress for all enrollments
+    for (const enrollment of enrollments) {
+      await this.recalculateProgressIfNeeded(enrollment);
+    }
+
+    return enrollments;
   }
 
   /**
@@ -99,7 +112,48 @@ export class EnrollmentsService {
       throw new NotFoundException('Enrollment not found');
     }
 
+    // Auto-fix progress if it doesn't match completedLessons
+    await this.recalculateProgressIfNeeded(enrollment);
+
     return enrollment;
+  }
+
+  /**
+   * Recalculate and update progress if it doesn't match completedLessons
+   */
+  private async recalculateProgressIfNeeded(enrollment: any) {
+    if (!enrollment.completedLessons || enrollment.completedLessons.length === 0) {
+      // No completed lessons, progress should be 0
+      if (enrollment.progress !== 0 && enrollment.status !== 'completed') {
+        enrollment.progress = 0;
+        await enrollment.save();
+      }
+      return;
+    }
+
+    // Calculate actual progress
+    const progress = await this.calculateProgress(
+      enrollment.courseId.toString(),
+      enrollment.completedLessons
+    );
+
+    // Update if progress doesn't match
+    if (enrollment.progress !== progress.progressPercentage) {
+      enrollment.progress = progress.progressPercentage;
+      
+      // Also update status if needed
+      if (progress.progressPercentage >= 100 && enrollment.status !== 'completed') {
+        enrollment.status = 'completed';
+        if (!enrollment.completedAt) {
+          enrollment.completedAt = new Date();
+        }
+      } else if (progress.progressPercentage < 100 && enrollment.status === 'completed' && enrollment.progress === 0) {
+        // Only change status if progress was 0 (likely a bug)
+        enrollment.status = 'active';
+      }
+      
+      await enrollment.save();
+    }
   }
 
   /**
@@ -110,9 +164,21 @@ export class EnrollmentsService {
       .findOne({ userId, courseId })
       .exec();
 
+    if (!enrollment) {
+      return {
+        isEnrolled: false,
+        enrollment: null,
+        progress: null,
+      };
+    }
+
+    // Get progress details
+    const progress = await this.getEnrollmentProgress(enrollment._id.toString());
+
     return {
-      isEnrolled: !!enrollment,
+      isEnrolled: true,
       enrollment,
+      progress,
     };
   }
 
@@ -148,6 +214,121 @@ export class EnrollmentsService {
     await enrollment.save();
 
     return enrollment;
+  }
+
+  /**
+   * Mark a lesson as completed
+   */
+  async markLessonComplete(enrollmentId: string, lessonId: string) {
+    const enrollment = await this.enrollmentModel.findById(enrollmentId).exec();
+    if (!enrollment) {
+      throw new NotFoundException('Enrollment not found');
+    }
+
+    // Add lesson to completedLessons if not already there
+    if (!enrollment.completedLessons.includes(lessonId)) {
+      enrollment.completedLessons.push(lessonId);
+    }
+
+    // Update last accessed lesson
+    enrollment.lastAccessedLessonId = lessonId;
+
+    // Calculate and update progress percentage
+    // IMPORTANT: Pass completedLessons to calculateProgress
+    const progress = await this.calculateProgress(
+      enrollment.courseId.toString(),
+      enrollment.completedLessons
+    );
+    enrollment.progress = progress.progressPercentage;
+
+    // Mark as completed if all lessons are done
+    if (progress.completedCount === progress.totalLessons && enrollment.status !== 'completed') {
+      enrollment.status = 'completed';
+      enrollment.completedAt = new Date();
+
+      // Send completion email
+      const user: any = await this.userModel.findById(enrollment.userId).exec();
+      const course: any = await this.courseModel.findById(enrollment.courseId).exec();
+
+      if (user && course) {
+        await this.sendCompletionEmail(user.email, user.name, course.title);
+      }
+    }
+
+    await enrollment.save();
+
+    return enrollment;
+  }
+
+  /**
+   * Get enrollment progress details
+   */
+  async getEnrollmentProgress(enrollmentId: string) {
+    const enrollment = await this.enrollmentModel.findById(enrollmentId).exec();
+    if (!enrollment) {
+      throw new NotFoundException('Enrollment not found');
+    }
+
+    const progress = await this.calculateProgress(enrollment.courseId.toString(), enrollment.completedLessons);
+
+    return {
+      completedLessons: enrollment.completedLessons || [],
+      totalLessons: progress.totalLessons,
+      completedCount: progress.completedCount,
+      progressPercentage: progress.progressPercentage,
+      lastAccessedLessonId: enrollment.lastAccessedLessonId,
+    };
+  }
+
+  /**
+   * Calculate progress for a course
+   */
+  private async calculateProgress(courseId: string, completedLessons: string[] = []) {
+    try {
+      // Convert courseId to ObjectId if it's a valid ObjectId string
+      const courseIdQuery = Types.ObjectId.isValid(courseId) 
+        ? new Types.ObjectId(courseId) 
+        : courseId;
+
+      // Get all modules for the course
+      const modules = await this.moduleModel.find({ courseId: courseIdQuery }).exec();
+
+      if (modules.length === 0) {
+        return {
+          totalLessons: 0,
+          completedCount: completedLessons.length,
+          progressPercentage: 0,
+        };
+      }
+
+      // Get all lessons for all modules
+      const moduleIds = modules.map(m => m._id);
+      const allLessons = await this.lessonModel
+        .find({ 
+          moduleId: { $in: moduleIds },
+          deletedAt: null 
+        })
+        .exec();
+
+      const totalLessons = allLessons.length;
+      const completedCount = completedLessons.length;
+      const progressPercentage = totalLessons > 0 
+        ? Math.round((completedCount / totalLessons) * 100) 
+        : 0;
+
+      return {
+        totalLessons,
+        completedCount,
+        progressPercentage,
+      };
+    } catch (error) {
+      this.logger.error(`Error calculating progress for course ${courseId}:`, error);
+      return {
+        totalLessons: 0,
+        completedCount: completedLessons.length,
+        progressPercentage: 0,
+      };
+    }
   }
 
   /**
@@ -228,6 +409,8 @@ export class EnrollmentsService {
    */
   private async sendEnrollmentEmail(email: string, userName: string, courseName: string) {
     try {
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+      
       await this.mailerService.sendMail({
         to: email,
         subject: 'Course Enrollment Successful',
@@ -235,6 +418,7 @@ export class EnrollmentsService {
         context: {
           userName,
           courseName,
+          frontendUrl,
         },
       });
     } catch (error) {
@@ -247,6 +431,8 @@ export class EnrollmentsService {
    */
   private async sendCompletionEmail(email: string, userName: string, courseName: string) {
     try {
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+      
       await this.mailerService.sendMail({
         to: email,
         subject: 'Congratulations on Completing the Course!',
@@ -254,6 +440,7 @@ export class EnrollmentsService {
         context: {
           userName,
           courseName,
+          frontendUrl,
         },
       });
     } catch (error) {

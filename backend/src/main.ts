@@ -16,10 +16,6 @@ async function bootstrap() {
     whitelist: true,
     forbidNonWhitelisted: true
   }))
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true
-  }))
   const port = configService.get('PORT')
 
   const config = new DocumentBuilder()
@@ -32,6 +28,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app,config)
 
   SwaggerModule.setup('api', app, document)
+  
   await app.listen(port ?? 3000);
+
 }
 bootstrap();

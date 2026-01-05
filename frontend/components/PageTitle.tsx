@@ -16,7 +16,7 @@ const getPageTitle = (pathname: string, titleParam?: string | null): string => {
   const titleMap: Record<string, string> = {
     "/": "Trang chủ",
     "/about": "Giới thiệu",
-    "/courses/online": "Khóa học trực tuyến",
+    "/courses": "Khóa học trực tuyến",
     "/tests": "Đề thi online",
     "/flashcards": "Flashcards",
     "/posts": "Blog",
@@ -32,7 +32,7 @@ const getPageTitle = (pathname: string, titleParam?: string | null): string => {
   }
 
   // Kiểm tra route động với pattern matching
-  if (pathname.startsWith("/courses/") && pathname !== "/courses/online") {
+  if (pathname.startsWith("/courses/") && pathname !== "/courses") {
     return `Chi tiết khóa học - ${baseTitle}`;
   }
   

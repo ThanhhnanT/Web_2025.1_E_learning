@@ -5,6 +5,8 @@ import { EnrollmentsController } from './enrollments.controller';
 import { Enrollment, EnrollmentSchema } from './schema/enrollment.schema';
 import { Course, CourseSchema } from '../courses/schema/course.schema';
 import { User, UserSchema } from '../users/schemas/user.schema';
+import { Module as CourseModule, ModuleSchema } from '../courses/schema/module.schema';
+import { Lesson, LessonSchema } from '../courses/schema/lesson.schema';
 
 @Module({
   imports: [
@@ -20,6 +22,14 @@ import { User, UserSchema } from '../users/schemas/user.schema';
       {
         name: User.name,
         schema: UserSchema,
+      },
+      {
+        name: CourseModule.name,
+        schema: ModuleSchema,
+      },
+      {
+        name: Lesson.name,
+        schema: LessonSchema,
       },
     ]),
   ],

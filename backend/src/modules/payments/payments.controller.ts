@@ -126,6 +126,21 @@ export class PaymentsController {
     return this.paymentsService.remove(id);
   }
 
+  // ========== Payment Verification Endpoints ==========
+
+  @ApiOperation({ 
+    summary: 'Verify Stripe payment session and complete payment',
+    description: 'Kiểm tra trạng thái thanh toán từ Stripe session ID và hoàn tất thanh toán nếu thành công. API này là public.'
+  })
+  @ApiQuery({ name: 'session_id', description: 'Stripe session ID từ redirect', example: 'cs_test_abc123...' })
+  @ApiResponse({ status: 200, description: 'Payment verified and completed successfully' })
+  @ApiResponse({ status: 404, description: 'Session not found' })
+  @Public()
+  @Get('verify/stripe-session')
+  async verifyStripeSession(@Query('session_id') sessionId: string) {
+    return this.paymentsService.verifyAndCompleteStripePayment(sessionId);
+  }
+
   // ========== Webhook Endpoints ==========
 
   @ApiOperation({ 

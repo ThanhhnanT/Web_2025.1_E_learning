@@ -1,4 +1,4 @@
-import api from '../lib/api';
+import { getAccess, postAccess, patchAccess, deleteAccess } from '../helper/api';
 
 export interface CreatePaymentIntentDto {
   courseId: string;
@@ -55,24 +55,21 @@ class PaymentService {
    * Create payment intent/session
    */
   async createPaymentIntent(data: CreatePaymentIntentDto): Promise<PaymentIntentResponse> {
-    const response = await api.post('/payments/create-intent', data);
-    return response.data;
+    return await postAccess('payments/create-intent', data);
   }
 
   /**
    * Get payment by ID
    */
   async getPaymentById(paymentId: string): Promise<Payment> {
-    const response = await api.get(`/payments/${paymentId}`);
-    return response.data;
+    return await getAccess(`payments/${paymentId}`);
   }
 
   /**
    * Get payment by transaction ID
    */
   async getPaymentByTransactionId(transactionId: string): Promise<Payment> {
-    const response = await api.get(`/payments/transaction/${transactionId}`);
-    return response.data;
+    return await getAccess(`payments/transaction/${transactionId}`);
   }
 
   /**
@@ -82,8 +79,14 @@ class PaymentService {
     courseId?: string;
     status?: string;
   }): Promise<Payment[]> {
-    const response = await api.get('/payments', { params: filters });
-    return response.data;
+    return await getAccess('payments', filters);
+  }
+
+  /**
+   * Verify Stripe session and complete payment
+   */
+  async verifyStripeSession(sessionId: string): Promise<any> {
+    return await getAccess(`payments/verify/stripe-session?session_id=${sessionId}`);
   }
 
   /**
@@ -91,31 +94,28 @@ class PaymentService {
    */
   async verifyPaymentReturn(gateway: string, queryParams: any): Promise<any> {
     const queryString = new URLSearchParams(queryParams).toString();
-    const response = await api.get(`/payments/verify/${gateway}?${queryString}`);
-    return response.data;
+    return await getAccess(`payments/verify/${gateway}?${queryString}`);
   }
 
   /**
    * Get user's saved payment methods
    */
   async getPaymentMethods(): Promise<PaymentMethod[]> {
-    const response = await api.get('/payments/methods');
-    return response.data;
+    return await getAccess('payments/methods');
   }
 
   /**
    * Delete a payment method
    */
   async deletePaymentMethod(methodId: string): Promise<void> {
-    await api.delete(`/payments/methods/${methodId}`);
+    await deleteAccess(`payments/methods/${methodId}`);
   }
 
   /**
    * Request refund
    */
   async requestRefund(paymentId: string, reason: string): Promise<Payment> {
-    const response = await api.post(`/payments/${paymentId}/refund`, { reason });
-    return response.data;
+    return await postAccess(`payments/${paymentId}/refund`, { reason });
   }
 
   /**

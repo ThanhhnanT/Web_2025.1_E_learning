@@ -10,8 +10,10 @@ import { StripeService } from './services/stripe.service';
 import { VNPayService } from './services/vnpay.service';
 import { MomoService } from './services/momo.service';
 import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 import { Course } from '../courses/schema/course.schema';
 import { User } from '../users/schemas/user.schema';
+import { EnrollmentsService } from '../enrollments/enrollments.service';
 
 @Injectable()
 export class PaymentsService {
@@ -26,6 +28,8 @@ export class PaymentsService {
     private vnpayService: VNPayService,
     private momoService: MomoService,
     private mailerService: MailerService,
+    private configService: ConfigService,
+    private enrollmentsService: EnrollmentsService,
   ) {}
 
   async create(createPaymentDto: CreatePaymentDto) {
@@ -125,6 +129,8 @@ export class PaymentsService {
             course.title,
             user.email,
             dto.savePaymentMethod,
+            dto.returnUrl,
+            dto.cancelUrl,
           );
           paymentData.gatewayPaymentIntent = gatewayResponse.sessionId;
           paymentData.metadata = { stripeSessionId: gatewayResponse.sessionId };
@@ -176,6 +182,101 @@ export class PaymentsService {
       };
     } catch (error) {
       this.logger.error('Error creating payment intent:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Verify Stripe session and complete payment
+   * Used when webhook is not available (localhost development)
+   */
+  async verifyAndCompleteStripePayment(sessionId: string) {
+    try {
+      this.logger.log(`Verifying Stripe session: ${sessionId}`);
+      
+      // Get session from Stripe
+      const session = await this.stripeService.retrieveSession(sessionId);
+      
+      if (!session) {
+        throw new NotFoundException('Stripe session not found');
+      }
+
+      // Find payment by session ID
+      const payment = await this.paymentModel
+        .findOne({ 'metadata.stripeSessionId': sessionId })
+        .populate('userId')
+        .populate('courseId')
+        .exec();
+
+      if (!payment) {
+        throw new NotFoundException('Payment record not found for this session');
+      }
+
+      // Check if already completed
+      if (payment.status === 'completed') {
+        this.logger.log(`Payment ${payment._id} already completed`);
+        return {
+          success: true,
+          message: 'Payment already completed',
+          payment,
+          courseId: payment.courseId,
+        };
+      }
+
+      // Check payment status from Stripe
+      if (session.payment_status === 'paid') {
+        // Update payment status
+        payment.status = 'completed';
+        payment.paymentDate = new Date();
+        payment.gatewayTransactionId = session.payment_intent as string;
+        await payment.save();
+
+        this.logger.log(`Payment ${payment._id} marked as completed`);
+
+        // Enroll user in course
+        // Extract ObjectId from populated fields
+        const userIdToUse = (payment.userId as any)?._id || payment.userId;
+        const courseIdToUse = (payment.courseId as any)?._id || payment.courseId;
+        
+        const enrollment = await this.enrollmentsService.createEnrollment(
+          userIdToUse.toString(),
+          courseIdToUse.toString(),
+          payment._id.toString(),
+        );
+
+        this.logger.log(`User enrolled in course: ${enrollment._id}`);
+
+        // Send success email
+        const user: any = payment.userId;
+        const course: any = payment.courseId;
+        if (user && course) {
+          await this.sendPaymentSuccessEmail(
+            user.email,
+            user.name,
+            course.title,
+            payment.amount,
+          );
+        }
+
+        return {
+          success: true,
+          message: 'Payment completed successfully',
+          payment,
+          enrollment,
+          courseId: payment.courseId._id,
+        };
+      } else {
+        // Payment not completed yet
+        this.logger.warn(`Payment ${payment._id} not completed yet. Stripe status: ${session.payment_status}`);
+        return {
+          success: false,
+          message: 'Payment not completed yet',
+          payment,
+          stripeStatus: session.payment_status,
+        };
+      }
+    } catch (error) {
+      this.logger.error('Error verifying Stripe payment:', error);
       throw error;
     }
   }
@@ -376,14 +477,17 @@ export class PaymentsService {
     amount: number,
   ) {
     try {
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+      
       await this.mailerService.sendMail({
         to: email,
-        subject: 'Payment Successful - Course Enrollment Confirmed',
+        subject: 'Thanh toán thành công - Chào mừng bạn đến với khóa học',
         template: 'payment-success',
         context: {
           userName,
           courseName,
           amount,
+          frontendUrl,
         },
       });
     } catch (error) {
@@ -401,14 +505,17 @@ export class PaymentsService {
     reason: string,
   ) {
     try {
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+      
       await this.mailerService.sendMail({
         to: email,
-        subject: 'Payment Failed - Please Try Again',
+        subject: 'Thanh toán không thành công - Vui lòng thử lại',
         template: 'payment-failed',
         context: {
           userName,
           courseName,
           reason,
+          frontendUrl,
         },
       });
     } catch (error) {

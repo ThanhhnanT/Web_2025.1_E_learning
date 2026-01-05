@@ -1,4 +1,5 @@
 import type { CourseModule, Lesson } from '@/types/course';
+import enrollmentService from '@/service/enrollmentService';
 
 export interface CourseProgress {
   courseId: string;
@@ -7,6 +8,10 @@ export interface CourseProgress {
 }
 
 const STORAGE_PREFIX = 'courseProgress_';
+
+// Cache for enrollment data to avoid repeated API calls
+const enrollmentCache = new Map<string, { completedLessons: string[]; timestamp: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
  * Get progress data for a course from localStorage
@@ -38,7 +43,49 @@ export const saveCourseProgressData = (progress: CourseProgress): void => {
 };
 
 /**
+ * Get completed lessons from backend (with cache)
+ */
+export const getCompletedLessonsFromBackend = async (courseId: string, enrollmentId?: string): Promise<string[]> => {
+  try {
+    // Check cache first
+    const cached = enrollmentCache.get(courseId);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      return cached.completedLessons;
+    }
+
+    // If enrollmentId provided, get progress directly
+    if (enrollmentId) {
+      const progress = await enrollmentService.getEnrollmentProgress(enrollmentId);
+      enrollmentCache.set(courseId, {
+        completedLessons: progress.completedLessons,
+        timestamp: Date.now(),
+      });
+      return progress.completedLessons;
+    }
+
+    // Otherwise, check enrollment first
+    const { isEnrolled, enrollment, progress } = await enrollmentService.checkEnrollment(courseId);
+    
+    if (isEnrolled && enrollment) {
+      const completedLessons = progress?.completedLessons || enrollment.completedLessons || [];
+      enrollmentCache.set(courseId, {
+        completedLessons,
+        timestamp: Date.now(),
+      });
+      return completedLessons;
+    }
+
+    return [];
+  } catch (error) {
+    console.error('Error fetching completed lessons from backend:', error);
+    // Fallback to localStorage
+    return getCompletedLessons(courseId);
+  }
+};
+
+/**
  * Get list of completed lesson IDs for a course
+ * Tries backend first, falls back to localStorage
  */
 export const getCompletedLessons = (courseId: string): string[] => {
   const progress = getCourseProgressData(courseId);
@@ -46,9 +93,49 @@ export const getCompletedLessons = (courseId: string): string[] => {
 };
 
 /**
- * Mark a lesson as completed
+ * Sync lesson completion with backend
  */
-export const markLessonComplete = (courseId: string, lessonId: string): void => {
+export const syncLessonCompletion = async (
+  courseId: string,
+  lessonId: string,
+  enrollmentId?: string
+): Promise<void> => {
+  try {
+    // If enrollmentId provided, mark directly
+    if (enrollmentId) {
+      await enrollmentService.markLessonComplete(enrollmentId, lessonId);
+      // Invalidate cache
+      enrollmentCache.delete(courseId);
+      // Dispatch event to notify other components
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('lessonCompleted', { detail: { courseId, enrollmentId } }));
+      }
+      return;
+    }
+
+    // Otherwise, check enrollment first
+    const { isEnrolled, enrollment } = await enrollmentService.checkEnrollment(courseId);
+    
+    if (isEnrolled && enrollment) {
+      await enrollmentService.markLessonComplete(enrollment._id, lessonId);
+      // Invalidate cache
+      enrollmentCache.delete(courseId);
+      // Dispatch event to notify other components
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('lessonCompleted', { detail: { courseId, enrollmentId: enrollment._id } }));
+      }
+    }
+  } catch (error) {
+    console.error('Error syncing lesson completion with backend:', error);
+    // Fallback to localStorage
+    markLessonCompleteLocal(courseId, lessonId);
+  }
+};
+
+/**
+ * Mark a lesson as completed (localStorage only - fallback)
+ */
+const markLessonCompleteLocal = (courseId: string, lessonId: string): void => {
   const progress = getCourseProgressData(courseId) || {
     courseId,
     completedLessons: [],
@@ -58,6 +145,21 @@ export const markLessonComplete = (courseId: string, lessonId: string): void => 
     progress.completedLessons.push(lessonId);
     saveCourseProgressData(progress);
   }
+};
+
+/**
+ * Mark a lesson as completed (public API - syncs with backend)
+ */
+export const markLessonComplete = async (
+  courseId: string,
+  lessonId: string,
+  enrollmentId?: string
+): Promise<void> => {
+  // Sync with backend first
+  await syncLessonCompletion(courseId, lessonId, enrollmentId);
+  
+  // Also update localStorage as cache
+  markLessonCompleteLocal(courseId, lessonId);
 };
 
 /**
@@ -153,23 +255,32 @@ export const isModuleInProgress = (
 
 /**
  * Check if a module is locked (previous module not completed)
+ * @param isEnrolled - If user is enrolled (paid), all modules are unlocked
  */
 export const isModuleLocked = (
   module: CourseModule,
   modules: CourseModule[],
   lessonsByModule: Record<string, Lesson[]>,
-  courseId: string
+  courseId: string,
+  isEnrolled: boolean = false
 ): boolean => {
-  // First module is always unlocked
+  // If user is enrolled, unlock all modules
+  if (isEnrolled) return false;
+  
+  // First module is always unlocked for free trial
   if (module.order === 1) return false;
   
-  // Find previous module
-  const previousModule = modules.find(m => m.order === module.order - 1);
-  if (!previousModule) return false;
+  // All other modules are locked for non-enrolled users
+  return true;
   
-  // Check if previous module is completed
-  const previousLessons = lessonsByModule[previousModule._id] || [];
-  return !isModuleCompleted(previousModule._id, previousLessons, courseId);
+  // Original logic (commented out - for sequential unlock)
+  // // Find previous module
+  // const previousModule = modules.find(m => m.order === module.order - 1);
+  // if (!previousModule) return false;
+  // 
+  // // Check if previous module is completed
+  // const previousLessons = lessonsByModule[previousModule._id] || [];
+  // return !isModuleCompleted(previousModule._id, previousLessons, courseId);
 };
 
 /**
@@ -204,24 +315,33 @@ export const getCurrentLesson = (
  * @param lessons - All lessons in the module
  * @param courseId - Course ID
  * @param module - Optional module object to check if it's module 1 (for free trial)
+ * @param isEnrolled - If user is enrolled (paid), all lessons are unlocked
  */
 export const isLessonLocked = (
   lesson: Lesson,
   lessons: Lesson[],
   courseId: string,
-  module?: CourseModule
+  module?: CourseModule,
+  isEnrolled: boolean = false
 ): boolean => {
+  // If user is enrolled, unlock all lessons
+  if (isEnrolled) return false;
+  
   // Module 1 (order = 1) is always unlocked for free trial - all lessons accessible
   if (module && module.order === 1) return false;
   
-  // First lesson in module is always unlocked
-  if (lesson.order === 1) return false;
+  // All other modules: lock all lessons for non-enrolled users
+  return true;
   
-  // Find previous lesson
-  const previousLesson = lessons.find(l => l.order === lesson.order - 1);
-  if (!previousLesson) return false;
-  
-  // Check if previous lesson is completed
-  return !isLessonCompleted(courseId, previousLesson._id);
+  // Original logic (commented out - for sequential unlock)
+  // // First lesson in module is always unlocked
+  // if (lesson.order === 1) return false;
+  // 
+  // // Find previous lesson
+  // const previousLesson = lessons.find(l => l.order === lesson.order - 1);
+  // if (!previousLesson) return false;
+  // 
+  // // Check if previous lesson is completed
+  // return !isLessonCompleted(courseId, previousLesson._id);
 };
 

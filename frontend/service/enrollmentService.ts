@@ -1,4 +1,4 @@
-import api from '../lib/api';
+import { getAccess, postAccess, patchAccess } from '../helper/api';
 
 export interface Enrollment {
   _id: string;
@@ -9,8 +9,18 @@ export interface Enrollment {
   progress: number;
   completedAt?: string;
   status: 'active' | 'completed' | 'suspended';
+  completedLessons?: string[];
+  lastAccessedLessonId?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface EnrollmentProgress {
+  completedLessons: string[];
+  totalLessons: number;
+  completedCount: number;
+  progressPercentage: number;
+  lastAccessedLessonId?: string;
 }
 
 export interface EnrollmentStats {
@@ -26,58 +36,67 @@ class EnrollmentService {
    * Get user's enrollments
    */
   async getMyEnrollments(status?: string): Promise<Enrollment[]> {
-    const response = await api.get('/enrollments', {
-      params: { status },
-    });
-    return response.data;
+    return await getAccess('enrollments', { status });
   }
 
   /**
    * Get enrollment by ID
    */
   async getEnrollmentById(enrollmentId: string): Promise<Enrollment> {
-    const response = await api.get(`/enrollments/${enrollmentId}`);
-    return response.data;
+    return await getAccess(`enrollments/${enrollmentId}`);
   }
 
   /**
    * Check if enrolled in a course
    */
-  async checkEnrollment(courseId: string): Promise<{ isEnrolled: boolean; enrollment?: Enrollment }> {
-    const response = await api.get(`/enrollments/check/${courseId}`);
-    return response.data;
+  async checkEnrollment(courseId: string): Promise<{ 
+    isEnrolled: boolean; 
+    enrollment?: Enrollment;
+    progress?: EnrollmentProgress | null;
+  }> {
+    return await getAccess(`enrollments/check/${courseId}`);
   }
 
   /**
    * Update progress
    */
   async updateProgress(enrollmentId: string, progress: number): Promise<Enrollment> {
-    const response = await api.patch(`/enrollments/${enrollmentId}/progress`, { progress });
-    return response.data;
+    return await patchAccess(`enrollments/${enrollmentId}/progress`, { progress });
+  }
+
+  /**
+   * Mark a lesson as complete
+   */
+  async markLessonComplete(enrollmentId: string, lessonId: string): Promise<Enrollment> {
+    return await patchAccess(`enrollments/${enrollmentId}/lessons/${lessonId}/complete`, {});
+  }
+
+  /**
+   * Get enrollment progress details
+   */
+  async getEnrollmentProgress(enrollmentId: string): Promise<EnrollmentProgress> {
+    return await getAccess(`enrollments/${enrollmentId}/progress`);
   }
 
   /**
    * Get enrollment statistics
    */
   async getMyStats(): Promise<EnrollmentStats> {
-    const response = await api.get('/enrollments/stats/me');
-    return response.data;
+    return await getAccess('enrollments/stats/me');
   }
 
   /**
    * Suspend enrollment
    */
   async suspendEnrollment(enrollmentId: string, reason?: string): Promise<Enrollment> {
-    const response = await api.patch(`/enrollments/${enrollmentId}/suspend`, { reason });
-    return response.data;
+    return await patchAccess(`enrollments/${enrollmentId}/suspend`, { reason });
   }
 
   /**
    * Reactivate enrollment
    */
   async reactivateEnrollment(enrollmentId: string): Promise<Enrollment> {
-    const response = await api.patch(`/enrollments/${enrollmentId}/reactivate`);
-    return response.data;
+    return await patchAccess(`enrollments/${enrollmentId}/reactivate`, {});
   }
 
   /**

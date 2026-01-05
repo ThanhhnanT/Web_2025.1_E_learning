@@ -52,19 +52,19 @@ export default function VNPayCheckout({ paymentData }: VNPayCheckoutProps) {
       <div style={{ marginBottom: '16px' }}>
         <h4 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>
           <BankOutlined style={{ marginRight: '8px' }} />
-          VNPay Payment
+          Thanh toán VNPay
         </h4>
         <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
-          Select your bank to continue with payment
+          Chọn ngân hàng của bạn để tiếp tục thanh toán
         </p>
       </div>
 
       <div style={{ marginBottom: '16px' }}>
         <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
-          Select Bank (Optional)
+          Chọn ngân hàng (Tùy chọn)
         </label>
         <Select
-          placeholder="Choose your bank"
+          placeholder="Chọn ngân hàng của bạn"
           style={{ width: '100%' }}
           value={selectedBank}
           onChange={setSelectedBank}
@@ -79,7 +79,7 @@ export default function VNPayCheckout({ paymentData }: VNPayCheckoutProps) {
           ))}
         </Select>
         <p style={{ marginTop: '8px', fontSize: '12px', color: '#999' }}>
-          Or select your bank on the VNPay payment page
+          Hoặc chọn ngân hàng trên trang thanh toán VNPay
         </p>
       </div>
 
@@ -92,20 +92,20 @@ export default function VNPayCheckout({ paymentData }: VNPayCheckoutProps) {
           disabled={!paymentData.paymentUrl}
           icon={<BankOutlined />}
         >
-          Continue to VNPay
+          Tiếp tục đến VNPay
         </Button>
       ) : (
         <div style={{ textAlign: 'center', padding: '24px 0' }}>
           <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
           <p style={{ marginTop: '16px', color: '#666' }}>
-            Redirecting to VNPay...
+            Đang chuyển đến VNPay...
           </p>
         </div>
       )}
 
       <div style={{ marginTop: '16px', fontSize: '12px', color: '#999', textAlign: 'center' }}>
         <p>
-          🔒 Secured by VNPay - Vietnam's trusted payment gateway
+          🔒 Bảo mật bởi VNPay - Cổng thanh toán uy tín của Việt Nam
         </p>
       </div>
     </div>

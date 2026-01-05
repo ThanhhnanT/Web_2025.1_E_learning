@@ -17,8 +17,8 @@ import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { UpdatePostStatusDto } from './dto/update-post-status.dto';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
+import { CreatePostCommentDto } from './dto/create-comment.dto';
+import { UpdatePostCommentDto } from './dto/update-comment.dto';
 import { CreateReactionDto } from './dto/create-reaction.dto';
 import { QueryPostsDto } from './dto/query-posts.dto';
 import { Public } from '@/auth/decorate/customize';
@@ -252,7 +252,7 @@ export class PostsController {
   })
   @ApiBearerAuth()
   @ApiParam({ name: 'postId', description: 'ID của post' })
-  @ApiBody({ type: CreateCommentDto })
+  @ApiBody({ type: CreatePostCommentDto })
   @ApiResponse({ status: 201, description: 'Tạo comment thành công' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Post not found' })
@@ -261,7 +261,7 @@ export class PostsController {
   async createComment(
     @Param('postId') postId: string,
     @Request() req: any,
-    @Body() createCommentDto: CreateCommentDto,
+    @Body() createCommentDto: CreatePostCommentDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     const userId = req.user?._id || req.user?.id;
@@ -278,7 +278,7 @@ export class PostsController {
   @ApiBearerAuth()
   @ApiParam({ name: 'postId', description: 'ID của post' })
   @ApiParam({ name: 'commentId', description: 'ID của comment cha' })
-  @ApiBody({ type: CreateCommentDto })
+  @ApiBody({ type: CreatePostCommentDto })
   @ApiResponse({ status: 201, description: 'Tạo reply thành công' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Post or comment not found' })
@@ -288,7 +288,7 @@ export class PostsController {
     @Param('postId') postId: string,
     @Param('commentId') commentId: string,
     @Request() req: any,
-    @Body() createCommentDto: CreateCommentDto,
+    @Body() createCommentDto: CreatePostCommentDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     const userId = req.user._id || req.user.id;
@@ -307,7 +307,7 @@ export class PostsController {
   @ApiBearerAuth()
   @ApiParam({ name: 'postId', description: 'ID của post' })
   @ApiParam({ name: 'commentId', description: 'ID của comment' })
-  @ApiBody({ type: UpdateCommentDto })
+  @ApiBody({ type: UpdatePostCommentDto })
   @ApiResponse({ status: 200, description: 'Cập nhật comment thành công' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Not owner' })
@@ -317,7 +317,7 @@ export class PostsController {
     @Param('postId') postId: string,
     @Param('commentId') commentId: string,
     @Request() req: any,
-    @Body() updateCommentDto: UpdateCommentDto,
+    @Body() updateCommentDto: UpdatePostCommentDto,
   ) {
     const userId = req.user._id || req.user.id;
     return this.postsService.updateComment(postId, commentId, updateCommentDto, userId.toString());

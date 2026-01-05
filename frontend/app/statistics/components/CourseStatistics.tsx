@@ -52,7 +52,7 @@ export default function CourseStatistics({ courseStats }: CourseStatsProps) {
             return (
               <List.Item
                 style={{ cursor: 'pointer' }}
-                onClick={() => router.push(`/courses/online`)}
+                onClick={() => router.push(`/courses`)}
               >
                 <List.Item.Meta
                   avatar={

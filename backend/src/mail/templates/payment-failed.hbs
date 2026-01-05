@@ -1,104 +1,76 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Failed</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .container {
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .error-icon {
-            font-size: 48px;
-            color: #f44336;
-            margin-bottom: 15px;
-        }
-        h1 {
-            color: #f44336;
-            margin: 0;
-        }
-        .content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        .reason {
-            background-color: #ffebee;
-            padding: 15px;
-            border-left: 4px solid #f44336;
-            margin: 15px 0;
-        }
-        .button {
-            display: inline-block;
-            padding: 12px 30px;
-            background-color: #2196F3;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin: 20px auto;
-            text-align: center;
-        }
-        .button-container {
-            text-align: center;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #666;
-            font-size: 14px;
-        }
-    </style>
+    <title>Thanh toán không thành công - E-learning</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="error-icon">✕</div>
-            <h1>Payment Failed</h1>
+
+<body
+    style="margin: 0; padding: 0; min-width: 100%; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; background-color: #FAFAFA; color: #222222;">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <!-- Header -->
+        <div style="background-color: #ff4d4f; padding: 24px; color: #ffffff;">
+            <h1
+                style="font-size: 24px; font-weight: 700; line-height: 1.25; margin-top: 0; margin-bottom: 15px; text-align: center;">
+                ❌ Thanh toán không thành công</h1>
         </div>
-        
-        <div class="content">
-            <p>Hi {{userName}},</p>
+
+        <!-- Body -->
+        <div style="padding: 24px; background-color: #ffffff;">
+            <p style="margin-top: 0; margin-bottom: 24px;">Xin chào <strong>{{userName}}</strong>,</p>
             
-            <p>Unfortunately, your payment for the course <strong>{{courseName}}</strong> could not be processed.</p>
-            
-            <div class="reason">
-                <strong>Reason:</strong> {{reason}}
+            <p style="margin-top: 0; margin-bottom: 24px;">
+                Rất tiếc, thanh toán của bạn cho khóa học <strong>{{courseName}}</strong> đã không thành công.
+            </p>
+
+            <div style="background-color: #fff1f0; padding: 16px; border-radius: 8px; margin-bottom: 24px; border-left: 4px solid #ff4d4f;">
+                <p style="margin: 0; color: #ff4d4f; font-weight: 600;">
+                    ⚠️ Lý do: {{reason}}
+                </p>
             </div>
-            
-            <p>Don't worry! Here's what you can do:</p>
-            <ul>
-                <li>Check your payment details and try again</li>
-                <li>Try a different payment method</li>
-                <li>Contact your bank if the issue persists</li>
-                <li>Reach out to our support team for assistance</li>
+
+            <p style="margin-top: 0; margin-bottom: 16px;">
+                <strong>Một số nguyên nhân phổ biến:</strong>
+            </p>
+
+            <ul style="margin-top: 0; margin-bottom: 24px; color: #666; font-size: 14px;">
+                <li>Thẻ không đủ số dư</li>
+                <li>Thông tin thẻ không chính xác</li>
+                <li>Thẻ đã hết hạn</li>
+                <li>Ngân hàng từ chối giao dịch</li>
             </ul>
-            
-            <div class="button-container">
-                <a href="{{frontendUrl}}/courses/{{courseId}}" class="button">Try Again</a>
+
+            <p style="margin-top: 0; margin-bottom: 24px;">
+                Vui lòng kiểm tra lại thông tin và thử lại. Nếu vấn đề vẫn tiếp diễn, hãy liên hệ với ngân hàng hoặc đội ngũ hỗ trợ của chúng tôi.
+            </p>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="{{frontendUrl}}/courses"
+                    style="display: inline-block; padding: 12px 32px; background-color: #1890ff; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                    Thử lại thanh toán
+                </a>
             </div>
+
+            <p style="margin-top: 24px; margin-bottom: 0; font-size: 14px; color: #666;">
+                Cảm ơn bạn đã quan tâm đến khóa học của chúng tôi!
+            </p>
         </div>
-        
-        <div class="footer">
-            <p>Need help? Contact our support team at support@elearning.com</p>
-            <p>&copy; 2025 E-Learning Platform. All rights reserved.</p>
+
+        <!-- Footer -->
+        <div style="background-color: #f6f6f6; padding: 24px;">
+            <p style="margin-top: 0; margin-bottom: 12px; font-size: 14px; color: #666;">
+                Nếu bạn cần hỗ trợ, vui lòng liên hệ với chúng tôi tại 
+                <a href="mailto:support@elearning.com" style="color: #1890ff; text-decoration: none;">
+                    support@elearning.com
+                </a>
+            </p>
+            <p style="margin: 0; font-size: 12px; color: #999; text-align: center;">
+                © 2026 E-learning Platform. All rights reserved.
+            </p>
         </div>
     </div>
 </body>
-</html>
 
+</html>

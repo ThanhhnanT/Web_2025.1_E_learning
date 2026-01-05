@@ -1,7 +1,67 @@
-const BASE_URL = 'https://api.example.com';
-
 import Cookies from "js-cookie";
+import axios from "axios";
 
+// Get base URL from environment variable or use default (same as helper/api.tsx)
+const BASE_URL = process.env.API || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8888';
+
+// Create axios instance with base configuration
+const api = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true, // Send cookies with requests
+});
+
+// Add request interceptor to include auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = Cookies.get('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid
+      Cookies.remove('access_token');
+      
+      // Only redirect to login if not on public pages
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname;
+        const publicPaths = ['/login', '/register', '/courses', '/'];
+        const isPublicPage = publicPaths.some(path => 
+          currentPath === path || currentPath.startsWith('/courses/')
+        );
+        
+        // Don't redirect if on public page or already on login page
+        // TODO: Create proper /login page for users
+        if (!isPublicPage && !currentPath.includes('/login')) {
+          console.log('401 Unauthorized - User needs to login');
+          console.log('Redirect to login disabled - login page not implemented yet');
+          // window.location.href = '/login?redirect=' + encodeURIComponent(currentPath);
+        } else {
+          console.log('401 Unauthorized on public page - Not redirecting');
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Export axios instance as default
+export default api;
+
+// Keep existing functions for backward compatibility
 export async function registerUser(data: {
     fullName: string;
     email: string;
