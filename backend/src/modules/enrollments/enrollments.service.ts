@@ -443,8 +443,17 @@ export class EnrollmentsService {
           frontendUrl,
         },
       });
+      this.logger.log(`✅ Course completion email sent to: ${email}`);
     } catch (error) {
-      this.logger.error('Error sending completion email:', error);
+      this.logger.error(`❌ Failed to send completion email to ${email}:`, error);
+      if (error instanceof Error) {
+        this.logger.error('Error details:', {
+          message: error.message,
+          code: (error as any).code,
+          command: (error as any).command,
+          response: (error as any).response,
+        });
+      }
     }
   }
 }
