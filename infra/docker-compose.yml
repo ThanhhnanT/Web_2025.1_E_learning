@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  ai-service:
+    build:
+      context: ../AI
+      dockerfile: Dockerfile
+    container_name: ai-service
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist ChromaDB data
+      - ./data/chroma_db:/app/chroma_db
+      # Persist data directory
+      - ./data/app_data:/app/data
+      # Mount .env file
+      - ./.env:/app/.env
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - ai-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+networks:
+  ai-network:
+    driver: bridge
+
