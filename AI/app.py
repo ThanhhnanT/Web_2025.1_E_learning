@@ -7,15 +7,6 @@ from src.config.connectDatabase import  connect_db
 from src.features.face_recognition.face_recognition_controller import router as face_recognition_router
 
 
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:8888",
-    "http://127.0.0.1:8888",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000"
-]
-
 config = dotenv_values(".env")
 
 app = FastAPI()
@@ -23,7 +14,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
