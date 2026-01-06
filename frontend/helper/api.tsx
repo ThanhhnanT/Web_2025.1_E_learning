@@ -2,7 +2,19 @@ import axios, { type AxiosRequestConfig } from 'axios';
 import Cookies from "js-cookie";
 
 
-const API_DOMAIN = process.env.API || 'http://localhost:8888/'
+// Normalize base URL: remove trailing slash
+const getBaseUrl = () => {
+  const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8888';
+  return url.replace(/\/+$/, ''); // Remove trailing slashes
+};
+
+const API_DOMAIN = getBaseUrl();
+
+// Helper to normalize path: ensure it starts with /
+const normalizePath = (path: string) => {
+  return path.startsWith('/') ? path : '/' + path;
+};
+
 const config = {
     headers: {
         Accept: "application/json",
@@ -12,7 +24,7 @@ const config = {
 }
 export const get = async (path: string, options: AxiosRequestConfig = {}) => {
     try {
-        const result = await axios.get(API_DOMAIN + path, {
+        const result = await axios.get(API_DOMAIN + normalizePath(path), {
             ...config,
             ...options,
         });
@@ -25,8 +37,9 @@ export const get = async (path: string, options: AxiosRequestConfig = {}) => {
 
 export const post = async (path: string, data: object) => {
   try {
-    console.log(API_DOMAIN + path)
-    const res = await axios.post(API_DOMAIN + path, data, config);
+    const fullPath = API_DOMAIN + normalizePath(path);
+    console.log(fullPath)
+    const res = await axios.post(fullPath, data, config);
     return res.data; 
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
@@ -42,7 +55,7 @@ export const post = async (path: string, data: object) => {
 
 export const patch = async (path: String, data: object) => {
     try{
-        const res = await axios.patch(API_DOMAIN +path, data, config)
+        const res = await axios.patch(API_DOMAIN + normalizePath(path.toString()), data, config)
         return res
     } catch (e) {
         return e; 
@@ -51,7 +64,7 @@ export const patch = async (path: String, data: object) => {
 
 export const deleteData = async (path: String) => {
     try{
-        const res = await axios.delete(API_DOMAIN + path)
+        const res = await axios.delete(API_DOMAIN + normalizePath(path.toString()))
         return res
     } catch (e) {
         console.log(e)
@@ -63,7 +76,7 @@ export const deleteData = async (path: String) => {
 
 export const upImage = async (path: String, data: object) => {
     try{
-        const response = await axios.post(API_DOMAIN + path, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+        const response = await axios.post(API_DOMAIN + normalizePath(path.toString()), data, { headers: { 'Content-Type': 'multipart/form-data' } })
         return response
     } catch(e) {
         console.log(e)
@@ -82,7 +95,7 @@ const getTokenHeader = () => {
 export const getAccess = async (path: string, params: object = {}) => {
   try {
     const tokenHeader = getTokenHeader();
-    const result = await axios.get(API_DOMAIN + path, {
+    const result = await axios.get(API_DOMAIN + normalizePath(path), {
       ...config,
       headers: { ...config.headers, ...tokenHeader },
       params, 
@@ -95,7 +108,7 @@ export const getAccess = async (path: string, params: object = {}) => {
         status: e.response.status,
         statusText: e.response.statusText,
         data: e.response.data,
-        url: e.config?.url || `${API_DOMAIN}${path}`,
+        url: e.config?.url || `${API_DOMAIN}${normalizePath(path)}`,
         message: e.message
       });
       console.error(`Full error response:`, JSON.stringify(e.response.data, null, 2));
@@ -126,7 +139,7 @@ export const postAccess = async (path: string, data: object, options: AxiosReque
       headers = { ...config.headers, ...tokenHeader, ...options.headers };
     }
     
-    const res = await axios.post(API_DOMAIN + path, data, { 
+    const res = await axios.post(API_DOMAIN + normalizePath(path), data, { 
       ...config, 
       ...options,
       headers
@@ -139,14 +152,14 @@ export const postAccess = async (path: string, data: object, options: AxiosReque
         status: error.response.status,
         statusText: error.response.statusText,
         data: error.response.data,
-        url: error.config?.url || `${API_DOMAIN}${path}`,
+        url: error.config?.url || `${API_DOMAIN}${normalizePath(path)}`,
         message: error.message
       });
       console.error(`Full error response:`, JSON.stringify(error.response.data, null, 2));
     } else if (error?.request) {
       console.error(`API POST Network Error [${path}]:`, {
         message: error.message,
-        url: `${API_DOMAIN}${path}`,
+        url: `${API_DOMAIN}${normalizePath(path)}`,
         request: error.request
       });
     } else {
@@ -174,7 +187,7 @@ export const patchAccess = async (path: string, data: object, options: AxiosRequ
       headers = { ...config.headers, ...tokenHeader, ...options.headers };
     }
     
-    const res = await axios.patch(API_DOMAIN + path, data, { 
+    const res = await axios.patch(API_DOMAIN + normalizePath(path), data, { 
       ...config, 
       ...options,
       headers
@@ -187,14 +200,14 @@ export const patchAccess = async (path: string, data: object, options: AxiosRequ
         status: e.response.status,
         statusText: e.response.statusText,
         data: e.response.data,
-        url: e.config?.url || `${API_DOMAIN}${path}`,
+        url: e.config?.url || `${API_DOMAIN}${normalizePath(path)}`,
         message: e.message
       });
       console.error(`Full error response:`, JSON.stringify(e.response.data, null, 2));
     } else if (e?.request) {
       console.error(`API PATCH Network Error [${path}]:`, {
         message: e.message,
-        url: `${API_DOMAIN}${path}`,
+        url: `${API_DOMAIN}${normalizePath(path)}`,
         request: e.request
       });
     } else {
@@ -210,7 +223,7 @@ export const patchAccess = async (path: string, data: object, options: AxiosRequ
 export const deleteAccess = async (path: string) => {
   try {
     const tokenHeader = await getTokenHeader();
-    const res = await axios.delete(API_DOMAIN + path, { ...config, headers: { ...config.headers, ...tokenHeader } });
+    const res = await axios.delete(API_DOMAIN + normalizePath(path), { ...config, headers: { ...config.headers, ...tokenHeader } });
     return res.data;
   } catch (e: any) {
     // Log more details for debugging
@@ -219,14 +232,14 @@ export const deleteAccess = async (path: string) => {
         status: e.response.status,
         statusText: e.response.statusText,
         data: e.response.data,
-        url: e.config?.url || `${API_DOMAIN}${path}`,
+        url: e.config?.url || `${API_DOMAIN}${normalizePath(path)}`,
         message: e.message
       });
       console.error(`Full error response:`, JSON.stringify(e.response.data, null, 2));
     } else if (e?.request) {
       console.error(`API DELETE Network Error [${path}]:`, {
         message: e.message,
-        url: `${API_DOMAIN}${path}`,
+        url: `${API_DOMAIN}${normalizePath(path)}`,
         request: e.request
       });
     } else {
@@ -274,7 +287,7 @@ export const uploadAvatar = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
     
-    const res = await axios.post(API_DOMAIN + 'users/profile/avatar', formData, {
+    const res = await axios.post(API_DOMAIN + normalizePath('users/profile/avatar'), formData, {
       headers: {
         ...tokenHeader,
         'Content-Type': 'multipart/form-data',
@@ -293,7 +306,7 @@ export const uploadVideo = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
     
-    const res = await axios.post(API_DOMAIN + 'users/upload/video', formData, {
+    const res = await axios.post(API_DOMAIN + normalizePath('users/upload/video'), formData, {
       headers: {
         ...tokenHeader,
         'Content-Type': 'multipart/form-data',
@@ -312,7 +325,7 @@ export const uploadCoverImage = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
     
-    const res = await axios.post(API_DOMAIN + 'users/profile/cover-image', formData, {
+    const res = await axios.post(API_DOMAIN + normalizePath('users/profile/cover-image'), formData, {
       headers: {
         ...tokenHeader,
         'Content-Type': 'multipart/form-data',
@@ -333,3 +346,8 @@ export const changePassword = async (data: { oldPassword: string; newPassword: s
     throw error;
   }
 };
+
+// Logout function - removes access token cookie
+export function logoutUser() {
+  Cookies.remove("access_token");
+}

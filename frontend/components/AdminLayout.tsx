@@ -22,8 +22,7 @@ import {
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { checkAdminAuth, isAdmin, redirectToAdminLogin } from "@/lib/adminHelper";
-import { logoutUser } from "@/lib/api";
-import { getUserProfile } from "@/helper/api";
+import { getUserProfile, logoutUser } from "@/helper/api";
 import Cookies from "js-cookie";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider } from "antd";

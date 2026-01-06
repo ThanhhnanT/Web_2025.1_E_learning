@@ -1,8 +1,4 @@
-import { get, post, patch, del, getAccess, postAccess, patchAccess, deleteAccess } from '@/helper/api';
-import Cookies from 'js-cookie';
-import axios from 'axios';
-
-const API_DOMAIN = process.env.API || 'http://localhost:8888/';
+import { get, getAccess, postAccess, patchAccess, deleteAccess } from '@/helper/api';
 
 export interface Post {
   id: string;
@@ -58,27 +54,14 @@ export interface CreateReactionData {
 
 // Get posts with pagination
 export const getPosts = async (params?: QueryPostsParams): Promise<{ data: Post[]; pagination: any }> => {
-  const queryParams = new URLSearchParams();
-  if (params?.page) queryParams.append('page', params.page.toString());
-  if (params?.limit) queryParams.append('limit', params.limit.toString());
-  if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
-  if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
-
-  const token = Cookies.get('access_token');
-  const headers: any = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
+  const queryParams: Record<string, string> = {};
+  if (params?.page) queryParams.page = params.page.toString();
+  if (params?.limit) queryParams.limit = params.limit.toString();
+  if (params?.sortBy) queryParams.sortBy = params.sortBy;
+  if (params?.sortOrder) queryParams.sortOrder = params.sortOrder;
 
   try {
-    const response = await fetch(`${API_DOMAIN}posts?${queryParams.toString()}`, {
-      method: 'GET',
-      headers,
-    });
-    return await response.json();
+    return await getAccess('posts', queryParams);
   } catch (error) {
     console.error('Error fetching posts:', error);
     throw error;
@@ -87,21 +70,8 @@ export const getPosts = async (params?: QueryPostsParams): Promise<{ data: Post[
 
 // Get single post
 export const getPost = async (id: string): Promise<Post> => {
-  const token = Cookies.get('access_token');
-  const headers: any = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
   try {
-    const response = await fetch(`${API_DOMAIN}posts/${id}`, {
-      method: 'GET',
-      headers,
-    });
-    return await response.json();
+    return await getAccess(`posts/${id}`);
   } catch (error) {
     console.error('Error fetching post:', error);
     throw error;
@@ -119,19 +89,12 @@ export const createPost = async (data: CreatePostData, imageFile?: File): Promis
     formData.append('imageUrl', data.imageUrl);
   }
 
-  const token = Cookies.get('access_token');
-  if (!token) {
-    throw new Error('Not authenticated');
-  }
-
   try {
-    const response = await axios.post(`${API_DOMAIN}posts`, formData, {
+    return await postAccess('posts', formData, {
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'multipart/form-data',
       },
     });
-    return response.data;
   } catch (error: any) {
     console.error('Error creating post:', error);
     if (error.response) {
@@ -184,21 +147,8 @@ export const reactPost = async (
 
 // Get post reactions
 export const getPostReactions = async (postId: string): Promise<any> => {
-  const token = Cookies.get('access_token');
-  const headers: any = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
   try {
-    const response = await fetch(`${API_DOMAIN}posts/${postId}/reactions`, {
-      method: 'GET',
-      headers,
-    });
-    return await response.json();
+    return await getAccess(`posts/${postId}/reactions`);
   } catch (error) {
     console.error('Error fetching post reactions:', error);
     throw error;
@@ -212,21 +162,8 @@ export const getPostLikes = async (id: string): Promise<any[]> => {
 
 // Get comments
 export const getComments = async (postId: string): Promise<Comment[]> => {
-  const token = Cookies.get('access_token');
-  const headers: any = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
   try {
-    const response = await fetch(`${API_DOMAIN}posts/${postId}/comments`, {
-      method: 'GET',
-      headers,
-    });
-    return await response.json();
+    return await getAccess(`posts/${postId}/comments`);
   } catch (error) {
     console.error('Error fetching comments:', error);
     throw error;
@@ -293,21 +230,8 @@ export const reactComment = async (
 
 // Get comment reactions
 export const getCommentReactions = async (postId: string, commentId: string): Promise<any> => {
-  const token = Cookies.get('access_token');
-  const headers: any = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
   try {
-    const response = await fetch(`${API_DOMAIN}posts/${postId}/comments/${commentId}/reactions`, {
-      method: 'GET',
-      headers,
-    });
-    return await response.json();
+    return await getAccess(`posts/${postId}/comments/${commentId}/reactions`);
   } catch (error) {
     console.error('Error fetching reactions:', error);
     throw error;

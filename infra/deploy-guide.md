@@ -153,6 +153,27 @@ exit
 ```bash
 # Trên EC2
 cd /opt
+
+# Nếu thư mục đã tồn tại, xóa hoặc đổi tên
+if [ -d "ai-service" ]; then
+    echo "Thư mục ai-service đã tồn tại. Xóa thư mục cũ..."
+    sudo rm -rf ai-service
+fi
+
+# Clone repository
+sudo git clone YOUR_REPO_URL ai-service
+sudo chown -R $USER:$USER ai-service
+cd ai-service
+```
+
+**Hoặc nếu muốn giữ lại thư mục cũ:**
+
+```bash
+cd /opt
+# Đổi tên thư mục cũ
+sudo mv ai-service ai-service-backup
+
+# Clone mới
 sudo git clone YOUR_REPO_URL ai-service
 sudo chown -R $USER:$USER ai-service
 cd ai-service
