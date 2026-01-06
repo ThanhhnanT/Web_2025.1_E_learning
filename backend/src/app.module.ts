@@ -62,30 +62,54 @@ import { FaceRecognitionModule } from './modules/face-recognition/face-recogniti
 
     MailerModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService)  => ({
-        transport: {
-          host: 'smtp.gmail.com',
-          port: 465,
-          // ignoreTLS: true,
-          secure: true,
-          auth: {
-            user: configService.get<string>('MAILDEV_INCOMING_USER'),
-            pass: configService.get<string>('MAILDEV_INCOMING_PASS'),
-          },
-        },
-        defaults: {
-          from: `"${configService.get<string>('MAIL_SENDER_NAME') || 'Learnify'}" <${configService.get<string>('MAILDEV_INCOMING_USER') || 'Learnify@elearning.com'}>`,
-        },
+      useFactory: async (configService: ConfigService) => {
+        const mailUser = configService.get<string>('MAILDEV_INCOMING_USER');
+        const mailPass = configService.get<string>('MAILDEV_INCOMING_PASS');
+        const mailSenderName = configService.get<string>('MAIL_SENDER_NAME') || 'Learnify';
+        
+        // Log email configuration status (without sensitive data)
+        console.log('📧 Email Configuration:');
+        console.log(`   - SMTP Host: smtp.gmail.com`);
+        console.log(`   - SMTP Port: 465`);
+        console.log(`   - User: ${mailUser ? '✅ Set' : '❌ Missing'}`);
+        console.log(`   - Password: ${mailPass ? '✅ Set' : '❌ Missing'}`);
+        console.log(`   - Sender Name: ${mailSenderName}`);
+        
+        if (!mailUser || !mailPass) {
+          console.warn('⚠️  WARNING: Email credentials are missing. Email sending will fail!');
+          console.warn('   Please set MAILDEV_INCOMING_USER and MAILDEV_INCOMING_PASS environment variables.');
+        }
 
-        // preview: true,
-        template: {
-          dir: process.cwd() + '/src/mail/templates/',
-          adapter: new HandlebarsAdapter(), 
-          options: {
-            strict: true,
+        return {
+          transport: {
+            host: configService.get<string>('SMTP_HOST') || 'smtp.gmail.com',
+            port: parseInt(configService.get<string>('SMTP_PORT') || '465', 10),
+            secure: true, // true for 465, false for other ports
+            auth: {
+              user: mailUser,
+              pass: mailPass,
+            },
+            // Additional options for better reliability on Render
+            connectionTimeout: 60000, // 60 seconds
+            greetingTimeout: 30000, // 30 seconds
+            socketTimeout: 60000, // 60 seconds
+            // Retry configuration
+            pool: true,
+            maxConnections: 1,
+            maxMessages: 3,
           },
-        },
-      }),
+          defaults: {
+            from: `"${mailSenderName}" <${mailUser || 'Learnify@elearning.com'}>`,
+          },
+          template: {
+            dir: process.cwd() + '/src/mail/templates/',
+            adapter: new HandlebarsAdapter(),
+            options: {
+              strict: true,
+            },
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],

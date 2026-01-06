@@ -2,6 +2,8 @@
 
 Hướng dẫn chi tiết từng bước để deploy phần AI lên AWS EC2 với Docker và Nginx.
 
+> **Lưu ý:** Để deploy Backend NestJS (không dùng Docker), xem [backend-deploy-guide.md](./backend-deploy-guide.md)
+
 ## Yêu cầu
 
 - Tài khoản AWS
@@ -452,6 +454,49 @@ docker stats
 ```
 
 Nếu thiếu RAM, upgrade instance type lên t3.large hoặc t3.xlarge.
+
+### Out of disk space (no space left on device)
+
+```bash
+# Kiểm tra disk space
+df -h
+
+# Kiểm tra dung lượng Docker đang dùng
+docker system df
+
+# Cleanup Docker (xóa images, containers, volumes không dùng)
+docker system prune -a --volumes
+
+# Hoặc cleanup từng phần
+docker image prune -a  # Xóa tất cả images không dùng
+docker container prune  # Xóa containers đã dừng
+docker volume prune     # Xóa volumes không dùng
+
+# Kiểm tra lại
+df -h
+docker system df
+```
+
+**Nếu vẫn thiếu space:**
+
+1. **Tăng EBS volume size:**
+   - Vào AWS Console → EC2 → Volumes
+   - Chọn volume của instance → Modify Volume
+   - Tăng size (ví dụ: 20GB → 30GB)
+   - Trên EC2: `sudo growpart /dev/xvda1 1` và `sudo resize2fs /dev/xvda1`
+
+2. **Di chuyển Docker data directory:**
+   ```bash
+   # Dừng Docker
+   sudo systemctl stop docker
+   
+   # Di chuyển data sang partition khác (nếu có)
+   sudo mv /var/lib/docker /mnt/docker
+   sudo ln -s /mnt/docker /var/lib/docker
+   
+   # Hoặc tạo symbolic link đến EBS volume lớn hơn
+   sudo systemctl start docker
+   ```
 
 ### Port đã được sử dụng
 

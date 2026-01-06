@@ -56,13 +56,14 @@ export class EnrollmentsService {
         { $inc: { totalStudents: 1 } },
       ).exec();
 
-      // Send enrollment confirmation email
-      const user: any = await this.userModel.findById(userId).exec();
-      const course: any = await this.courseModel.findById(courseId).exec();
+      // Send enrollment confirmation email - TEMPORARILY DISABLED
+      // const user: any = await this.userModel.findById(userId).exec();
+      // const course: any = await this.courseModel.findById(courseId).exec();
 
-      if (user && course) {
-        await this.sendEnrollmentEmail(user.email, user.name, course.title);
-      }
+      // if (user && course) {
+      //   await this.sendEnrollmentEmail(user.email, user.name, course.title);
+      // }
+      this.logger.log(`⏭️  Enrollment email skipped (email sending temporarily disabled)`);
 
       this.logger.log(`Enrollment created successfully for user ${userId} in course ${courseId}`);
 
@@ -202,13 +203,14 @@ export class EnrollmentsService {
       enrollment.status = 'completed';
       enrollment.completedAt = new Date();
 
-      // Send completion email
-      const user: any = await this.userModel.findById(enrollment.userId).exec();
-      const course: any = await this.courseModel.findById(enrollment.courseId).exec();
+      // Send completion email - TEMPORARILY DISABLED
+      // const user: any = await this.userModel.findById(enrollment.userId).exec();
+      // const course: any = await this.courseModel.findById(enrollment.courseId).exec();
 
-      if (user && course) {
-        await this.sendCompletionEmail(user.email, user.name, course.title);
-      }
+      // if (user && course) {
+      //   await this.sendCompletionEmail(user.email, user.name, course.title);
+      // }
+      this.logger.log(`⏭️  Completion email skipped (email sending temporarily disabled)`);
     }
 
     await enrollment.save();
@@ -246,13 +248,14 @@ export class EnrollmentsService {
       enrollment.status = 'completed';
       enrollment.completedAt = new Date();
 
-      // Send completion email
-      const user: any = await this.userModel.findById(enrollment.userId).exec();
-      const course: any = await this.courseModel.findById(enrollment.courseId).exec();
+      // Send completion email - TEMPORARILY DISABLED
+      // const user: any = await this.userModel.findById(enrollment.userId).exec();
+      // const course: any = await this.courseModel.findById(enrollment.courseId).exec();
 
-      if (user && course) {
-        await this.sendCompletionEmail(user.email, user.name, course.title);
-      }
+      // if (user && course) {
+      //   await this.sendCompletionEmail(user.email, user.name, course.title);
+      // }
+      this.logger.log(`⏭️  Completion email skipped (email sending temporarily disabled)`);
     }
 
     await enrollment.save();
@@ -406,8 +409,14 @@ export class EnrollmentsService {
 
   /**
    * Send enrollment confirmation email
+   * TEMPORARILY DISABLED
    */
   private async sendEnrollmentEmail(email: string, userName: string, courseName: string) {
+    // Email sending temporarily disabled
+    this.logger.log(`⏭️  Enrollment email skipped for ${email} (email sending temporarily disabled)`);
+    return;
+    
+    /* DISABLED CODE
     try {
       const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
       
@@ -424,12 +433,19 @@ export class EnrollmentsService {
     } catch (error) {
       this.logger.error('Error sending enrollment email:', error);
     }
+    */
   }
 
   /**
    * Send course completion email
+   * TEMPORARILY DISABLED
    */
   private async sendCompletionEmail(email: string, userName: string, courseName: string) {
+    // Email sending temporarily disabled
+    this.logger.log(`⏭️  Completion email skipped for ${email} (email sending temporarily disabled)`);
+    return;
+    
+    /* DISABLED CODE
     try {
       const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
       
@@ -443,9 +459,19 @@ export class EnrollmentsService {
           frontendUrl,
         },
       });
+      this.logger.log(`✅ Course completion email sent to: ${email}`);
     } catch (error) {
-      this.logger.error('Error sending completion email:', error);
+      this.logger.error(`❌ Failed to send completion email to ${email}:`, error);
+      if (error instanceof Error) {
+        this.logger.error('Error details:', {
+          message: error.message,
+          code: (error as any).code,
+          command: (error as any).command,
+          response: (error as any).response,
+        });
+      }
     }
+    */
   }
 }
 

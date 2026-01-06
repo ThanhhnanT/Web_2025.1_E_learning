@@ -375,17 +375,33 @@ export class UsersService implements OnModuleInit {
       codeExpired: dayjs().add(1, 'day')
     })
 
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'Active your account',
-      text: 'welcome',
-      template: 'register',
-      context: {
-        name: name,
-        activationCode: codeId 
-      }
-
-    })
+    // Email sending temporarily disabled
+    // try {
+    //   await this.mailerService.sendMail({
+    //     to: email,
+    //     subject: 'Active your account',
+    //     text: 'welcome',
+    //     template: 'register',
+    //     context: {
+    //       name: name,
+    //       activationCode: codeId 
+    //     }
+    //   });
+    //   console.log(`✅ Registration email sent successfully to: ${email}`);
+    // } catch (error) {
+    //   console.error(`❌ Failed to send registration email to ${email}:`, error);
+    //   // Don't throw error - user registration should still succeed even if email fails
+    //   // Log the error for debugging
+    //   if (error instanceof Error) {
+    //     console.error('Error details:', {
+    //       message: error.message,
+    //       stack: error.stack,
+    //       code: (error as any).code,
+    //       command: (error as any).command,
+    //     });
+    //   }
+    // }
+    console.log(`⏭️  Registration email skipped for: ${email} (email sending temporarily disabled)`);
 
     return {
       statusCode: 201,
