@@ -70,7 +70,8 @@ export const getUsers = async (
 };
 
 export const getUserById = async (id: string): Promise<User> => {
-  return await getAccess(`users/${id}`);
+  // Use the profile endpoint which allows friends to view each other's profiles
+  return await getAccess(`users/${id}/profile`);
 };
 
 export const createUser = async (data: CreateUserData): Promise<{ _id: string }> => {

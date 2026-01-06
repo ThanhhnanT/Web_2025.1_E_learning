@@ -5,6 +5,7 @@ import {User, UserSchema} from './schemas/user.schema'
 import { RolePreset, RolePresetSchema } from './schema/role-preset.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CloudinaryService } from './cloudinary.service';
+import { FriendsModule } from '../friends/friends.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { CloudinaryService } from './cloudinary.service';
         name: RolePreset.name,
         schema: RolePresetSchema
       }
-    ])
+    ]),
+    FriendsModule
   ],
   controllers: [UsersController],
   providers: [UsersService, CloudinaryService],

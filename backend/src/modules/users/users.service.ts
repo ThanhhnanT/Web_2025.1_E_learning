@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException, OnModuleInit, ForbiddenException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -16,6 +16,7 @@ import { VerifyDto } from '@/auth/dto/verify-email.dto';
 import { CloudinaryService } from './cloudinary.service';
 import { computeEffectivePermissions, LEGACY_ROLE_MAP, ROLE_PRESETS } from './constants/permissions';
 import { UpdateRolePresetDto } from './dto/update-role-preset.dto';
+import { FriendsService } from '../friends/friends.service';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -25,7 +26,8 @@ export class UsersService implements OnModuleInit {
     @InjectModel(RolePreset.name)
     private rolePresetModel: Model<RolePreset>,
     private readonly mailerService: MailerService,
-    private readonly cloudinaryService: CloudinaryService
+    private readonly cloudinaryService: CloudinaryService,
+    private readonly friendsService: FriendsService
   ) {}
   
  isEmailExist = async (email:string) => {
@@ -120,6 +122,33 @@ export class UsersService implements OnModuleInit {
       await this.normalizeLegacyRole(user);
     }
     return user;
+  }
+
+  async getUserProfileForViewing(targetUserId: string, requestUserId: string) {
+    // Normalize IDs to strings
+    const targetUserIdStr = targetUserId?.toString();
+    const requestUserIdStr = requestUserId?.toString();
+
+    // If viewing own profile, always allow
+    if (targetUserIdStr === requestUserIdStr) {
+      return this.findOne(targetUserIdStr);
+    }
+
+    // Check if target user exists
+    const targetUser = await this.userModel.findById(targetUserIdStr).select('-password').lean();
+    if (!targetUser) {
+      throw new NotFoundException(`User with ID ${targetUserIdStr} not found`);
+    }
+
+    // Check if they are friends
+    const friendshipStatus = await this.friendsService.checkFriendshipStatus(requestUserIdStr, targetUserIdStr);
+    if (friendshipStatus.status !== 'friends') {
+      throw new ForbiddenException('Forbidden resource');
+    }
+
+    // Return user profile
+    await this.normalizeLegacyRole(targetUser as any);
+    return targetUser;
   }
 
   async update(userId: string, updateUserDto: UpdateUserDto) {

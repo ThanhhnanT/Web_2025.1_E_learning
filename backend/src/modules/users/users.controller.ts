@@ -70,6 +70,15 @@ export class UsersController {
     return this.usersService.update(userId, updateUserDto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user profile (for viewing by friends or own profile)' })
+  @Get(':id/profile')
+  async getUserProfile(@Param('id') id: string, @Request() req: any) {
+    const requestUserId = req.user._id || req.user.id;
+    return this.usersService.getUserProfileForViewing(id, requestUserId);
+  }
+
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get user by ID (Admin only)' })
