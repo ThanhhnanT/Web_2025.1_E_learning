@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Empty } from "antd";

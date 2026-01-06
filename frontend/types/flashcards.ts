@@ -98,6 +98,7 @@ export interface BackendProgress {
   learned: number;
   remembered: number;
   review: number;
+  wordStatus?: { [word: string]: string };
   createdAt: string;
   updatedAt: string;
 }

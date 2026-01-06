@@ -139,9 +139,11 @@ export default function CoursesOnlinePage() {
     setCurrentPage(1);
   };
 
-  const handlePriceRangeChange = (value: [number, number]) => {
-    setPriceRange(value);
-    setCurrentPage(1);
+  const handlePriceRangeChange = (value: number | number[]) => {
+    if (Array.isArray(value) && value.length === 2) {
+      setPriceRange([value[0], value[1]]);
+      setCurrentPage(1);
+    }
   };
 
   const handleFreeChange = (e: any) => {
@@ -366,7 +368,7 @@ export default function CoursesOnlinePage() {
                             {getInstructorAvatar(course) ? (
                               <Avatar
                                 src={getInstructorAvatar(course)}
-                                size="100%"
+                                style={{ width: '100%', height: '100%' }}
                                 icon={<UserOutlined />}
                                 className={styles.fullAvatar}
                                 shape="square"

@@ -415,7 +415,7 @@ export default function CoursesManagementPage() {
               style={{ width: "100%" }}
               value={categoryFilter}
               onChange={handleCategoryFilterChange}
-              prefixIcon={<FilterOutlined />}
+              suffixIcon={<FilterOutlined />}
             >
               <Option value="all">Tất cả</Option>
               <Option value="HSK">HSK</Option>

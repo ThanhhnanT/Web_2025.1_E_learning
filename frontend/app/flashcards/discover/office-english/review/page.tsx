@@ -3,6 +3,8 @@ import React,{useState,useEffect} from 'react'
 import { useSearchParams } from 'next/navigation'
 import WordReview from '@/components/WordReview'
 
+export const dynamic = 'force-dynamic';
+
 interface Word {
   word: string;
   type: string;

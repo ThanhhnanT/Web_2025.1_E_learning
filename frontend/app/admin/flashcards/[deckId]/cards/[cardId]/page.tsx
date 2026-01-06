@@ -105,7 +105,7 @@ export default function CardDetailPage() {
     return `Card #${shortId}`;
   }, [cardId]);
 
-  const uploadProps: UploadProps = {
+  const imageUploadProps: UploadProps = {
     beforeUpload: () => false,
     maxCount: 1,
     showUploadList: false,
@@ -113,12 +113,20 @@ export default function CardDetailPage() {
       const file = info.file.originFileObj;
       if (file) {
         const url = URL.createObjectURL(file);
-        if (info.file.field === "image") {
-          handleChange("image", url);
-        }
-        if (info.file.field === "audio") {
-          handleChange("audio", url);
-        }
+        handleChange("image", url);
+      }
+    },
+  };
+
+  const audioUploadProps: UploadProps = {
+    beforeUpload: () => false,
+    maxCount: 1,
+    showUploadList: false,
+    onChange(info) {
+      const file = info.file.originFileObj;
+      if (file) {
+        const url = URL.createObjectURL(file);
+        handleChange("audio", url);
       }
     },
   };
@@ -162,9 +170,8 @@ export default function CardDetailPage() {
                     )}
                   </div>
                   <Dragger
-                    {...uploadProps}
+                    {...imageUploadProps}
                     accept="image/*"
-                    field="image"
                     style={{ marginTop: 12 }}
                   >
                     <p className="ant-upload-drag-icon">
@@ -190,9 +197,8 @@ export default function CardDetailPage() {
                     )}
                   </div>
                   <Dragger
-                    {...uploadProps}
+                    {...audioUploadProps}
                     accept="audio/*"
-                    field="audio"
                   >
                     <p className="ant-upload-drag-icon">
                       <UploadOutlined />

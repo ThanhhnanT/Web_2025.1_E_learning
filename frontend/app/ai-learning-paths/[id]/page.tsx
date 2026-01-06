@@ -519,7 +519,7 @@ export default function AILearningPathPage() {
                               )}
                             </div>
                             <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 4 }}>
-                              <Tag size="small">{day.skill}</Tag>
+                              <Tag style={{ fontSize: 12 }}>{day.skill}</Tag>
                               {day.youtube_links && (
                                 <YoutubeOutlined style={{ marginLeft: 8, fontSize: 12 }} />
                               )}

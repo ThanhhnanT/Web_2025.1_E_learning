@@ -105,7 +105,7 @@ export default function PostsManagementPage() {
       user: {
         id: user.id || (user as any)._id?.toString() || '',
         name: user.name || 'Unknown User',
-        avatar_url: user.avatar_url || user.avatar || '',
+        avatar_url: user.avatar_url || (user as { avatar?: string }).avatar || '',
       },
       content: apiPost.content || '',
       imageUrl: apiPost.imageUrl,

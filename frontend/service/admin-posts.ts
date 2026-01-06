@@ -83,6 +83,6 @@ export const bulkDeletePosts = async (postIds: string[]) => {
 
 // Bulk hard delete posts
 export const bulkHardDeletePosts = async (postIds: string[]) => {
-  return await deleteAccess('admin/posts/bulk/hard', { postIds });
+  return await postAccess('admin/posts/bulk/hard', { postIds });
 };
 

@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import WordDetail from "@/components/WordDetail";
 import { useSearchParams } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 interface Word {
   word: string;
   type: string;

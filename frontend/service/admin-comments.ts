@@ -78,6 +78,6 @@ export const bulkDeleteComments = async (commentIds: string[]) => {
 
 // Bulk hard delete comments
 export const bulkHardDeleteComments = async (commentIds: string[]) => {
-  return await deleteAccess('admin/comments/bulk/hard', { commentIds });
+  return await postAccess('admin/comments/bulk/hard', { commentIds });
 };
 

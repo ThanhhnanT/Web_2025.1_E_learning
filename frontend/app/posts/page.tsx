@@ -45,7 +45,7 @@ const BlogPage: React.FC = () => {
     const user = apiPost.user || {};
     const userId = user.id || (user as any)._id?.toString() || '';
     const userName = user.name || 'Unknown User';
-    const userAvatar = user.avatar_url || user.avatar || '';
+    const userAvatar = user.avatar_url || (user as { avatar?: string }).avatar || '';
 
     return {
       id: apiPost.id || (apiPost as any)._id?.toString() || '',
@@ -61,7 +61,7 @@ const BlogPage: React.FC = () => {
       likedByCurrentUser: apiPost.likedByCurrentUser || false,
       comments: [], // Comments are loaded separately
       commentsCount: apiPost.commentsCount || 0, // Add commentsCount from API
-      reactions: apiPost.reactions || {}, // Add reactions from API
+      reactions: (apiPost as { reactions?: Record<string, { count: number; users: unknown[]; likedByCurrentUser: boolean }> }).reactions || {}, // Add reactions from API
     };
   };
 
@@ -74,7 +74,7 @@ const BlogPage: React.FC = () => {
     const user = apiComment.user || {};
     const userId = user.id || user._id?.toString() || '';
     const userName = user.name || 'Unknown User';
-    const userAvatar = user.avatar_url || user.avatar || '';
+    const userAvatar = user.avatar_url || (user as { avatar?: string }).avatar || '';
     const commentId = apiComment.id || apiComment._id?.toString() || '';
 
     // Ensure content is a string and not an ID
@@ -107,7 +107,22 @@ const BlogPage: React.FC = () => {
       content: content,
       createdAt: apiComment.createdAt || new Date().toISOString(),
       replies: apiComment.replies ? apiComment.replies.map(convertApiCommentToComment) : [],
-      reactions: apiComment.reactions || {},
+      reactions: (() => {
+        const reactions = apiComment.reactions || {};
+        // Convert complex reaction format to simple Record<string, number>
+        if (typeof reactions === 'object' && reactions !== null) {
+          const simpleReactions: Record<string, number> = {};
+          Object.entries(reactions).forEach(([key, value]) => {
+            if (typeof value === 'number') {
+              simpleReactions[key] = value;
+            } else if (typeof value === 'object' && value !== null && 'count' in value) {
+              simpleReactions[key] = (value as { count: number }).count;
+            }
+          });
+          return simpleReactions;
+        }
+        return {};
+      })(),
       likedByCurrentUser: apiComment.likedByCurrentUser || false,
     };
   };
@@ -416,30 +431,19 @@ const BlogPage: React.FC = () => {
             if (c.id === data.commentId) {
               const currentReactions = c.reactions || {};
               
-              // If current user reacted, remove all their previous reactions first
-              if (isCurrentUser && data.reacted) {
-                Object.keys(currentReactions).forEach((emoji) => {
-                  if (currentReactions[emoji].likedByCurrentUser) {
-                    currentReactions[emoji] = {
-                      ...currentReactions[emoji],
-                      count: Math.max(0, currentReactions[emoji].count - 1),
-                      likedByCurrentUser: false,
-                    };
-                  }
-                });
-              }
+              // Convert to simple number format
+              const currentCount = typeof currentReactions[data.emoji] === 'number' 
+                ? currentReactions[data.emoji] 
+                : 0;
               
-              const currentCount = currentReactions[data.emoji]?.count || 0;
+              const newReactions: Record<string, number> = {
+                ...currentReactions,
+                [data.emoji]: data.reacted ? currentCount + 1 : Math.max(0, currentCount - 1),
+              };
+              
               return {
                 ...c,
-                reactions: {
-                  ...currentReactions,
-                  [data.emoji]: {
-                    count: data.reacted ? currentCount + 1 : Math.max(0, currentCount - 1),
-                    users: [],
-                    likedByCurrentUser: isCurrentUser ? data.reacted : (currentReactions[data.emoji]?.likedByCurrentUser || false),
-                  },
-                },
+                reactions: newReactions,
                 likedByCurrentUser: isCurrentUser ? data.reacted : (c.likedByCurrentUser || false),
               };
             }

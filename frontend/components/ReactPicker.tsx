@@ -30,7 +30,7 @@ const ReactPicker: React.FC<ReactPickerProps> = ({ currentReactions, onReact, ch
     .map(([emoji, data]) => ({
       emoji,
       count: data.count || 0,
-      ...data,
+      likedByCurrentUser: data.likedByCurrentUser || false,
     }))
     .filter(r => r.count > 0)
     .sort((a, b) => b.count - a.count)
@@ -159,7 +159,7 @@ const ReactPicker: React.FC<ReactPickerProps> = ({ currentReactions, onReact, ch
       mouseLeaveDelay={0.3}
       getPopupContainer={() => document.body}
       destroyTooltipOnHide
-      autoAdjustOverflow={{ adjustX: true, adjustY: true }}
+      autoAdjustOverflow={{ adjustX: 1, adjustY: 1 }}
       arrow={false}
     >
       <div

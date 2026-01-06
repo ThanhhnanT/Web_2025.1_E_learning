@@ -12,6 +12,7 @@ export interface Comment {
   replies: Comment[];
   reactions: Record<string,number>;
   likedByCurrentUser?: boolean;
+  imageUrl?: string;
 }
 
 export interface Post {
