@@ -193,6 +193,30 @@ export default function CheckoutPage() {
     await proceedWithPayment();
   };
 
+  const handleSkipFaceVerification = () => {
+    setFaceVerificationModalOpen(false);
+    // Proceed with payment without verification token
+    proceedWithPayment();
+    notification.info({
+      message: 'Đã bỏ qua xác thực khuôn mặt',
+      description: 'Bạn đã chọn bỏ qua xác thực khuôn mặt. Thanh toán sẽ tiếp tục.',
+      placement: 'topRight',
+      duration: 3,
+    });
+  };
+
+  const handleSkipFaceRegistration = () => {
+    setFaceRegistrationModalOpen(false);
+    // Proceed with payment without face registration
+    proceedWithPayment();
+    notification.info({
+      message: 'Đã bỏ qua đăng ký khuôn mặt',
+      description: 'Bạn đã chọn bỏ qua đăng ký khuôn mặt. Thanh toán sẽ tiếp tục.',
+      placement: 'topRight',
+      duration: 3,
+    });
+  };
+
   const proceedWithPayment = async (verificationToken?: string) => {
     const token = verificationToken || faceVerificationToken;
     
@@ -617,6 +641,8 @@ export default function CheckoutPage() {
         open={faceRegistrationModalOpen}
         onClose={() => setFaceRegistrationModalOpen(false)}
         onCapture={handleFaceRegistration}
+        onSkip={handleSkipFaceRegistration}
+        showSkipButton={true}
         mode="register"
         title="Đăng ký khuôn mặt"
       />
@@ -626,6 +652,8 @@ export default function CheckoutPage() {
         open={faceVerificationModalOpen}
         onClose={() => setFaceVerificationModalOpen(false)}
         onCapture={handleFaceVerification}
+        onSkip={handleSkipFaceVerification}
+        showSkipButton={true}
         mode="verify"
         title="Xác thực khuôn mặt để thanh toán"
       />

@@ -11,6 +11,8 @@ interface FaceVerificationCameraProps {
   onCapture: (imageBase64: string) => Promise<void>;
   title?: string;
   mode?: 'register' | 'verify';
+  onSkip?: () => void; // Optional skip handler
+  showSkipButton?: boolean; // Whether to show skip button
 }
 
 export default function FaceVerificationCamera({
@@ -19,6 +21,8 @@ export default function FaceVerificationCamera({
   onCapture,
   title,
   mode = 'verify',
+  onSkip,
+  showSkipButton = false,
 }: FaceVerificationCameraProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -387,6 +391,15 @@ export default function FaceVerificationCamera({
         <Button key="cancel" onClick={handleClose}>
           Hủy
         </Button>,
+        ...(showSkipButton && onSkip ? [
+          <Button
+            key="skip"
+            onClick={onSkip}
+            danger
+          >
+            Tạm thời bỏ qua
+          </Button>
+        ] : []),
         <Button
           key="retry"
           icon={<ReloadOutlined />}

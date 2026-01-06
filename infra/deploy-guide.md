@@ -2,6 +2,8 @@
 
 Hướng dẫn chi tiết từng bước để deploy phần AI lên AWS EC2 với Docker và Nginx.
 
+> **Lưu ý:** Để deploy Backend NestJS (không dùng Docker), xem [backend-deploy-guide.md](./backend-deploy-guide.md)
+
 ## Yêu cầu
 
 - Tài khoản AWS
