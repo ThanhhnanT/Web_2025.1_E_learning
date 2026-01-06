@@ -15,6 +15,7 @@ from src.database.RoadMap_Schema import RoadMap
 from src.database.Learning_Path import LearningPath
 from src.utils.get_domain import get_domain
 from src.utils.generate_course_title import generate_course_title
+from src.utils.find_course_image import find_course_image
 from datetime import datetime
 import uuid
 
@@ -121,6 +122,10 @@ def GenSchedule(req: ScheduleType):
         # Calculate totalDays
         total_days = len(learning_path)
         
+
+        image_url = find_course_image(course_title, learning_goal)
+        print(f"Course image URL: {image_url}")
+        
         roadmap = RoadMap(
             goal=course_title,  # Use generated course title instead of raw input
             level=req.level,
@@ -129,7 +134,8 @@ def GenSchedule(req: ScheduleType):
             skills=roadmap["skills"],
             userId=req.userId,
             roadmapId=roadmap_id,
-            createdAt=datetime.now()
+            createdAt=datetime.now(),
+            imageUrl=image_url  # Add course cover image URL
         )
         try:
             roadmap.save()
@@ -175,6 +181,7 @@ def GenSchedule(req: ScheduleType):
             "learningPathMongoId": str(schedule.id),
             "totalDays": total_days,
             "courseTitle": course_title,  # Add generated course title
+            "imageUrl": image_url,  # Add course cover image URL
             "message": "Learning path generated successfully"
         }
 

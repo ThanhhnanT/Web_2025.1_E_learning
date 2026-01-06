@@ -26,6 +26,7 @@ export interface LearningPathResponse {
     roadmap_id?: string;
     learning_path_id?: string;
     total_days?: number;
+    imageUrl?: string;
   };
   message: string;
 }

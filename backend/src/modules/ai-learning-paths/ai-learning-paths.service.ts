@@ -133,6 +133,7 @@ export class AiLearningPathsService {
           currentDay: lp.currentDay,
           progressPercentage: lp.progressPercentage || 0,
           estimatedHours: roadmap?.estimated_hours || 0,
+          imageUrl: roadmap?.imageUrl || null,
           createdAt: lp.createdAt,
           lastAccessed: lp.lastAccessed,
         };
@@ -175,6 +176,7 @@ export class AiLearningPathsService {
         description: roadmap?.description || '',
         totalDays: learningPath.totalDays,
         estimatedHours: roadmap?.estimated_hours || 0,
+        imageUrl: roadmap?.imageUrl || null,
         currentDay: learningPath.currentDay,
         completedDays: learningPath.completedDays || [],
         progressPercentage: learningPath.progressPercentage || 0,
