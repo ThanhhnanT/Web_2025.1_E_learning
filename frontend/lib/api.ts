@@ -2,21 +2,7 @@ import Cookies from "js-cookie";
 import axios from "axios";
 
 // Get base URL from environment variable or use default (same as helper/api.tsx)
-const getBaseUrl = () => {
-  const url = process.env.API || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8888';
-  return url.replace(/\/+$/, ''); // Remove trailing slashes
-};
-
-// Check if we need to use proxy (HTTPS frontend calling HTTP backend)
-const shouldUseProxy = () => {
-  if (typeof window === 'undefined') return false; // SSR, use direct URL
-  const isHttps = window.location.protocol === 'https:';
-  const backendUrl = getBaseUrl();
-  const isHttpBackend = backendUrl.startsWith('http://');
-  return isHttps && isHttpBackend;
-};
-
-const BASE_URL = shouldUseProxy() ? '/api/proxy' : getBaseUrl();
+const BASE_URL = process.env.API || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8888';
 
 // Create axios instance with base configuration
 const api = axios.create({

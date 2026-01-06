@@ -9,16 +9,7 @@ const getBaseUrl = () => {
   return url.replace(/\/+$/, ''); // Remove trailing slashes
 };
 
-// Check if we need to use proxy (HTTPS frontend calling HTTP backend)
-const shouldUseProxy = () => {
-  if (typeof window === 'undefined') return false; // SSR, use direct URL
-  const isHttps = window.location.protocol === 'https:';
-  const backendUrl = getBaseUrl();
-  const isHttpBackend = backendUrl.startsWith('http://');
-  return isHttps && isHttpBackend;
-};
-
-const API_DOMAIN = shouldUseProxy() ? '/api/proxy' : getBaseUrl();
+const API_DOMAIN = getBaseUrl();
 
 // Helper to normalize path: ensure it starts with /
 const normalizePath = (path: string) => {

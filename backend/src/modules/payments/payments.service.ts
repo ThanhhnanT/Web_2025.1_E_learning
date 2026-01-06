@@ -273,17 +273,18 @@ export class PaymentsService {
 
         this.logger.log(`User enrolled in course: ${enrollment._id}`);
 
-        // Send success email
-        const user: any = payment.userId;
-        const course: any = payment.courseId;
-        if (user && course) {
-          await this.sendPaymentSuccessEmail(
-            user.email,
-            user.name,
-            course.title,
-            payment.amount,
-          );
-        }
+        // Send success email - TEMPORARILY DISABLED
+        // const user: any = payment.userId;
+        // const course: any = payment.courseId;
+        // if (user && course) {
+        //   await this.sendPaymentSuccessEmail(
+        //     user.email,
+        //     user.name,
+        //     course.title,
+        //     payment.amount,
+        //   );
+        // }
+        this.logger.log(`⏭️  Payment success email skipped (email sending temporarily disabled)`);
 
         return {
           success: true,
@@ -339,17 +340,18 @@ export class PaymentsService {
 
       this.logger.log(`Payment ${paymentId} completed successfully`);
 
-      // Send payment success email
-      const user: any = payment.userId;
-      const course: any = payment.courseId;
-      if (user && course) {
-        await this.sendPaymentSuccessEmail(
-          user.email,
-          user.name,
-          course.title,
-          payment.amount,
-        );
-      }
+      // Send payment success email - TEMPORARILY DISABLED
+      // const user: any = payment.userId;
+      // const course: any = payment.courseId;
+      // if (user && course) {
+      //   await this.sendPaymentSuccessEmail(
+      //     user.email,
+      //     user.name,
+      //     course.title,
+      //     payment.amount,
+      //   );
+      // }
+      this.logger.log(`⏭️  Payment success email skipped (email sending temporarily disabled)`);
 
       return payment;
     } catch (error) {
@@ -374,13 +376,14 @@ export class PaymentsService {
 
       this.logger.log(`Payment ${paymentId} marked as failed: ${reason}`);
 
-      // Send failure notification email
-      const user: any = await this.userModel.findById(payment.userId).exec();
-      const course: any = await this.courseModel.findById(payment.courseId).exec();
+      // Send failure notification email - TEMPORARILY DISABLED
+      // const user: any = await this.userModel.findById(payment.userId).exec();
+      // const course: any = await this.courseModel.findById(payment.courseId).exec();
       
-      if (user && course) {
-        await this.sendPaymentFailedEmail(user.email, user.name, course.title, reason);
-      }
+      // if (user && course) {
+      //   await this.sendPaymentFailedEmail(user.email, user.name, course.title, reason);
+      // }
+      this.logger.log(`⏭️  Payment failed email skipped (email sending temporarily disabled)`);
 
       return payment;
     } catch (error) {
@@ -496,6 +499,7 @@ export class PaymentsService {
 
   /**
    * Send payment success email
+   * TEMPORARILY DISABLED
    */
   private async sendPaymentSuccessEmail(
     email: string,
@@ -503,6 +507,11 @@ export class PaymentsService {
     courseName: string,
     amount: number,
   ) {
+    // Email sending temporarily disabled
+    this.logger.log(`⏭️  Payment success email skipped for ${email} (email sending temporarily disabled)`);
+    return;
+    
+    /* DISABLED CODE
     try {
       const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
       
@@ -529,10 +538,12 @@ export class PaymentsService {
         });
       }
     }
+    */
   }
 
   /**
    * Send payment failed email
+   * TEMPORARILY DISABLED
    */
   private async sendPaymentFailedEmail(
     email: string,
@@ -540,6 +551,11 @@ export class PaymentsService {
     courseName: string,
     reason: string,
   ) {
+    // Email sending temporarily disabled
+    this.logger.log(`⏭️  Payment failed email skipped for ${email} (email sending temporarily disabled)`);
+    return;
+    
+    /* DISABLED CODE
     try {
       const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
       
@@ -566,6 +582,7 @@ export class PaymentsService {
         });
       }
     }
+    */
   }
 
   /**
