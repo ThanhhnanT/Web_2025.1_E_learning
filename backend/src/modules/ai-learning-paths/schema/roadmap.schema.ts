@@ -28,6 +28,9 @@ export class RoadMap {
 
   @Prop({ type: Object })
   skills: Record<string, string[]>;
+
+  @Prop({ type: String, required: false })
+  imageUrl?: string;
 }
 
 export const RoadMapSchema = SchemaFactory.createForClass(RoadMap);

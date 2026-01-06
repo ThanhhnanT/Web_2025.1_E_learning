@@ -9,6 +9,7 @@ class RoadMap(Document):
     userId = StringField()
     createdAt = DateTimeField(default=datetime.now)
     roadmapId = StringField()
+    imageUrl = StringField(required=False)  # URL of course cover image
 
     skills = MapField(field=ListField(StringField()))
 

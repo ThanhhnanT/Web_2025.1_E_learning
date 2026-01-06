@@ -76,6 +76,8 @@ export default function AILearningPathPage() {
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState<LearningPathDay | null>(null);
   const [expandedDays, setExpandedDays] = useState<string[]>([]);
+  // Store user answers for questions: { questionId: selectedOption }
+  const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (id) {
@@ -282,43 +284,118 @@ export default function AILearningPathPage() {
                     </Title>
                     <List
                       dataSource={selectedDay.question_review}
-                      renderItem={(question, idx) => (
-                        <List.Item>
-                          <Card style={{ width: '100%' }}>
-                            <Text strong>
-                              Câu {idx + 1}: {question.question_text}
-                            </Text>
-                            <div style={{ marginTop: 12 }}>
-                              {question.options?.map((option, optIdx) => (
-                                <div
-                                  key={optIdx}
-                                  style={{
-                                    padding: '8px 12px',
-                                    marginBottom: 4,
-                                    backgroundColor:
-                                      option === question.correct_answer
-                                        ? '#f6ffed'
-                                        : '#fafafa',
-                                    border:
-                                      option === question.correct_answer
-                                        ? '1px solid #b7eb8f'
-                                        : '1px solid #d9d9d9',
-                                    borderRadius: 4,
-                                  }}
-                                >
-                                  {option}
-                                  {option === question.correct_answer && (
-                                    <CheckCircleOutlined
-                                      style={{ color: '#52c41a', marginLeft: 8 }}
-                                    />
+                      renderItem={(question, idx) => {
+                        const userAnswer = userAnswers[question.id];
+                        const hasAnswered = !!userAnswer;
+                        const isCorrect = hasAnswered && userAnswer === question.correct_answer;
+                        // Extract option letter (A, B, C, D) from option string
+                        const getOptionLetter = (option: string) => option.split('.')[0]?.trim();
+                        
+                        return (
+                          <List.Item>
+                            <Card style={{ width: '100%' }}>
+                              <Text strong>
+                                Câu {idx + 1}: {question.question_text}
+                              </Text>
+                              <div style={{ marginTop: 12 }}>
+                                {question.options?.map((option, optIdx) => {
+                                  const optionLetter = getOptionLetter(option);
+                                  const isSelected = hasAnswered && userAnswer === optionLetter;
+                                  const isCorrectOption = optionLetter === question.correct_answer;
+                                  
+                                  // Determine background color
+                                  let backgroundColor = '#fafafa';
+                                  let borderColor = '#d9d9d9';
+                                  let cursor = 'pointer';
+                                  
+                                  if (hasAnswered) {
+                                    if (isCorrectOption) {
+                                      // Correct answer - always green
+                                      backgroundColor = '#f6ffed';
+                                      borderColor = '#b7eb8f';
+                                    } else if (isSelected && !isCorrectOption) {
+                                      // User selected wrong answer - red
+                                      backgroundColor = '#fff2f0';
+                                      borderColor = '#ffccc7';
+                                    }
+                                  } else {
+                                    // Not answered yet - hoverable
+                                    cursor = 'pointer';
+                                  }
+                                  
+                                  return (
+                                    <div
+                                      key={optIdx}
+                                      onClick={() => {
+                                        if (!hasAnswered) {
+                                          setUserAnswers(prev => ({
+                                            ...prev,
+                                            [question.id]: optionLetter
+                                          }));
+                                        }
+                                      }}
+                                      style={{
+                                        padding: '12px 16px',
+                                        marginBottom: 8,
+                                        backgroundColor,
+                                        border: `2px solid ${borderColor}`,
+                                        borderRadius: 8,
+                                        cursor,
+                                        transition: 'all 0.2s',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        if (!hasAnswered) {
+                                          e.currentTarget.style.backgroundColor = '#f0f0f0';
+                                          e.currentTarget.style.borderColor = '#1890ff';
+                                        }
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        if (!hasAnswered) {
+                                          e.currentTarget.style.backgroundColor = '#fafafa';
+                                          e.currentTarget.style.borderColor = '#d9d9d9';
+                                        }
+                                      }}
+                                    >
+                                      <span>{option}</span>
+                                      {hasAnswered && (
+                                        <>
+                                          {isCorrectOption && (
+                                            <CheckCircleOutlined
+                                              style={{ color: '#52c41a', fontSize: 18 }}
+                                            />
+                                          )}
+                                          {isSelected && !isCorrectOption && (
+                                            <span style={{ color: '#ff4d4f', fontSize: 18 }}>✗</span>
+                                          )}
+                                        </>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              {hasAnswered && (
+                                <div style={{ marginTop: 12 }}>
+                                  {isCorrect ? (
+                                    <Tag color="success" style={{ fontSize: 14, padding: '4px 12px' }}>
+                                      <CheckCircleFilled style={{ marginRight: 4 }} />
+                                      Đúng! Bạn đã trả lời đúng
+                                    </Tag>
+                                  ) : (
+                                    <Tag color="error" style={{ fontSize: 14, padding: '4px 12px' }}>
+                                      <span style={{ marginRight: 4 }}>✗</span>
+                                      Sai. Đáp án đúng là: <strong>{question.correct_answer}</strong>
+                                    </Tag>
                                   )}
                                 </div>
-                              ))}
-                            </div>
-                            <Tag style={{ marginTop: 8 }}>{question.level}</Tag>
-                          </Card>
-                        </List.Item>
-                      )}
+                              )}
+                              <Tag style={{ marginTop: 8 }}>{question.level}</Tag>
+                            </Card>
+                          </List.Item>
+                        );
+                      }}
                     />
                   </div>
                 )}
