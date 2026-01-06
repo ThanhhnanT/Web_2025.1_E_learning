@@ -267,7 +267,13 @@ docker-compose logs -f
 docker-compose ps
 ```
 
-**Lưu ý:** Lần đầu build có thể mất 15-30 phút do download ML dependencies lớn.
+**Lưu ý quan trọng:**
+- Lần đầu build có thể mất **20-40 phút** do:
+  - Download ML dependencies lớn (PyTorch, transformers, etc.)
+  - Compile các package C/C++ (insightface, dlib) - cần g++ và cmake
+  - Download embedding models
+- Nếu build fail với lỗi về `g++` hoặc `cmake`, đảm bảo Dockerfile đã được cập nhật với các build tools
+- Có thể theo dõi tiến trình build bằng: `docker-compose build --progress=plain`
 
 ## Bước 8: Cấu hình Nginx
 
