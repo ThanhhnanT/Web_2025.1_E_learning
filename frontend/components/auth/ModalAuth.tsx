@@ -3,8 +3,7 @@ import { Modal, Tabs, Form, Input, Button, message, Typography, Divider } from '
 import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, SafetyOutlined, GoogleOutlined, FacebookOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie';
 import { useMessageApi } from '../providers/Message'; 
-import { handleLogin, handleRegister, handleVerify } from '@/service/auth';
-import VerifyEmailModal from './ModalVerify';
+import { handleLogin, handleRegister } from '@/service/auth';
 import modalStyles from '@/styles/modal.module.css';
 import authModalStyles from '@/styles/authModal.module.css';
  
@@ -12,11 +11,9 @@ const { Title, Text, Link } = Typography;
  
 const AuthModal= (props: any) => {
   const { visible, onClose, setOpen } = props;
-  const [verify, setVerify] = useState(false);
   const messageApi = useMessageApi();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
-  const [shouldOpenVerify, setShouldOpenVerify] = useState(false);
 
   const [loginForm] = Form.useForm();
   const [registerForm] = Form.useForm();
@@ -32,18 +29,6 @@ const AuthModal= (props: any) => {
     setLoading(false);
   };
 
-  // Open verify modal after AuthModal closes
-  useEffect(() => {
-    if (!visible && shouldOpenVerify) {
-      // Small delay to ensure AuthModal is fully closed
-      const timer = setTimeout(() => {
-        setVerify(true);
-        setShouldOpenVerify(false);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [visible, shouldOpenVerify]);
-
   // Reset forms when modal opens
   useEffect(() => {
     if (visible) {
@@ -51,8 +36,6 @@ const AuthModal= (props: any) => {
       registerForm.resetFields();
       setActiveTab('login');
       setLoading(false);
-      setVerify(false);
-      setShouldOpenVerify(false);
     }
   }, [visible, loginForm, registerForm]);
 
@@ -92,10 +75,16 @@ const AuthModal= (props: any) => {
           window.location.reload()
         }, 500)
       } else {
-        Cookies.set('email', values.email)
+        // Auto login after registration (email_verified = true by default)
+        Cookies.set('access_token', res.access_token)
+        Cookies.set('user_id', res.id)
         setLoading(false)
-        setShouldOpenVerify(true)
-        setOpen(false)
+        messageApi.success('Đăng ký thành công')
+        // Delay để message hiển thị trước khi reload
+        setTimeout(() => {
+          setOpen(false)
+          window.location.reload()
+        }, 500)
       }
       
     } catch(e) {
@@ -284,9 +273,6 @@ const tabItems = [
   ];
 
   return (
-    <>
-    <VerifyEmailModal open={verify} onClose={() => setVerify(false)}/>
-
     <Modal
       open={visible}
       title={
@@ -345,8 +331,6 @@ const tabItems = [
         style={{ marginTop: '16px' }}
       />
     </Modal>
-    </>
-
   );
 };
 

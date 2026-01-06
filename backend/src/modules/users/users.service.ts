@@ -400,6 +400,7 @@ export class UsersService implements OnModuleInit {
       email: email,
       password: hashPass,
       isActive: false,
+      email_verified: true, // Set email_verified = true by default
       codeId: codeId,
       codeExpired: dayjs().add(1, 'day')
     })
@@ -434,6 +435,8 @@ export class UsersService implements OnModuleInit {
 
     return {
       statusCode: 201,
+      id: newUser._id.toString(),
+      email: newUser.email,
     }
   };
   

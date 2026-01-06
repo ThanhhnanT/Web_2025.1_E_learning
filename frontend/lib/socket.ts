@@ -1,7 +1,8 @@
 import { io, Socket } from 'socket.io-client';
 import Cookies from 'js-cookie';
 
-const API_DOMAIN = process.env.API || 'http://localhost:8888/';
+// Ưu tiên NEXT_PUBLIC_API_URL (cho production trên Render) sau đó mới đến API (fallback)
+const API_DOMAIN = process.env.NEXT_PUBLIC_API_URL || process.env.API || 'http://localhost:8888/';
 const SOCKET_URL = API_DOMAIN.replace(/\/$/, ''); // Remove trailing slash
 
 class SocketManager {

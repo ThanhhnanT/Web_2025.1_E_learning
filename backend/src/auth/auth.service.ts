@@ -57,8 +57,22 @@ export class AuthService {
     };
   }
 
-  register = async ( createUser : CreateAuthDto) => 
-  {return this.usersService.hanldeRegister(createUser)}
+  register = async ( createUser : CreateAuthDto) => {
+    const res = await this.usersService.hanldeRegister(createUser)
+    if (res.statusCode !== 201){
+      return res
+    }
+    // Auto login after registration (email_verified = true by default)
+    const {id, email} = res
+    const payload = {sud: id, email: email} 
+    const access_token = await this.jwtService.signAsync(payload)
+    return {
+      statusCode: 201,
+      access_token: access_token,
+      id: id,
+      email: email
+    };
+  }
 
   verifyEmail = async (verify_email : VerifyDto) => {
     const res = await this.usersService.verifyEmail(verify_email)
