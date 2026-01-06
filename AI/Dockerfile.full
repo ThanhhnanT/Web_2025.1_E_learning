@@ -1,5 +1,5 @@
-# Base image
-FROM python:3.11-slim
+# Base image - sử dụng full image thay vì slim để có đầy đủ tools
+FROM python:3.11
 
 # Set workdir
 WORKDIR /app
@@ -36,3 +36,4 @@ ENV PYTHONUNBUFFERED=1
 
 # Run app
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+
