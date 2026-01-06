@@ -59,11 +59,47 @@ export class CloudinaryService implements OnModuleInit {
     });
   }
 
+  async uploadVideo(file: any, folder: string = 'videos'): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const options: any = {
+        folder,
+        resource_type: 'video',
+        chunk_size: 6000000, // 6MB chunks for large videos
+        eager: [
+          { quality: 'auto', format: 'mp4' },
+        ],
+      };
+
+      const uploadStream = cloudinary.uploader.upload_stream(
+        options,
+        (error: UploadApiErrorResponse | undefined, result: UploadApiResponse | undefined) => {
+          if (error) {
+            reject(error);
+          } else if (result) {
+            resolve(result.secure_url);
+          } else {
+            reject(new Error('Upload failed: No result returned'));
+          }
+        },
+      );
+
+      uploadStream.end(file.buffer);
+    });
+  }
+
   async deleteImage(publicId: string): Promise<void> {
     try {
       await cloudinary.uploader.destroy(publicId);
     } catch (error) {
       console.error('Error deleting image from Cloudinary:', error);
+    }
+  }
+
+  async deleteVideo(publicId: string): Promise<void> {
+    try {
+      await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
+    } catch (error) {
+      console.error('Error deleting video from Cloudinary:', error);
     }
   }
 }

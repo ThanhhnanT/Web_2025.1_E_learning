@@ -4,13 +4,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.features.ai_schedule.schedule_controller import GenSchedule
 from src.constant.ScheduleType import Schedule
 from src.config.connectDatabase import  connect_db
+from src.features.face_recognition.face_recognition_controller import router as face_recognition_router
 
 
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:8888",
-    "http://127.0.0.1:8888"
+    "http://127.0.0.1:8888",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
 ]
 
 config = dotenv_values(".env")
@@ -35,3 +38,6 @@ def root():
 @app.post("/generate_schedule")
 async def query_schedule(req: Schedule):
     return GenSchedule(req)
+
+# Face Recognition routes
+app.include_router(face_recognition_router, prefix="/face-recognition", tags=["Face Recognition"])

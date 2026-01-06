@@ -13,7 +13,8 @@ import {
   ReadOutlined, 
   ShoppingCartOutlined,
   UserOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  SafetyOutlined
 } from "@ant-design/icons";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,6 +27,8 @@ import FooterComponent from "./FooterComponent";
 import styles from '@/styles/antLayout.module.css';
 import skeletonStyles from '@/styles/skeleton.module.css';
 import AuthModal from "./auth/ModalAuth";
+import FaceVerificationCamera from "./FaceVerificationCamera";
+import faceVerificationService from "@/service/faceVerification";
 // import MessageProvider from "./providers/MessageProvider";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider } from "antd";
@@ -38,6 +41,8 @@ const style = commonStyle()
 
 // Component client-only cho User menu
 function UserMenuClient({ onOpenModal, onCloseSubmenu }: { onOpenModal: () => void; onCloseSubmenu?: () => void }) {
+  const [faceVerificationModalOpen, setFaceVerificationModalOpen] = useState(false);
+  const { message } = App.useApp();
   const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
@@ -165,11 +170,28 @@ function UserMenuClient({ onOpenModal, onCloseSubmenu }: { onOpenModal: () => vo
       icon: <BookOutlined />
     },
     { 
+      key: "face-verification", 
+      label: "Xác thực khuôn mặt",
+      icon: <SafetyOutlined />
+    },
+    { 
       key: "logout", 
       label: "Đăng xuất",
       icon: <LogoutOutlined />
     },
   ];
+
+  const handleFaceRegistration = async (imageBase64: string) => {
+    try {
+      const result = await faceVerificationService.registerFace(imageBase64);
+      if (result.success) {
+        setFaceVerificationModalOpen(false);
+        message.success('Đăng ký khuôn mặt thành công!');
+      }
+    } catch (error: any) {
+      message.error(error?.response?.data?.message || 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.');
+    }
+  };
 
   const handleMenuClick = ({ key }: { key: string }) => {
     // Đóng submenu khi click vào item trong dropdown
@@ -182,6 +204,9 @@ function UserMenuClient({ onOpenModal, onCloseSubmenu }: { onOpenModal: () => vo
         break;
       case "my-courses":
         router.push("/my-courses");
+        break;
+      case "face-verification":
+        setFaceVerificationModalOpen(true);
         break;
       case "logout":
         logoutUser();
@@ -213,6 +238,15 @@ function UserMenuClient({ onOpenModal, onCloseSubmenu }: { onOpenModal: () => vo
           style={{ cursor: "pointer" }}
         />
       </Dropdown>
+
+      {/* Face Verification Modal */}
+      <FaceVerificationCamera
+        open={faceVerificationModalOpen}
+        onClose={() => setFaceVerificationModalOpen(false)}
+        onCapture={handleFaceRegistration}
+        mode="register"
+        title="Đăng ký khuôn mặt"
+      />
     </div>
   ) : (
     <Button

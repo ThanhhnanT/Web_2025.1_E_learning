@@ -76,24 +76,19 @@ export class TestsFullController {
     const sectionsWithGroups = await Promise.all(
       sections.map(async (section: any) => {
         const questionGroups = await this.questionGroupsService.findBySectionId(section._id.toString());
+        const mappedGroups = questionGroups.map((group: any) =>
+          typeof group.toObject === 'function' ? group.toObject() : group,
+        );
+
         return {
           ...(typeof section.toObject === 'function' ? section.toObject() : section),
-          questionGroups: questionGroups.map((group: any) => ({
-            _id: group._id,
-            title: group.title,
-            questionRange: group.questionRange,
-            groupType: group.groupType,
-          })),
+          questionGroups: mappedGroups,
         };
       })
     );
     
     return {
-      _id: test._id,
-      title: test.title,
-      testType: test.testType,
-      durationMinutes: test.durationMinutes,
-      totalQuestions: test.totalQuestions,
+      ...(typeof test.toObject === 'function' ? test.toObject() : test),
       sections: sectionsWithGroups,
     };
   }

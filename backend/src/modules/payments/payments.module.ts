@@ -11,11 +11,13 @@ import { VNPayService } from './services/vnpay.service';
 import { MomoService } from './services/momo.service';
 import { ConfigModule } from '@nestjs/config';
 import { EnrollmentsModule } from '../enrollments/enrollments.module';
+import { FaceRecognitionModule } from '../face-recognition/face-recognition.module';
 
 @Module({
   imports: [
     ConfigModule,
     EnrollmentsModule,
+    FaceRecognitionModule,
     MongooseModule.forFeature([
       {
         name: Payment.name,

@@ -287,6 +287,25 @@ export const uploadAvatar = async (file: File) => {
   }
 };
 
+export const uploadVideo = async (file: File) => {
+  try {
+    const tokenHeader = await getTokenHeader();
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const res = await axios.post(API_DOMAIN + 'users/upload/video', formData, {
+      headers: {
+        ...tokenHeader,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error('Error uploading video:', error);
+    throw error;
+  }
+};
+
 export const uploadCoverImage = async (file: File) => {
   try {
     const tokenHeader = await getTokenHeader();
