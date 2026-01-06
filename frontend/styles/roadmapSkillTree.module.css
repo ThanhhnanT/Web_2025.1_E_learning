@@ -105,24 +105,24 @@
 }
 
 /* React Flow overrides */
-:global(.react-flow__node) {
+.roadmapContainer :global(.react-flow__node) {
   cursor: pointer;
 }
 
-:global(.react-flow__edge-path) {
+.roadmapContainer :global(.react-flow__edge-path) {
   stroke-width: 2;
 }
 
-:global(.react-flow__edge.selected .react-flow__edge-path) {
+.roadmapContainer :global(.react-flow__edge.selected .react-flow__edge-path) {
   stroke: #1890ff;
   stroke-width: 3;
 }
 
-:global(.react-flow__controls) {
+.roadmapContainer :global(.react-flow__controls) {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-:global(.react-flow__minimap) {
+.roadmapContainer :global(.react-flow__minimap) {
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   overflow: hidden;

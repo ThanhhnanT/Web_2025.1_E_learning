@@ -1,19 +1,19 @@
 /* Hide scrollbar but allow scrolling for modal body */
-:global(.ant-modal-body)::-webkit-scrollbar {
+.modalWrapper :global(.ant-modal-body)::-webkit-scrollbar {
   width: 0px;
   background: transparent;
 }
 
-:global(.ant-modal-body)::-webkit-scrollbar-track {
+.modalWrapper :global(.ant-modal-body)::-webkit-scrollbar-track {
   background: transparent;
 }
 
-:global(.ant-modal-body)::-webkit-scrollbar-thumb {
+.modalWrapper :global(.ant-modal-body)::-webkit-scrollbar-thumb {
   background: transparent;
 }
 
 /* For Firefox */
-:global(.ant-modal-body) {
+.modalWrapper :global(.ant-modal-body) {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -40,14 +40,14 @@
 
 /* Center modal vertically and horizontally, but slightly higher */
 /* Using more specific selector to avoid interfering with Ant Design's cleanup */
-:global(.ant-modal-wrap.ant-modal-wrap-open) {
+.modalWrapper :global(.ant-modal-wrap.ant-modal-wrap-open) {
   display: flex !important;
   align-items: flex-start !important;
   justify-content: center !important;
   padding-top: 10vh !important;
 }
 
-:global(.ant-modal-wrap.ant-modal-wrap-open .ant-modal) {
+.modalWrapper :global(.ant-modal-wrap.ant-modal-wrap-open .ant-modal) {
   top: 0 !important;
   padding-bottom: 0 !important;
   margin: 0 auto !important;

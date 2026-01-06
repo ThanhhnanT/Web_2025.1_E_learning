@@ -528,23 +528,23 @@
 }
 
 /* Form Item Styling */
-:global(.profileForm .ant-form-item-label > label) {
+.profilePageContainer :global(.profileForm .ant-form-item-label > label) {
   font-weight: 500;
   color: #262626;
 }
 
-:global(.profileForm .ant-input:disabled),
-:global(.profileForm .ant-input-disabled) {
+.profilePageContainer :global(.profileForm .ant-input:disabled),
+.profilePageContainer :global(.profileForm .ant-input-disabled) {
   background-color: #f5f5f5;
   color: #000000;
   cursor: not-allowed;
 }
 
-:global(.profileForm textarea.ant-input[disabled]) {
+.profilePageContainer :global(.profileForm textarea.ant-input[disabled]) {
   -webkit-text-fill-color: #000000;
 }
 
-:global(.profileForm textarea.ant-input[disabled]::placeholder) {
+.profilePageContainer :global(.profileForm textarea.ant-input[disabled]::placeholder) {
   color: #bfbfbf !important;
   opacity: 1 !important;
   -webkit-text-fill-color: #bfbfbf !important;
