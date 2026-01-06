@@ -96,28 +96,29 @@ export class PaymentsService {
         throw new NotFoundException('User not found');
       }
 
-      // Face verification check
+      // Face verification check - Allow skipping if no token provided
       if (user.face_encoding_registered && user.face_encoding) {
-        // User has face registered, require verification token
+        // User has face registered, check if verification token is provided
         if (!dto.face_verification_token) {
-          throw new BadRequestException(
-            'Face verification required. Please verify your face before proceeding with payment.',
+          // Allow skipping face verification (user clicked "Tạm thời bỏ qua")
+          this.logger.warn(
+            `Face verification skipped for user ${userId}. User has registered face but chose to skip verification.`,
           );
-        }
-
-        // Validate verification token
-        const isValidToken = this.faceVerificationTokenService.validateToken(
-          dto.face_verification_token,
-          userId,
-        );
-
-        if (!isValidToken) {
-          throw new BadRequestException(
-            'Invalid or expired face verification token. Please verify your face again.',
+        } else {
+          // Validate verification token if provided
+          const isValidToken = this.faceVerificationTokenService.validateToken(
+            dto.face_verification_token,
+            userId,
           );
-        }
 
-        this.logger.log(`Face verification token validated for user ${userId}`);
+          if (!isValidToken) {
+            throw new BadRequestException(
+              'Invalid or expired face verification token. Please verify your face again.',
+            );
+          }
+
+          this.logger.log(`Face verification token validated for user ${userId}`);
+        }
       }
 
       // Check if user already enrolled (check if there's a completed payment)

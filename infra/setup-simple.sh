@@ -22,9 +22,26 @@ else
     echo "✅ Node.js already installed"
 fi
 
-# Install Python 3.11
-echo "📦 Installing Python 3.11..."
-sudo apt-get install -y python3.11 python3.11-venv python3-pip
+# Install Python 3.11 (hoặc dùng Python 3.10 có sẵn)
+echo "📦 Installing Python..."
+if ! command -v python3.11 &> /dev/null; then
+    # Thử cài Python 3.11 từ deadsnakes PPA
+    sudo apt-get install -y software-properties-common
+    sudo add-apt-repository -y ppa:deadsnakes/ppa
+    sudo apt-get update
+    sudo apt-get install -y python3.11 python3.11-venv python3.11-dev
+    echo "✅ Python 3.11 installed"
+else
+    echo "✅ Python 3.11 already installed"
+fi
+
+# Cài pip nếu chưa có
+if ! command -v pip3 &> /dev/null; then
+    sudo apt-get install -y python3-pip
+    echo "✅ pip3 installed"
+else
+    echo "✅ pip3 already installed"
+fi
 
 # Install build tools
 echo "📦 Installing build tools..."

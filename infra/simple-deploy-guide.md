@@ -25,8 +25,15 @@ sudo apt-get update && sudo apt-get upgrade -y
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# Cài Python 3.11 và pip
-sudo apt-get install -y python3.11 python3.11-venv python3-pip
+# Cài Python 3.11 (hoặc dùng Python 3.10)
+# Cách 1: Cài Python 3.11 từ deadsnakes PPA
+sudo apt-get install -y software-properties-common
+sudo add-apt-repository -y ppa:deadsnakes/ppa
+sudo apt-get update
+sudo apt-get install -y python3.11 python3.11-venv python3.11-dev python3-pip
+
+# Cách 2: Hoặc dùng Python 3.10 có sẵn (đơn giản hơn)
+# sudo apt-get install -y python3.10 python3.10-venv python3-pip
 
 # Cài build tools cho Python packages
 sudo apt-get install -y build-essential cmake g++ gcc libopenblas-dev liblapack-dev pkg-config
@@ -101,7 +108,11 @@ pm2 startup
 cd /opt/e-learning/AI
 
 # Tạo virtual environment
+# Nếu dùng Python 3.11:
 python3.11 -m venv venv
+# Hoặc nếu dùng Python 3.10:
+# python3.10 -m venv venv
+
 source venv/bin/activate
 
 # Upgrade pip
