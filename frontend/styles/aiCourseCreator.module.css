@@ -351,6 +351,53 @@
   overflow: hidden;
 }
 
+/* Generated Course Card */
+.generatedCourseCard {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.generatedCourseCard:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.generatedCourseCard :global(.ant-card-body) {
+  padding: 0;
+}
+
+.generatedCourseCard :global(.ant-card-cover) {
+  margin: 0;
+}
+
+/* Existing Learning Paths Cards */
+.existingPathCard {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.existingPathCard:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+}
+
+.existingPathCard :global(.ant-card-body) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.existingPathCard :global(.ant-card-cover) {
+  margin: 0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .container {

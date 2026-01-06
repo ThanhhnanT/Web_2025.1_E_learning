@@ -1,4 +1,5 @@
-from mongoengine import Document, StringField, IntField, ListField, EmbeddedDocument, EmbeddedDocumentField, DictField
+from mongoengine import Document, StringField, IntField, ListField, EmbeddedDocument, EmbeddedDocumentField, DictField, DateTimeField
+from datetime import datetime
 
 class Question(EmbeddedDocument):
     id = StringField()
@@ -18,11 +19,18 @@ class Day(EmbeddedDocument):
 
 
 class LearningPath(Document):
-    user_id = StringField()
+    userId = StringField()
     course = StringField()
     schedule = ListField(EmbeddedDocumentField(Day))
+    roadmapId = StringField()
+    createdAt = DateTimeField(default=datetime.now)
+    currentDay = IntField(default=1)
+    completedDays = ListField(IntField(), default=[])
+    progressPercentage = IntField(default=0, min_value=0, max_value=100)
+    totalDays = IntField()
+    lastAccessed = DateTimeField()
 
     meta = {
         'collection': 'Learning_Path',
-        'ordering': ['user_id']
+        'ordering': ['userId']
     }
