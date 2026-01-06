@@ -1,6 +1,3 @@
-# # Ignore crawl helper project
-Crawl_Ielts_Test/
-
 ./PAYMENT_SYSTEM_GUIDE.md
 ./**.md
 ./**.puml

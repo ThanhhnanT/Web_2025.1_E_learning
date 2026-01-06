@@ -1,0 +1,29 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Scrapy logs & debug
+*.log
+logs/
+
+# Local settings / secrets (if any)
+local_settings.py
+
+# Exported data (can be regenerated)
+export/*.json
+export/collections/*.json
+data/*.json
+*.json
+
+# Misc
+.DS_Store
+*.swp
+*.swo
+
+
+
