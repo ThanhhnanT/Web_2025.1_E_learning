@@ -99,18 +99,31 @@ export default function FaceVerificationCamera({
           // Draw bounding boxes
           const overlayCtx = overlayCanvas.getContext('2d');
           if (overlayCtx) {
-            overlayCanvas.width = video.videoWidth;
-            overlayCanvas.height = video.videoHeight;
+            // Get video display dimensions
+            const videoRect = video.getBoundingClientRect();
+            const displayWidth = videoRect.width;
+            const displayHeight = videoRect.height;
+            
+            // Set canvas internal size to match display size (for crisp rendering)
+            const dpr = window.devicePixelRatio || 1;
+            overlayCanvas.width = displayWidth * dpr;
+            overlayCanvas.height = displayHeight * dpr;
+            overlayCtx.scale(dpr, dpr);
+            
+            // Calculate scale factors
+            const scaleX = displayWidth / video.videoWidth;
+            const scaleY = displayHeight / video.videoHeight;
             
             // Clear previous frame
-            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            overlayCtx.clearRect(0, 0, displayWidth, displayHeight);
             
             // Draw each bounding box
             response.faces.forEach((box) => {
-              const x1 = box.x1;
-              const y1 = box.y1;
-              const x2 = box.x2;
-              const y2 = box.y2;
+              // Scale coordinates to match display size
+              const x1 = box.x1 * scaleX;
+              const y1 = box.y1 * scaleY;
+              const x2 = box.x2 * scaleX;
+              const y2 = box.y2 * scaleY;
               const width = x2 - x1;
               const height = y2 - y1;
               
@@ -465,6 +478,7 @@ export default function FaceVerificationCamera({
                   minHeight: '480px',
                   pointerEvents: 'none',
                   zIndex: 2,
+                  objectFit: 'contain',
                 }}
               />
           {(!cameraReady || loading) && (
