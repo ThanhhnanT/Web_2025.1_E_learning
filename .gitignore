@@ -5,4 +5,5 @@ Crawl_Ielts_Test/
 ./**.md
 ./**.puml
 
-Face_Recognition/
+# Face_Recognition/ - Commented out, need this folder in AI service
+# !AI/src/features/face_recognition/
