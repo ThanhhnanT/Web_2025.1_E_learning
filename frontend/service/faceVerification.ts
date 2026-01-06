@@ -61,33 +61,12 @@ class FaceVerificationService {
 
   /**
    * Detect faces in image and return bounding boxes
-   * This calls the AI service directly
+   * This calls the backend API which then calls the AI service
    */
   async detectFaces(imageBase64: string): Promise<DetectFaceResponse> {
-    const AI_SERVICE_URL = process.env.NEXT_PUBLIC_AI_SERVICE_URL || 'http://localhost:8000';
-    const url = `${AI_SERVICE_URL}/face-recognition/detect`;
-    
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          image_base64: imageBase64,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Face detection failed: ${response.statusText} - ${errorText}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error: any) {
-      throw error;
-    }
+    return await postAccess('face-recognition/detect', {
+      image_base64: imageBase64,
+    });
   }
 }
 

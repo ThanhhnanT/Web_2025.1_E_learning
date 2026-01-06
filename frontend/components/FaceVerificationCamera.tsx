@@ -84,25 +84,30 @@ export default function FaceVerificationCamera({
         // Call AI service to detect faces
         const response = await faceVerificationService.detectFaces(imageBase64);
         
-        if (response.success) {
-          setFaceBoxes(response.faces);
+        if (response && response.success) {
+          setFaceBoxes(response.faces || []);
           
           // Update message based on face count
           if (response.face_count === 0) {
-            setDetectionMessage('Hãy cho mặt vào khung hình');
+            setDetectionMessage('Vui lòng cho mặt vào khung hình');
           } else if (response.face_count === 1) {
             setDetectionMessage('');
           } else {
-            setDetectionMessage('Cảnh báo: Phát hiện nhiều hơn 1 khuôn mặt!');
+            setDetectionMessage('Phát hiện nhiều hơn 1 người trong ảnh');
           }
           
           // Draw bounding boxes
           const overlayCtx = overlayCanvas.getContext('2d');
-          if (overlayCtx) {
+          if (overlayCtx && video.videoWidth > 0 && video.videoHeight > 0) {
             // Get video display dimensions
             const videoRect = video.getBoundingClientRect();
-            const displayWidth = videoRect.width;
-            const displayHeight = videoRect.height;
+            const displayWidth = videoRect.width || video.videoWidth;
+            const displayHeight = videoRect.height || video.videoHeight;
+            
+            // Validate dimensions
+            if (displayWidth <= 0 || displayHeight <= 0) {
+              return;
+            }
             
             // Set canvas internal size to match display size (for crisp rendering)
             const dpr = window.devicePixelRatio || 1;
@@ -110,15 +115,21 @@ export default function FaceVerificationCamera({
             overlayCanvas.height = displayHeight * dpr;
             overlayCtx.scale(dpr, dpr);
             
-            // Calculate scale factors
+            // Calculate scale factors with validation
             const scaleX = displayWidth / video.videoWidth;
             const scaleY = displayHeight / video.videoHeight;
             
             // Clear previous frame
             overlayCtx.clearRect(0, 0, displayWidth, displayHeight);
             
-            // Draw each bounding box
-            response.faces.forEach((box) => {
+            // Draw bounding boxes if exists and valid
+            if (response.faces && Array.isArray(response.faces) && response.faces.length > 0) {
+              response.faces.forEach((box) => {
+                // Validate bounding box data
+                if (!box || typeof box.x1 !== 'number' || typeof box.y1 !== 'number' || 
+                    typeof box.x2 !== 'number' || typeof box.y2 !== 'number') {
+                  return; // Skip invalid boxes
+                }
               // Scale coordinates to match display size
               const x1 = box.x1 * scaleX;
               const y1 = box.y1 * scaleY;
@@ -177,11 +188,31 @@ export default function FaceVerificationCamera({
                   y1 - 5
                 );
               }
-            });
+              });
+            }
           }
+        } else if (response && !response.success) {
+          // Handle error response
+          setDetectionMessage(response.error || 'Không thể phát hiện khuôn mặt');
+          setFaceBoxes([]);
+          // Clear canvas on error
+          const overlayCtx = overlayCanvas.getContext('2d');
+          if (overlayCtx) {
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+          }
+        } else {
+          // Clear boxes if no valid response
+          setFaceBoxes([]);
         }
       } catch (error: any) {
-        // Silent error handling
+        console.error('Face detection error:', error);
+        setFaceBoxes([]);
+        setDetectionMessage('Lỗi khi phát hiện khuôn mặt. Vui lòng thử lại.');
+        // Clear canvas on error
+        const overlayCtx = overlayCanvas.getContext('2d');
+        if (overlayCtx) {
+          overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        }
       }
     };
 
@@ -474,11 +505,10 @@ export default function FaceVerificationCamera({
                   left: 0,
                   width: '100%',
                   maxWidth: '640px',
-                  height: 'auto',
+                  height: '100%',
                   minHeight: '480px',
                   pointerEvents: 'none',
                   zIndex: 2,
-                  objectFit: 'contain',
                 }}
               />
           {(!cameraReady || loading) && (

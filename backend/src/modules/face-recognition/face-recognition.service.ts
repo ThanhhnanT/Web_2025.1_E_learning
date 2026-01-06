@@ -6,6 +6,7 @@ import axios from 'axios';
 import { User } from '../users/schemas/user.schema';
 import { RegisterFaceDto } from './dto/register-face.dto';
 import { VerifyFaceDto } from './dto/verify-face.dto';
+import { DetectFaceDto } from './dto/detect-face.dto';
 
 @Injectable()
 export class FaceRecognitionService {
@@ -195,6 +196,60 @@ export class FaceRecognitionService {
       }
 
       throw new BadRequestException(`Failed to get face status: ${error.message}`);
+    }
+  }
+
+  /**
+   * Detect faces in image and return bounding boxes
+   */
+  async detectFaces(detectFaceDto: DetectFaceDto) {
+    try {
+      this.logger.log('Detecting faces in image');
+
+      // Call AI service to detect faces
+      const response = await axios.post(
+        `${this.aiServiceUrl}/face-recognition/detect`,
+        {
+          image_base64: detectFaceDto.image_base64,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          timeout: 30000, // 30 seconds timeout
+        },
+      );
+
+      // Return the response directly from AI service
+      return response.data;
+    } catch (error: any) {
+      this.logger.error(`Error detecting faces: ${error.message}`, error.stack);
+
+      if (error.response) {
+        // Return error response in same format as AI service
+        return {
+          success: false,
+          faces: [],
+          face_count: 0,
+          error: error.response.data?.error || error.response.statusText || 'Failed to detect faces',
+        };
+      }
+
+      if (error.code === 'ECONNREFUSED') {
+        return {
+          success: false,
+          faces: [],
+          face_count: 0,
+          error: 'AI service is not available. Please try again later.',
+        };
+      }
+
+      return {
+        success: false,
+        faces: [],
+        face_count: 0,
+        error: `Failed to detect faces: ${error.message}`,
+      };
     }
   }
 }

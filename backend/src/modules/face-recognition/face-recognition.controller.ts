@@ -12,6 +12,7 @@ import { FaceRecognitionService } from './face-recognition.service';
 import { FaceVerificationTokenService } from './face-verification-token.service';
 import { RegisterFaceDto } from './dto/register-face.dto';
 import { VerifyFaceDto } from './dto/verify-face.dto';
+import { DetectFaceDto } from './dto/detect-face.dto';
 
 @ApiTags('Face Recognition')
 @Controller('face-recognition')
@@ -70,6 +71,18 @@ export class FaceRecognitionController {
   async getFaceStatus(@Request() req: any) {
     const userId = req.user._id || req.user.id;
     return this.faceRecognitionService.getFaceStatus(userId.toString());
+  }
+
+  @ApiOperation({
+    summary: 'Detect faces in image',
+    description: 'Detect faces in image and return bounding boxes. Used for real-time face detection. Requires authentication.',
+  })
+  @ApiResponse({ status: 200, description: 'Face detection result with bounding boxes' })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid image' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Post('detect')
+  async detectFaces(@Body() detectFaceDto: DetectFaceDto) {
+    return this.faceRecognitionService.detectFaces(detectFaceDto);
   }
 }
 
