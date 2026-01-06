@@ -24,6 +24,7 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { FriendsModule } from './modules/friends/friends.module';
 import { ChatsModule } from './modules/chats/chats.module';
+import { AiLearningPathsModule } from './modules/ai-learning-paths/ai-learning-paths.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ChatsModule } from './modules/chats/chats.module';
     PostsModule,
     FriendsModule,
     ChatsModule,
+    AiLearningPathsModule,
 
     ConfigModule.forRoot({
       isGlobal: true, 

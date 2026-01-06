@@ -35,18 +35,35 @@ def load_vector_store(
 
 def get_similar_docs(query: str, vector_store: Chroma, level: str, file_type: str, domain:str, k: int = 5) -> List[str]:
     try:
-        return vector_store.similarity_search(
+        # ChromaDB filter syntax: use $and for multiple conditions
+        filter_dict = {
+            "$and": [
+                {"domain": {"$eq": domain}},
+                {"level": {"$eq": level}},
+                {"file_type": {"$eq": file_type}},
+            ]
+        }
+        
+        print(f"Searching with filter: domain='{domain}', level='{level}', file_type='{file_type}'")
+        
+        results = vector_store.similarity_search(
             query,
             k=k,
-            filter={
-                "$and": [
-                    {"domain": {"$eq": domain}},
-                    {"level": {"$eq": level}},
-                    {"file_type": {"$eq": file_type}},
-                ]
-            }
+            filter=filter_dict
         )
+        
+        print(f"Found {len(results)} documents")
+        if len(results) == 0:
+            # Try without filter to see if there are any documents at all
+            all_results = vector_store.similarity_search(query, k=1)
+            print(f"Total documents in store (without filter): {len(all_results)}")
+            if len(all_results) > 0:
+                print(f"Sample document metadata: {all_results[0].metadata}")
+        
+        return results
     except Exception as e:
         print(f"Error retrieving similar documents: {e}")
+        import traceback
+        traceback.print_exc()
         return []
 

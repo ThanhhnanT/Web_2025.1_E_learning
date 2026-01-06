@@ -14,44 +14,63 @@ import re
 from src.database.RoadMap_Schema import RoadMap
 from src.database.Learning_Path import LearningPath
 from src.utils.get_domain import get_domain
+from src.utils.generate_course_title import generate_course_title
+from datetime import datetime
+import uuid
 
 
 config = dotenv_values(".env")
 def GenSchedule(req: ScheduleType):
     print(req)
     try:
-        # base_path = "data/questions/AI_Engineer"
-        # documents= []
-        #
-        # for root, dirs, files in os.walk(base_path):
-        #     for file in files:
-        #         if file.endswith(".json"):
-        #             path = os.path.join(root, file)
-        #             parts = path.split(os.sep)
-        #
-        #             if len(parts) >= 5:
-        #                 domain = parts[3].strip().lower()  # 'computer vision'
-        #                 level = parts[4].strip().lower()  # 'advance'
-        #                 file_type = os.path.splitext(file)[0].strip()  # 'Theory'
-        #             else:
-        #                 continue
-        #
-        #             # Load tài liệu với metadata
-        #             docs = load_document(path, level=level, domain=domain)
-        #             if docs:
-        #                 # Thêm file_type vào metadata
-        #                 for doc in docs:
-        #                     doc.metadata["file_type"] = file_type
-        #                 documents.extend(docs)
-        #                 print(
-        #                     f"Loaded {len(docs)} chunks from {path} (domain={domain}, level={level}, file_type={file_type})")
-        #
-        # if not documents:
-        #     print("No documents loaded.")
-        #     return {"error": "No documents loaded"}
+        base_path = "data/questions/AI_Engineer"
+        documents= []
+        
+        for root, dirs, files in os.walk(base_path):
+            for file in files:
+                if file.endswith(".json"):
+                    path = os.path.join(root, file)
+                    parts = path.split(os.sep)
+        
+                    if len(parts) >= 5:
+                        domain = parts[3].strip().lower()  # 'computer vision'
+                        level = parts[4].strip().lower()  # 'advance'
+                        file_type = os.path.splitext(file)[0].strip()  # 'Theory'
+                    else:
+                        continue
+        
+                    # Load tài liệu với metadata
+                    docs = load_document(path, level=level, domain=domain)
+                    if docs:
+                        # Thêm file_type vào metadata
+                        for doc in docs:
+                            doc.metadata["file_type"] = file_type
+                        documents.extend(docs)
+                        print(
+                            f"Loaded {len(docs)} chunks from {path} (domain={domain}, level={level}, file_type={file_type})")
+        
+        if not documents:
+            print("No documents loaded.")
+            return {"error": "No documents loaded"}
 
+        # Map user level to folder level names
+        level_mapping = {
+            "beginner": "beginner",
+            "intermediate": "medium",
+            "advanced": "advance",
+            "medium": "medium",
+            "advance": "advance"
+        }
         user_knowledge = req.level.lower()
+        user_level_for_filter = level_mapping.get(user_knowledge, user_knowledge)
+        print(f"User level: {user_knowledge} -> Filter level: {user_level_for_filter}")
+        
         learning_goal = req.goal
+        # Generate beautiful course title
+        course_title = generate_course_title(learning_goal)
+        print(f"Original goal: {learning_goal}")
+        print(f"Generated course title: {course_title}")
+        
         domain = get_domain(learning_goal)
         print("Domain:", domain)
 
@@ -66,11 +85,15 @@ def GenSchedule(req: ScheduleType):
         # --- LLM, Agent ---
         llm = initialize_llm()
         memory = ConversationBufferMemory(memory_key="chat_history", input_key="input")
-        agent = create_agent(domain,user_knowledge,llm, vector_store, memory)
+        agent = create_agent(domain, user_level_for_filter, llm, vector_store, memory)
 
         # --- Create learning path ---
-
-        roadmap = create_roadmap(agent, learning_goal, user_knowledge)
+        # Ensure domain is in English for tool calls
+        if not domain:
+            domain = "computer vision"  # Default fallback
+            print(f"Warning: Domain extraction failed, using default: {domain}")
+        
+        roadmap = create_roadmap(agent, learning_goal, user_knowledge, domain)
 
         if roadmap.startswith("```"):
             roadmap = re.sub(r"^```[a-zA-Z]*\n?", "", roadmap)
@@ -92,27 +115,71 @@ def GenSchedule(req: ScheduleType):
             break
 
 
+        # Generate roadmapId
+        roadmap_id = str(uuid.uuid4())
+        
+        # Calculate totalDays
+        total_days = len(learning_path)
+        
         roadmap = RoadMap(
-            goal=req.goal,
+            goal=course_title,  # Use generated course title instead of raw input
             level=req.level,
             description=req.discription,
             estimated_hours=req.estimated_hours,
-            skills=roadmap["skills"]
+            skills=roadmap["skills"],
+            userId=req.userId,
+            roadmapId=roadmap_id,
+            createdAt=datetime.now()
         )
-        # print(roadmap)
-        roadmap.save()
-        print(RoadMap)
+        try:
+            roadmap.save()
+            print(f"✅ RoadMap saved successfully with ID: {roadmap.id}, roadmapId: {roadmap_id}")
+        except Exception as e:
+            print(f"❌ Error saving RoadMap: {e}")
+            import traceback
+            traceback.print_exc()
+            raise
+        
         schedule = LearningPath(
-            schedule = learning_path
+            schedule=learning_path,
+            userId=req.userId,
+            roadmapId=roadmap_id,
+            createdAt=datetime.now(),
+            currentDay=1,
+            completedDays=[],
+            progressPercentage=0,
+            totalDays=total_days,
+            lastAccessed=datetime.now()
         )
-        schedule.save()
-        print("Schedule")
+        try:
+            schedule.save()
+            print(f" LearningPath saved successfully")
+            print(f"   - MongoDB ID: {schedule.id}")
+            print(f"   - roadmapId: {roadmap_id}")
+            print(f"   - userId: {req.userId}")
+            print(f"   - totalDays: {total_days}")
+            print(f"   - Collection: Learning_Path")
+        except Exception as e:
+            print(f" Error saving LearningPath: {e}")
+            import traceback
+            traceback.print_exc()
+            raise
 
         return {
+            "success": True,
             "skills": roadmap["skills"],
-            "learning_path": learning_path
+            "learning_path": learning_path,
+            "roadmapId": roadmap_id,
+            "learningPathId": str(schedule.id),
+            "roadmapMongoId": str(roadmap.id),
+            "learningPathMongoId": str(schedule.id),
+            "totalDays": total_days,
+            "courseTitle": course_title,  # Add generated course title
+            "message": "Learning path generated successfully"
         }
 
     except Exception as e:
-        print(f"Unexpected error: {e}")
-        return {"error": str(e)}
+        print(f" Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"error": str(e), "success": False}

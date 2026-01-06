@@ -5,6 +5,7 @@ class Schedule(BaseModel):
     level: str | None = Field(None, example="Beginner")
     discription: str | None = Field(None, example="This is a course to learn Computer Vision step by step")
     estimated_hours: int = Field(..., example=40)
+    userId: str | None = Field(None, example="user123")
 
     class Config:
         schema_extra = {
@@ -12,6 +13,7 @@ class Schedule(BaseModel):
                 "goal": "I want to learn Computer Vision",
                 "level": "Beginner",
                 "discription": "This is a course to learn Computer Vision step by step",
-                "estimated_hours": 40
+                "estimated_hours": 40,
+                "userId": "user123"
             }
         }

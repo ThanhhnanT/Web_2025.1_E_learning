@@ -51,26 +51,35 @@ def create_learning_path(agent: Any, skill: str, subskill: str, level: str, day:
 
 
 
-def create_roadmap(agent: Any, learning_goal: str, user_knowledge: str = "") -> str:
+def create_roadmap(agent: Any, learning_goal: str, user_knowledge: str = "", domain: str = None) -> str:
 
     try:
+        # Use English domain for tool calls, but keep original learning_goal for context
+        domain_for_tools = domain if domain else learning_goal
+        
         prompt = f"""
                 You are a helpful AI assistant designed to create personalized roadmap.
                 The user's learning goal is: "{learning_goal}".
                 """
         if user_knowledge:
             prompt += f'The user already has some prior knowledge: "{user_knowledge}".'
-        prompt += """
+        prompt += f"""
+                    The domain for this learning goal in English is: "{domain_for_tools}"
+                    
                     Return your result in JSON format with the following structure:
-                    {
-                      "skills": { ]
+                    {{
+                      "skills": {{
                         "skill 1": [subskill of skill 1],
                         "skill 2": [subskill of skill 2],
-                    }
+                      }}
+                    }}
         """
         prompt += f"""
-          IMPORTANT RULES:
-          - To identify "skills" use (retrieval_roadmap), then thought "I now know the final answer" and return final answer.
+          CRITICAL RULES FOR TOOL USAGE:
+          - When you call the tool (retrieval_roadmap), you MUST use ONLY the English domain name: "{domain_for_tools}"
+          - DO NOT use the original learning goal "{learning_goal}" in the tool call if it's not in English
+          - The Action Input for retrieval_roadmap MUST be: "{domain_for_tools}"
+          - After using the tool, thought "I now know the final answer" and return final answer.
           """
         return agent.run(prompt.strip())
     except Exception as e:

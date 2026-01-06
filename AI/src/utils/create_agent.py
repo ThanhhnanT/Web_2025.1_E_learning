@@ -12,6 +12,11 @@ def create_agent(domain:str ,level: str,llm: Any, vector_store: Chroma, memory: 
 
     try:
         wiki = WikipediaAPIWrapper()
+        
+        # Wrapper function to ensure retrieval_roadmap always uses English domain
+        def retrieval_roadmap_wrapper(query: str):
+            # Force use of English domain, ignore query if it's not English
+            return get_similar_docs(domain, vector_store, level, file_type="Skills_Subskills_Roadmap", domain=domain)
 
         tools = [
             Tool.from_function(
@@ -30,9 +35,9 @@ def create_agent(domain:str ,level: str,llm: Any, vector_store: Chroma, memory: 
                 description="Useful for get question of subskill."
             ),
             Tool.from_function(
-                func=lambda q: get_similar_docs(q, vector_store, level, file_type="Skills_Subskills_Roadmap", domain= domain),
+                func=retrieval_roadmap_wrapper,
                 name="retrieval_roadmap",
-                description="Useful for get roadmap."
+                description=f"Useful for getting roadmap. This tool automatically uses the English domain '{domain}'. You can call it with any input, but it will use '{domain}' internally."
             ),
             Tool.from_function(
                 func=wiki.run,

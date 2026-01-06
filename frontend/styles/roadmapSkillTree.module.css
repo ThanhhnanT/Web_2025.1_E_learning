@@ -1,0 +1,130 @@
+.roadmapContainer {
+  width: 100%;
+  height: 800px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.roadmapWrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Root Node */
+.rootNode {
+  position: relative;
+}
+
+.rootCard {
+  min-width: 200px;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border: none;
+  border-radius: 12px;
+  text-align: center;
+  padding: 16px 24px;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+
+.rootIcon {
+  font-size: 32px;
+  color: white;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.rootTitle {
+  color: white !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  display: block;
+}
+
+/* Skill Category Node (Yellow nodes - main skills) */
+.skillCategoryNode {
+  position: relative;
+}
+
+.skillCategoryCard {
+  min-width: 200px;
+  max-width: 250px;
+  background: #faad14 !important;
+  border: none !important;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(250, 173, 20, 0.3);
+}
+
+.skillCategoryCard :global(.ant-card-body) {
+  padding: 16px 20px !important;
+  text-align: center;
+}
+
+.skillCategoryTitle {
+  color: white !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  display: block;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.subskillCount {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Subskill Node */
+.subskillNode {
+  position: relative;
+}
+
+.subskillCard {
+  min-width: 180px;
+  max-width: 220px;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  padding: 8px 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.subskillCard:hover {
+  border-color: #52c41a;
+  box-shadow: 0 2px 8px rgba(82, 196, 26, 0.2);
+  transform: translateY(-2px);
+}
+
+.subskillText {
+  font-size: 13px;
+  color: #262626;
+  line-height: 1.4;
+}
+
+/* React Flow overrides */
+:global(.react-flow__node) {
+  cursor: pointer;
+}
+
+:global(.react-flow__edge-path) {
+  stroke-width: 2;
+}
+
+:global(.react-flow__edge.selected .react-flow__edge-path) {
+  stroke: #1890ff;
+  stroke-width: 3;
+}
+
+:global(.react-flow__controls) {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+:global(.react-flow__minimap) {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+

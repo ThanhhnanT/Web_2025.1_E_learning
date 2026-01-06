@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   Input,
@@ -11,9 +11,23 @@ import {
   Row,
   Col,
   Tag,
+  message,
+  Progress,
+  Image,
+  Avatar,
+  Spin,
 } from 'antd';
-import { ThunderboltOutlined } from '@ant-design/icons';
+import { 
+  ThunderboltOutlined, 
+  BookOutlined,
+  ClockCircleOutlined,
+  UserOutlined,
+  PlayCircleOutlined,
+  RightOutlined,
+} from '@ant-design/icons';
+import { useRouter } from 'next/navigation';
 import styles from '@/styles/aiCourseCreator.module.css';
+import { generateLearningPath, getUserLearningPaths } from '@/service/aiLearningPathService';
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
@@ -22,15 +36,179 @@ interface AICourseCreatorProps {
   className?: string;
 }
 
+interface GeneratedCourse {
+  learningPathId: string;
+  roadmapId: string;
+  title: string;
+  level: string;
+  totalDays: number;
+  estimatedHours: number;
+  skills: Record<string, string[]>;
+  learning_path: any[];
+  isGenerating: boolean;
+  progress: number;
+}
+
 const AICourseCreator: React.FC<AICourseCreatorProps> = ({ className }) => {
+  const router = useRouter();
   const [topic, setTopic] = useState('');
   const [proficiency, setProficiency] = useState('Beginner');
   const [weeklyHours, setWeeklyHours] = useState(5);
   const [goals, setGoals] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [generatedCourse, setGeneratedCourse] = useState<GeneratedCourse | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [existingLearningPaths, setExistingLearningPaths] = useState<any[]>([]);
+  const [loadingPaths, setLoadingPaths] = useState(false);
 
-  const handleGenerate = () => {
-    // TODO: Implement AI course generation
-    console.log({ topic, proficiency, weeklyHours, goals });
+  // Fetch existing learning paths on mount
+  useEffect(() => {
+    fetchExistingLearningPaths();
+  }, []);
+
+  const fetchExistingLearningPaths = async () => {
+    try {
+      setLoadingPaths(true);
+      console.log('[AICourseCreator] Fetching existing learning paths...');
+      
+      const response = await getUserLearningPaths();
+      console.log('[AICourseCreator] API Response:', response);
+      
+      // Handle both array response and wrapped response
+      const paths = Array.isArray(response) ? response : (response?.data || response || []);
+      console.log('[AICourseCreator] Parsed paths:', paths);
+      
+      if (Array.isArray(paths)) {
+        console.log(`[AICourseCreator] Found ${paths.length} learning paths`);
+        setExistingLearningPaths(paths);
+      } else {
+        console.error('[AICourseCreator] Unexpected response format:', response);
+        setExistingLearningPaths([]);
+      }
+    } catch (err: any) {
+      console.error('[AICourseCreator] Error fetching learning paths:', err);
+      console.error('[AICourseCreator] Error details:', {
+        message: err?.message,
+        response: err?.response?.data,
+        status: err?.response?.status,
+      });
+      setExistingLearningPaths([]);
+    } finally {
+      setLoadingPaths(false);
+    }
+  };
+
+  const handleGenerate = async () => {
+    // Validate form
+    if (!topic.trim()) {
+      message.error('Vui lòng nhập mục tiêu học tập của bạn');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setProgress(0);
+
+    // Calculate estimated hours and weeks
+    const estimatedHours = weeklyHours * 6; // 6 weeks average
+    const estimatedWeeks = Math.ceil(estimatedHours / weeklyHours);
+
+    // Create preview course card immediately
+    const previewCourse: GeneratedCourse = {
+      learningPathId: '',
+      roadmapId: '',
+      title: topic.trim(),
+      level: proficiency,
+      totalDays: estimatedWeeks * 7,
+      estimatedHours: estimatedHours,
+      skills: {},
+      learning_path: [],
+      isGenerating: true,
+      progress: 0,
+    };
+    setGeneratedCourse(previewCourse);
+
+    // Simulate progress updates
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 90) return prev;
+        return prev + Math.random() * 10;
+      });
+    }, 500);
+
+    try {
+      const response = await generateLearningPath({
+        goal: topic.trim(),
+        level: proficiency,
+        description: goals.trim() || undefined,
+        estimatedHours: estimatedHours,
+        weeklyHours: weeklyHours,
+        goals: goals.trim() || undefined,
+      });
+
+      clearInterval(progressInterval);
+      setProgress(100);
+
+      if (response.success && response.data) {
+        message.success('Tạo lộ trình học tập thành công!');
+        
+        // Clear generated course card to avoid duplicate
+        // The course will appear in the existing learning paths list after refresh
+        setGeneratedCourse(null);
+        
+        // Reset form
+        setTopic('');
+        setProficiency('Beginner');
+        setWeeklyHours(5);
+        setGoals('');
+      } else {
+        throw new Error(response.message || 'Không thể tạo lộ trình học tập');
+      }
+    } catch (err: any) {
+      clearInterval(progressInterval);
+      const errorMessage = err?.response?.data?.message || err?.message || 'Đã xảy ra lỗi khi tạo lộ trình học tập. Vui lòng thử lại.';
+      setError(errorMessage);
+      setGeneratedCourse(null);
+      message.error(errorMessage);
+      console.error('Error generating learning path:', err);
+    } finally {
+      setLoading(false);
+      // Refresh list after generation to show the new course
+      await fetchExistingLearningPaths();
+    }
+  };
+
+  const handleCourseClick = () => {
+    if (generatedCourse && !generatedCourse.isGenerating && generatedCourse.learningPathId) {
+      router.push(`/ai-learning-paths/${generatedCourse.learningPathId}`);
+    }
+  };
+
+  const getLevelColor = (level: string) => {
+    switch (level) {
+      case 'Beginner':
+        return 'green';
+      case 'Intermediate':
+        return 'orange';
+      case 'Advanced':
+        return 'purple';
+      default:
+        return 'blue';
+    }
+  };
+
+  const getLevelText = (level: string) => {
+    switch (level) {
+      case 'Beginner':
+        return 'Cơ bản';
+      case 'Intermediate':
+        return 'Trung bình';
+      case 'Advanced':
+        return 'Nâng cao';
+      default:
+        return level;
+    }
   };
 
   return (
@@ -133,6 +311,13 @@ const AICourseCreator: React.FC<AICourseCreatorProps> = ({ className }) => {
             </label>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div style={{ marginBottom: 16, padding: '12px 16px', backgroundColor: '#fff2f0', border: '1px solid #ffccc7', borderRadius: 4 }}>
+              <Text type="danger">{error}</Text>
+            </div>
+          )}
+
           {/* Action Area */}
           <div className={styles.actionArea}>
             <Button
@@ -141,6 +326,7 @@ const AICourseCreator: React.FC<AICourseCreatorProps> = ({ className }) => {
               icon={<ThunderboltOutlined />}
               onClick={handleGenerate}
               className={styles.generateButton}
+              disabled={loading}
             >
               Tạo khóa học của tôi
             </Button>
@@ -149,6 +335,180 @@ const AICourseCreator: React.FC<AICourseCreatorProps> = ({ className }) => {
             </Text>
           </div>
         </Card>
+
+        {/* Generated Course Card - Only show while generating */}
+        {generatedCourse && generatedCourse.isGenerating && (
+          <div style={{ marginTop: 32 }}>
+            <Title level={3} style={{ marginBottom: 24 }}>
+              Lộ trình học tập của bạn
+            </Title>
+            <Card
+              hoverable={!generatedCourse.isGenerating}
+              className={styles.generatedCourseCard}
+              style={{
+                opacity: generatedCourse.isGenerating ? 0.8 : 1,
+                cursor: generatedCourse.isGenerating ? 'not-allowed' : 'pointer',
+              }}
+              onClick={handleCourseClick}
+              cover={
+                <div style={{ 
+                  height: 200, 
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative'
+                }}>
+                  <BookOutlined style={{ fontSize: 64, color: 'white', opacity: 0.8 }} />
+                  {generatedCourse.isGenerating && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 16,
+                      left: 16,
+                      right: 16,
+                    }}>
+                      <Progress 
+                        percent={Math.round(progress)} 
+                        strokeColor="#52c41a"
+                        showInfo={true}
+                      />
+                    </div>
+                  )}
+                </div>
+              }
+            >
+              <div style={{ padding: '16px 0' }}>
+                <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Tag color={getLevelColor(generatedCourse.level)}>
+                    {getLevelText(generatedCourse.level)}
+                  </Tag>
+                  <Text type="secondary">
+                    <ClockCircleOutlined /> {Math.ceil(generatedCourse.totalDays / 7)} tuần
+                  </Text>
+                </div>
+                <Title level={4} style={{ marginBottom: 8, marginTop: 0 }}>
+                  {generatedCourse.title}
+                </Title>
+                <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+                  {goals || 'Lộ trình học tập được tạo bởi AI'}
+                </Text>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text type="secondary">
+                    <UserOutlined /> {generatedCourse.estimatedHours} giờ học
+                  </Text>
+                  {generatedCourse.isGenerating ? (
+                    <Text type="secondary">Đang tạo...</Text>
+                  ) : (
+                    <Button type="primary" onClick={(e) => { e.stopPropagation(); handleCourseClick(); }}>
+                      Xem chi tiết
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* Existing Learning Paths List */}
+        {existingLearningPaths.length > 0 && (
+          <div style={{ marginTop: 48 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <Title level={3} style={{ margin: 0 }}>
+                Lộ trình học tập của tôi ({existingLearningPaths.length})
+              </Title>
+              <Button 
+                type="link" 
+                onClick={fetchExistingLearningPaths}
+                loading={loadingPaths}
+              >
+                Làm mới
+              </Button>
+            </div>
+            <Row gutter={[16, 16]}>
+              {existingLearningPaths.map((path) => (
+                <Col xs={24} sm={12} lg={8} key={path.learningPathId || path._id}>
+                  <Card
+                    hoverable
+                    onClick={() => router.push(`/ai-learning-paths/${path.learningPathId || path._id}`)}
+                    style={{
+                      borderRadius: 8,
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      transition: 'all 0.3s',
+                    }}
+                    className={styles.existingPathCard}
+                    cover={
+                      <div style={{
+                        height: 120,
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                        <BookOutlined style={{ fontSize: 48, color: 'white', opacity: 0.9 }} />
+                      </div>
+                    }
+                  >
+                    <div>
+                      <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <Tag color={getLevelColor(path.level)}>
+                          {getLevelText(path.level)}
+                        </Tag>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          <ClockCircleOutlined /> {path.totalDays} ngày
+                        </Text>
+                      </div>
+                      <Title level={5} style={{ marginBottom: 8, marginTop: 0 }} ellipsis={{ tooltip: path.title }}>
+                        {path.title}
+                      </Title>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                          <Text strong style={{ fontSize: 12 }}>Tiến độ</Text>
+                          <Text strong style={{ fontSize: 12 }}>{path.progressPercentage || 0}%</Text>
+                        </div>
+                        <Progress
+                          percent={path.progressPercentage || 0}
+                          strokeColor={{
+                            '0%': '#108ee9',
+                            '100%': '#87d068',
+                          }}
+                          size="small"
+                          showInfo={false}
+                        />
+                        <Text type="secondary" style={{ fontSize: 11, marginTop: 4, display: 'block' }}>
+                          Đã hoàn thành {path.currentDay - 1} / {path.totalDays} ngày
+                        </Text>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          {path.estimatedHours} giờ học
+                        </Text>
+                        <Button 
+                          type="primary" 
+                          size="small"
+                          icon={<PlayCircleOutlined />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/ai-learning-paths/${path.learningPathId || path._id}`);
+                          }}
+                        >
+                          Tiếp tục
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </div>
+        )}
+
+        {/* Loading state for existing paths */}
+        {loadingPaths && existingLearningPaths.length === 0 && (
+          <div style={{ marginTop: 48, textAlign: 'center', padding: '40px 0' }}>
+            <Spin size="large" tip="Đang tải danh sách lộ trình học tập..." />
+          </div>
+        )}
+
       </div>
     </div>
   );
