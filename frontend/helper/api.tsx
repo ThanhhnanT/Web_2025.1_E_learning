@@ -1,5 +1,6 @@
 import axios, { type AxiosRequestConfig } from 'axios';
 import Cookies from "js-cookie";
+import { clearEnrollmentCache } from '@/lib/courseProgress';
 
 
 // Normalize base URL: remove trailing slash
@@ -347,7 +348,17 @@ export const changePassword = async (data: { oldPassword: string; newPassword: s
   }
 };
 
-// Logout function - removes access token cookie
+// Logout function - removes access token cookie and clears enrollment cache
 export function logoutUser() {
   Cookies.remove("access_token");
+  Cookies.remove("user_id");
+  
+  // Clear enrollment cache to prevent showing wrong user's progress
+  // This ensures that when a new user logs in, they don't see the previous user's cached enrollment data
+  clearEnrollmentCache();
+  
+  // Dispatch event to notify other components
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('userLogout'));
+  }
 }

@@ -1,5 +1,6 @@
 import type { CourseModule, Lesson } from '@/types/course';
 import enrollmentService from '@/service/enrollmentService';
+import { getUserId } from './helper';
 
 export interface CourseProgress {
   courseId: string;
@@ -10,8 +11,41 @@ export interface CourseProgress {
 const STORAGE_PREFIX = 'courseProgress_';
 
 // Cache for enrollment data to avoid repeated API calls
+// Cache key format: `${userId}_${courseId}` to prevent cross-user cache issues
 const enrollmentCache = new Map<string, { completedLessons: string[]; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Get cache key for enrollment data
+ */
+const getCacheKey = (courseId: string, userId?: string | null): string => {
+  const currentUserId = userId || getUserId();
+  if (currentUserId) {
+    return `${currentUserId}_${courseId}`;
+  }
+  // Fallback to courseId only if no userId (shouldn't happen in normal flow)
+  return courseId;
+};
+
+/**
+ * Clear enrollment cache for a specific course or all courses
+ * Should be called when user logs out or switches accounts
+ */
+export const clearEnrollmentCache = (courseId?: string): void => {
+  if (courseId) {
+    // Clear cache for specific course (all users)
+    const keysToDelete: string[] = [];
+    enrollmentCache.forEach((_, key) => {
+      if (key.endsWith(`_${courseId}`) || key === courseId) {
+        keysToDelete.push(key);
+      }
+    });
+    keysToDelete.forEach(key => enrollmentCache.delete(key));
+  } else {
+    // Clear all cache
+    enrollmentCache.clear();
+  }
+};
 
 /**
  * Get progress data for a course from localStorage
@@ -47,8 +81,11 @@ export const saveCourseProgressData = (progress: CourseProgress): void => {
  */
 export const getCompletedLessonsFromBackend = async (courseId: string, enrollmentId?: string): Promise<string[]> => {
   try {
+    const userId = getUserId();
+    const cacheKey = getCacheKey(courseId, userId);
+    
     // Check cache first
-    const cached = enrollmentCache.get(courseId);
+    const cached = enrollmentCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
       return cached.completedLessons;
     }
@@ -56,7 +93,7 @@ export const getCompletedLessonsFromBackend = async (courseId: string, enrollmen
     // If enrollmentId provided, get progress directly
     if (enrollmentId) {
       const progress = await enrollmentService.getEnrollmentProgress(enrollmentId);
-      enrollmentCache.set(courseId, {
+      enrollmentCache.set(cacheKey, {
         completedLessons: progress.completedLessons,
         timestamp: Date.now(),
       });
@@ -68,7 +105,7 @@ export const getCompletedLessonsFromBackend = async (courseId: string, enrollmen
     
     if (isEnrolled && enrollment) {
       const completedLessons = progress?.completedLessons || enrollment.completedLessons || [];
-      enrollmentCache.set(courseId, {
+      enrollmentCache.set(cacheKey, {
         completedLessons,
         timestamp: Date.now(),
       });
@@ -101,11 +138,14 @@ export const syncLessonCompletion = async (
   enrollmentId?: string
 ): Promise<void> => {
   try {
+    const userId = getUserId();
+    const cacheKey = getCacheKey(courseId, userId);
+    
     // If enrollmentId provided, mark directly
     if (enrollmentId) {
       await enrollmentService.markLessonComplete(enrollmentId, lessonId);
-      // Invalidate cache
-      enrollmentCache.delete(courseId);
+      // Invalidate cache for this user and course
+      enrollmentCache.delete(cacheKey);
       // Dispatch event to notify other components
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('lessonCompleted', { detail: { courseId, enrollmentId } }));
@@ -118,8 +158,8 @@ export const syncLessonCompletion = async (
     
     if (isEnrolled && enrollment) {
       await enrollmentService.markLessonComplete(enrollment._id, lessonId);
-      // Invalidate cache
-      enrollmentCache.delete(courseId);
+      // Invalidate cache for this user and course
+      enrollmentCache.delete(cacheKey);
       // Dispatch event to notify other components
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('lessonCompleted', { detail: { courseId, enrollmentId: enrollment._id } }));

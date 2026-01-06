@@ -108,9 +108,7 @@
   border-color: #1890ff !important;
   transition: all 0.3s ease;
 }
-body{
-  margin :0;
-}
+
 .container {
   width: 100%;
   max-width: 1200px; 
