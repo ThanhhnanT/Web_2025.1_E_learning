@@ -456,5 +456,108 @@ export class UsersService implements OnModuleInit {
     } catch (error) {
       console.error('Error migrating privacy settings:', error);
     }
+
+    // Migration: Convert editor/support roles to viewer
+    try {
+      const roleResult = await this.userModel.updateMany(
+        {
+          role: { $in: ['editor', 'support'] },
+        },
+        {
+          $set: {
+            role: 'viewer',
+          },
+        },
+      );
+      if (roleResult.modifiedCount > 0) {
+        console.log(`Migration: Converted ${roleResult.modifiedCount} users from editor/support to viewer role`);
+      }
+    } catch (error) {
+      console.error('Error migrating user roles:', error);
+    }
+  }
+
+  async suspendUser(userId: string, reason?: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      suspended: true,
+      suspensionReason: reason,
+      suspendedAt: new Date(),
+    });
+
+    return {
+      message: 'User suspended successfully',
+      statusCode: 200,
+    };
+  }
+
+  async activateUser(userId: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      suspended: false,
+      suspensionReason: null,
+      suspendedAt: null,
+    });
+
+    return {
+      message: 'User activated successfully',
+      statusCode: 200,
+    };
+  }
+
+  async getUserActivity(userId: string) {
+    const user = await this.userModel.findById(userId).select('-password');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Return user activity data - in production this would query activity logs
+    return {
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        lastLoginAt: user.lastLoginAt,
+        lastLoginIp: user.lastLoginIp,
+        lastLoginLocation: user.lastLoginLocation,
+        suspended: (user as any).suspended || false,
+        suspensionReason: (user as any).suspensionReason,
+        suspendedAt: (user as any).suspendedAt,
+      },
+      activities: [
+        // In production, this would query an activity log collection
+        {
+          type: 'login',
+          timestamp: user.lastLoginAt,
+          ip: user.lastLoginIp,
+          location: user.lastLoginLocation,
+        },
+      ],
+    };
+  }
+
+  async adminResetPassword(userId: string, newPassword: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    await this.userModel.findByIdAndUpdate(userId, {
+      password: hashedPassword,
+    });
+
+    return {
+      message: 'Password reset successfully',
+      statusCode: 200,
+    };
   }
 }

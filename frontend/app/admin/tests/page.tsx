@@ -22,10 +22,10 @@ import {
   ReloadOutlined,
   EditOutlined,
   DeleteOutlined,
-  ApartmentOutlined,
   PlusCircleOutlined,
   FileAddOutlined,
 } from "@ant-design/icons";
+import { useRouter } from "next/navigation";
 import { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import {
@@ -59,6 +59,7 @@ const statusColors: Record<TestStatus, string> = {
 const { Title, Text } = Typography;
 
 export default function AdminTestsPage() {
+  const router = useRouter();
   const [form] = Form.useForm<Partial<Test>>();
   const [sectionForm] = Form.useForm<any>();
   const [groupForm] = Form.useForm<any>();
@@ -323,7 +324,15 @@ export default function AdminTestsPage() {
       dataIndex: "title",
       key: "title",
       render: (text, record) => (
-        <Space direction="vertical" size={2}>
+        <Space
+          direction="vertical"
+          size={2}
+          style={{ cursor: "pointer" }}
+          onClick={(e) => {
+            e.stopPropagation();
+            router.push(`/admin/tests/${record._id}`);
+          }}
+        >
           <Text strong>{text}</Text>
           <Text type="secondary" style={{ fontSize: 12 }}>
             {record.series} {record.testNumber}
@@ -374,20 +383,26 @@ export default function AdminTestsPage() {
       render: (_, record) => (
         <Space>
           <Button
-            icon={<ApartmentOutlined />}
-            onClick={() => openStructure(record)}
-          />
-          <Button
             icon={<EditOutlined />}
-            onClick={() => openEdit(record)}
+            onClick={(e) => {
+              e.stopPropagation();
+              openEdit(record);
+            }}
           />
           <Popconfirm
             title="Xóa bài test?"
             okText="Xóa"
             cancelText="Hủy"
-            onConfirm={() => handleDelete(record._id)}
+            onConfirm={(e) => {
+              e?.stopPropagation();
+              handleDelete(record._id);
+            }}
           >
-            <Button danger icon={<DeleteOutlined />} />
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={(e) => e.stopPropagation()}
+            />
           </Popconfirm>
         </Space>
       ),
@@ -544,6 +559,10 @@ export default function AdminTestsPage() {
           columns={columns}
           dataSource={tests}
           loading={loading}
+          onRow={(record) => ({
+            onClick: () => router.push(`/admin/tests/${record._id}`),
+            style: { cursor: "pointer" },
+          })}
           pagination={{
             current: pagination.current,
             pageSize: pagination.pageSize,

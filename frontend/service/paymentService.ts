@@ -7,6 +7,7 @@ export interface CreatePaymentIntentDto {
   paymentMethodId?: string;
   returnUrl?: string;
   cancelUrl?: string;
+  face_verification_token?: string;
 }
 
 export interface PaymentIntentResponse {

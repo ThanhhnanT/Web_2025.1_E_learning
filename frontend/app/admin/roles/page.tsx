@@ -30,7 +30,7 @@ import { useMessageApi } from "@/components/providers/Message";
 
 const { Title, Text } = Typography;
 
-type RoleKey = "administrator" | "editor" | "viewer" | "support";
+type RoleKey = "administrator" | "viewer";
 
 type Permission = {
   key: string;
@@ -50,20 +50,10 @@ const ROLE_META: Record<RoleKey, { icon: React.ReactNode; name: string; desc: st
     name: "Quản trị viên",
     desc: "Quyền truy cập đầy đủ vào tất cả tính năng và cài đặt.",
   },
-  editor: {
-    icon: <EditOutlined />,
-    name: "Biên tập viên",
-    desc: "Có thể tạo, chỉnh sửa và xuất bản nội dung.",
-  },
   viewer: {
     icon: <EyeOutlined />,
-    name: "Người xem",
-    desc: "Chỉ có quyền xem nội dung, không thể chỉnh sửa.",
-  },
-  support: {
-    icon: <CustomerServiceOutlined />,
-    name: "Nhân viên hỗ trợ",
-    desc: "Có thể xem dữ liệu người dùng và phản hồi yêu cầu.",
+    name: "Người dùng",
+    desc: "Người dùng cơ bản có thể xem và tạo nội dung cá nhân.",
   },
 };
 
@@ -73,17 +63,22 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
     title: "Quản lý người dùng",
     permissions: [
       { key: "user:create", label: "Tạo người dùng", description: "Cho phép tạo tài khoản người dùng mới." },
-      { key: "user:edit", label: "Chỉnh sửa người dùng", description: "Cho phép chỉnh sửa thông tin người dùng hiện có." },
-      { key: "user:delete", label: "Xóa người dùng", description: "Cho phép xóa vĩnh viễn tài khoản người dùng." },
-      { key: "user:view", label: "Xem danh sách người dùng", description: "Cho phép xem danh sách đầy đủ người dùng." },
+      { key: "user:edit", label: "Chỉnh sửa người dùng", description: "Cho phép chỉnh sửa thông tin người dùng." },
+      { key: "user:edit-any", label: "Chỉnh sửa mọi người dùng", description: "Cho phép chỉnh sửa thông tin của bất kỳ người dùng nào." },
+      { key: "user:delete", label: "Xóa người dùng", description: "Cho phép xóa tài khoản người dùng." },
+      { key: "user:view", label: "Xem danh sách người dùng", description: "Cho phép xem danh sách người dùng." },
+      { key: "user:suspend", label: "Tạm ngưng người dùng", description: "Cho phép tạm ngưng tài khoản người dùng." },
+      { key: "user:activate", label: "Kích hoạt người dùng", description: "Cho phép kích hoạt lại tài khoản." },
     ],
   },
   {
     key: "content",
     title: "Quản lý nội dung",
     permissions: [
-      { key: "content:publish", label: "Xuất bản nội dung", description: "Cho phép xuất bản bài viết hoặc bài đăng mới." },
-      { key: "content:categories", label: "Quản lý danh mục", description: "Cho phép tạo và chỉnh sửa danh mục nội dung." },
+      { key: "content:publish", label: "Xuất bản nội dung", description: "Cho phép xuất bản nội dung mới." },
+      { key: "content:categories", label: "Quản lý danh mục", description: "Cho phép tạo và chỉnh sửa danh mục." },
+      { key: "content:edit-any", label: "Chỉnh sửa mọi nội dung", description: "Cho phép chỉnh sửa nội dung của bất kỳ ai." },
+      { key: "content:delete-any", label: "Xóa mọi nội dung", description: "Cho phép xóa nội dung của bất kỳ ai." },
     ],
   },
   {
@@ -91,18 +86,96 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
     title: "Quản lý bài viết",
     permissions: [
       { key: "post:create", label: "Tạo bài viết", description: "Cho phép tạo bài viết mới." },
-      { key: "post:edit", label: "Chỉnh sửa bài viết", description: "Cho phép chỉnh sửa bài viết của người khác." },
-      { key: "post:delete", label: "Xóa bài viết", description: "Cho phép xóa bài viết của người khác." },
+      { key: "post:edit", label: "Chỉnh sửa bài viết", description: "Cho phép chỉnh sửa bài viết riêng." },
+      { key: "post:edit-any", label: "Chỉnh sửa mọi bài viết", description: "Cho phép chỉnh sửa bài viết của bất kỳ ai." },
+      { key: "post:delete", label: "Xóa bài viết", description: "Cho phép xóa bài viết riêng." },
+      { key: "post:delete-any", label: "Xóa mọi bài viết", description: "Cho phép xóa bài viết của bất kỳ ai." },
       { key: "post:view", label: "Xem bài viết", description: "Cho phép xem tất cả bài viết." },
       { key: "post:moderate", label: "Kiểm duyệt bài viết", description: "Cho phép phê duyệt hoặc từ chối bài viết." },
     ],
   },
   {
-    key: "billing",
-    title: "Thanh toán",
+    key: "comments",
+    title: "Quản lý bình luận",
     permissions: [
-      { key: "billing:view", label: "Xem hóa đơn", description: "Cho phép xem hóa đơn trước và hiện tại." },
+      { key: "comment:create", label: "Tạo bình luận", description: "Cho phép tạo bình luận mới." },
+      { key: "comment:edit", label: "Chỉnh sửa bình luận", description: "Cho phép chỉnh sửa bình luận riêng." },
+      { key: "comment:edit-any", label: "Chỉnh sửa mọi bình luận", description: "Cho phép chỉnh sửa bình luận của bất kỳ ai." },
+      { key: "comment:delete", label: "Xóa bình luận", description: "Cho phép xóa bình luận riêng." },
+      { key: "comment:delete-any", label: "Xóa mọi bình luận", description: "Cho phép xóa bình luận của bất kỳ ai." },
+      { key: "comment:moderate", label: "Kiểm duyệt bình luận", description: "Cho phép kiểm duyệt bình luận." },
+    ],
+  },
+  {
+    key: "courses",
+    title: "Quản lý khóa học",
+    permissions: [
+      { key: "course:create", label: "Tạo khóa học", description: "Cho phép tạo khóa học mới." },
+      { key: "course:edit", label: "Chỉnh sửa khóa học", description: "Cho phép chỉnh sửa khóa học riêng." },
+      { key: "course:edit-any", label: "Chỉnh sửa mọi khóa học", description: "Cho phép chỉnh sửa khóa học của bất kỳ ai." },
+      { key: "course:delete", label: "Xóa khóa học", description: "Cho phép xóa khóa học." },
+      { key: "course:view", label: "Xem khóa học", description: "Cho phép xem khóa học." },
+      { key: "course:publish", label: "Xuất bản khóa học", description: "Cho phép xuất bản khóa học." },
+    ],
+  },
+  {
+    key: "tests",
+    title: "Quản lý bài kiểm tra",
+    permissions: [
+      { key: "test:create", label: "Tạo bài test", description: "Cho phép tạo bài test mới." },
+      { key: "test:edit", label: "Chỉnh sửa bài test", description: "Cho phép chỉnh sửa bài test." },
+      { key: "test:edit-any", label: "Chỉnh sửa mọi bài test", description: "Cho phép chỉnh sửa bài test của bất kỳ ai." },
+      { key: "test:delete", label: "Xóa bài test", description: "Cho phép xóa bài test." },
+      { key: "test:view", label: "Xem bài test", description: "Cho phép xem bài test." },
+    ],
+  },
+  {
+    key: "flashcards",
+    title: "Quản lý flashcards",
+    permissions: [
+      { key: "flashcard:create", label: "Tạo flashcard", description: "Cho phép tạo flashcard mới." },
+      { key: "flashcard:edit", label: "Chỉnh sửa flashcard", description: "Cho phép chỉnh sửa flashcard." },
+      { key: "flashcard:edit-any", label: "Chỉnh sửa mọi flashcard", description: "Cho phép chỉnh sửa flashcard của bất kỳ ai." },
+      { key: "flashcard:delete", label: "Xóa flashcard", description: "Cho phép xóa flashcard." },
+      { key: "flashcard:view", label: "Xem flashcard", description: "Cho phép xem flashcard." },
+    ],
+  },
+  {
+    key: "enrollment",
+    title: "Quản lý ghi danh",
+    permissions: [
+      { key: "enrollment:create", label: "Tạo ghi danh", description: "Cho phép tạo ghi danh mới." },
+      { key: "enrollment:edit", label: "Chỉnh sửa ghi danh", description: "Cho phép chỉnh sửa ghi danh." },
+      { key: "enrollment:delete", label: "Xóa ghi danh", description: "Cho phép xóa ghi danh." },
+      { key: "enrollment:view-all", label: "Xem tất cả ghi danh", description: "Cho phép xem tất cả ghi danh." },
+    ],
+  },
+  {
+    key: "payment",
+    title: "Quản lý thanh toán",
+    permissions: [
+      { key: "payment:view-all", label: "Xem thanh toán", description: "Cho phép xem tất cả thanh toán." },
+      { key: "payment:manage", label: "Quản lý thanh toán", description: "Cho phép quản lý thanh toán." },
+      { key: "payment:refund", label: "Hoàn tiền", description: "Cho phép hoàn tiền." },
+      { key: "billing:view", label: "Xem hóa đơn", description: "Cho phép xem hóa đơn." },
       { key: "billing:manage", label: "Quản lý gói đăng ký", description: "Cho phép thay đổi gói đăng ký." },
+    ],
+  },
+  {
+    key: "social",
+    title: "Quản lý xã hội",
+    permissions: [
+      { key: "chat:view-all", label: "Xem tất cả chat", description: "Cho phép xem tất cả cuộc trò chuyện." },
+      { key: "chat:moderate", label: "Kiểm duyệt chat", description: "Cho phép kiểm duyệt tin nhắn." },
+      { key: "friend:view-all", label: "Xem tất cả kết bạn", description: "Cho phép xem tất cả kết nối bạn bè." },
+      { key: "friend:manage", label: "Quản lý kết bạn", description: "Cho phép quản lý kết nối bạn bè." },
+    ],
+  },
+  {
+    key: "statistics",
+    title: "Thống kê",
+    permissions: [
+      { key: "statistics:view-all", label: "Xem thống kê", description: "Cho phép xem tất cả thống kê hệ thống." },
     ],
   },
 ];
@@ -112,51 +185,23 @@ const PRESET_PERMS: Record<RoleKey, Record<string, boolean>> = {
     g.permissions.forEach((p) => (acc[p.key] = true));
     return acc;
   }, {} as Record<string, boolean>),
-  editor: {
-    "user:create": false,
-    "user:edit": false,
-    "user:delete": false,
-    "user:view": true,
-    "content:publish": true,
-    "content:categories": true,
-    "post:create": true,
-    "post:edit": true,
-    "post:delete": false,
-    "post:view": true,
-    "post:moderate": true,
-    "billing:view": false,
-    "billing:manage": false,
-  },
-  viewer: {
-    "user:create": false,
-    "user:edit": false,
-    "user:delete": false,
-    "user:view": true,
-    "content:publish": false,
-    "content:categories": false,
-    "post:create": true,
-    "post:edit": false,
-    "post:delete": false,
-    "post:view": true,
-    "post:moderate": false,
-    "billing:view": false,
-    "billing:manage": false,
-  },
-  support: {
-    "user:create": false,
-    "user:edit": true,
-    "user:delete": false,
-    "user:view": true,
-    "content:publish": false,
-    "content:categories": false,
-    "post:create": false,
-    "post:edit": false,
-    "post:delete": false,
-    "post:view": true,
-    "post:moderate": false,
-    "billing:view": true,
-    "billing:manage": false,
-  },
+  viewer: PERMISSION_GROUPS.reduce((acc, g) => {
+    g.permissions.forEach((p) => {
+      // Viewer only has basic permissions
+      acc[p.key] = [
+        "post:create",
+        "post:view",
+        "post:edit",
+        "comment:create",
+        "comment:view",
+        "comment:edit",
+        "course:view",
+        "test:view",
+        "flashcard:view",
+      ].includes(p.key);
+    });
+    return acc;
+  }, {} as Record<string, boolean>),
 };
 
 export default function RolesManagementPage() {
@@ -271,8 +316,8 @@ export default function RolesManagementPage() {
             variant="outlined"
             styles={{ header: { padding: "12px 16px" }, body: { padding: 12 } }}
             title={
-              <Button type="primary" block icon={<PlusOutlined />}>
-                Tạo vai trò mới
+            <Button type="primary" block icon={<PlusOutlined />} disabled>
+              Tạo vai trò mới (Không khả dụng)
               </Button>
             }
           >

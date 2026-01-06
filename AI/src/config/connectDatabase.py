@@ -55,7 +55,10 @@ def connect_db():
             print(f"  Learning_Path collection does not exist yet (will be created on first save)")
             
     except Exception as e:
-        print(f"❌ MongoDB connection error: {e}")
+        print(f"⚠️  MongoDB connection error: {e}")
+        print("⚠️  Warning: MongoDB connection failed. Some features may not work.")
+        print("⚠️  Face recognition will still work without MongoDB.")
+        # Don't raise - allow app to start without MongoDB
+        # MongoDB is only needed for schedule/learning path features
         import traceback
         traceback.print_exc()
-        raise

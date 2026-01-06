@@ -162,13 +162,13 @@ export class PostsService {
       throw new NotFoundException('Post not found');
     }
 
-    // Check if user is admin or editor
+    // Check if user is admin (admin bypass)
     const currentUser = await this.usersService.findOne(userId);
-    const isAdminOrEditor = currentUser?.role === 'administrator' || currentUser?.role === 'editor';
+    const isAdmin = currentUser?.role === 'administrator';
 
-    // Only owner, admin, or editor can update
-    if (post.userId.toString() !== userId && !isAdminOrEditor) {
-      throw new ForbiddenException('You can only update your own posts or need admin/editor role');
+    // Only owner or admin can update
+    if (post.userId.toString() !== userId && !isAdmin) {
+      throw new ForbiddenException('You can only update your own posts or need administrator role');
     }
 
     let imageUrl = updatePostDto.imageUrl;
@@ -218,12 +218,12 @@ export class PostsService {
       throw new NotFoundException('Post not found');
     }
 
-    // Check if user is admin or editor
+    // Check if user is admin (admin bypass)
     const currentUser = await this.usersService.findOne(userId);
-    const isAdminOrEditor = currentUser?.role === 'administrator' || currentUser?.role === 'editor';
+    const isAdmin = currentUser?.role === 'administrator';
 
-    if (!isAdminOrEditor) {
-      throw new ForbiddenException('Only administrator or editor can update post status');
+    if (!isAdmin) {
+      throw new ForbiddenException('Only administrator can update post status');
     }
 
     const updatedPost = await this.postModel
@@ -262,8 +262,13 @@ export class PostsService {
       throw new NotFoundException('Post not found');
     }
 
-    if (post.userId.toString() !== userId) {
-      throw new ForbiddenException('You can only delete your own posts');
+    // Check if user is admin (admin bypass)
+    const currentUser = await this.usersService.findOne(userId);
+    const isAdmin = currentUser?.role === 'administrator';
+
+    // Only owner or admin can delete
+    if (post.userId.toString() !== userId && !isAdmin) {
+      throw new ForbiddenException('You can only delete your own posts or need administrator role');
     }
 
     await this.postModel.findByIdAndUpdate(id, { deletedAt: new Date() });
@@ -691,8 +696,13 @@ export class PostsService {
       throw new BadRequestException('Comment does not belong to this post');
     }
 
-    if (comment.userId.toString() !== userId) {
-      throw new ForbiddenException('You can only update your own comments');
+    // Check if user is admin (admin bypass)
+    const currentUser = await this.usersService.findOne(userId);
+    const isAdmin = currentUser?.role === 'administrator';
+
+    // Only owner or admin can update
+    if (comment.userId.toString() !== userId && !isAdmin) {
+      throw new ForbiddenException('You can only update your own comments or need administrator role');
     }
 
     const updatedComment = await this.commentModel
@@ -737,8 +747,13 @@ export class PostsService {
       throw new BadRequestException('Comment does not belong to this post');
     }
 
-    if (comment.userId.toString() !== userId) {
-      throw new ForbiddenException('You can only delete your own comments');
+    // Check if user is admin (admin bypass)
+    const currentUser = await this.usersService.findOne(userId);
+    const isAdmin = currentUser?.role === 'administrator';
+
+    // Only owner or admin can delete
+    if (comment.userId.toString() !== userId && !isAdmin) {
+      throw new ForbiddenException('You can only delete your own comments or need administrator role');
     }
 
     await this.commentModel.findByIdAndUpdate(commentId, { deletedAt: new Date() });

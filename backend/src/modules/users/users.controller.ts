@@ -26,10 +26,15 @@ import { PermissionsGuard } from '@/auth/permissions.guard';
 import { UpdatePermissionsDto } from './dto/update-permissions.dto';
 import { UpdateRolePresetDto } from './dto/update-role-preset.dto';
 
+import { CloudinaryService } from './cloudinary.service';
+
 @ApiTags('Admin')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiBearerAuth()
@@ -77,7 +82,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update user (Admin only)' })
-  @Permissions('user:edit')
+  @Permissions('user:edit', 'user:edit-any')
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
@@ -170,6 +175,52 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Upload video to Cloudinary' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @Post('upload/video')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadVideo(@Request() req: any, @UploadedFile() file: any) {
+    if (!file) {
+      throw new BadRequestException('File không được tìm thấy');
+    }
+
+    // Validate file type
+    const allowedMimeTypes = ['video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo', 'video/webm'];
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      throw new BadRequestException('Chỉ chấp nhận file video (MP4, MPEG, MOV, AVI, WEBM)');
+    }
+
+    // Validate file size (max 500MB for videos)
+    const maxSize = 500 * 1024 * 1024; // 500MB
+    if (file.size > maxSize) {
+      throw new BadRequestException('Kích thước file không được vượt quá 500MB');
+    }
+
+    try {
+      const videoUrl = await this.cloudinaryService.uploadVideo(file, 'course-videos');
+      return {
+        video_url: videoUrl,
+        message: 'Upload video thành công',
+      };
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      throw new BadRequestException('Không thể upload video. Vui lòng thử lại.');
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Đổi mật khẩu' })
   @Patch('profile/password')
   async changePassword(@Request() req: any, @Body() changePasswordDto: ChangePasswordDto) {
@@ -224,5 +275,44 @@ export class UsersController {
   @Patch(':id/permissions')
   updatePermissions(@Param('id') id: string, @Body() dto: UpdatePermissionsDto) {
     return this.usersService.updatePermissions(id, dto.permissions);
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Suspend user account (Admin only)' })
+  @Permissions('user:suspend')
+  @Post(':id/suspend')
+  suspendUser(@Param('id') id: string, @Body() body: { reason?: string }) {
+    return this.usersService.suspendUser(id, body.reason);
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Activate suspended user account (Admin only)' })
+  @Permissions('user:activate')
+  @Post(':id/activate')
+  activateUser(@Param('id') id: string) {
+    return this.usersService.activateUser(id);
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user activity log (Admin only)' })
+  @Permissions('user:view')
+  @Get(':id/activity')
+  getUserActivity(@Param('id') id: string) {
+    return this.usersService.getUserActivity(id);
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Admin reset user password (Admin only)' })
+  @Permissions('user:edit')
+  @Patch(':id/reset-password')
+  adminResetPassword(
+    @Param('id') id: string,
+    @Body() body: { newPassword: string },
+  ) {
+    return this.usersService.adminResetPassword(id, body.newPassword);
   }
 }

@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
+import { PostsAdminController } from './posts-admin.controller';
+import { CommentsAdminController } from './comments-admin.controller';
 import { PostsGateway } from './posts.gateway';
 import { Post, PostSchema } from './schema/post.schema';
 import { PostComment, PostCommentSchema } from './schema/comment.schema';
@@ -21,7 +23,7 @@ import { UsersModule } from '../users/users.module';
     ]),
     UsersModule,
   ],
-  controllers: [PostsController],
+  controllers: [PostsController, PostsAdminController, CommentsAdminController],
   providers: [PostsService, PostsGateway],
   exports: [PostsService],
 })

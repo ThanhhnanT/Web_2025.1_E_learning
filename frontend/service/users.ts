@@ -9,12 +9,15 @@ export interface User {
   avatar_url?: string;
   cover_image_url?: string;
   email_verified: boolean;
-  role: 'administrator' | 'editor' | 'viewer' | 'support';
+  role: 'administrator' | 'viewer';
   createdAt?: string;
   updatedAt?: string;
   lastLoginAt?: string;
   lastLoginIp?: string;
   lastLoginLocation?: string;
+  suspended?: boolean;
+  suspensionReason?: string;
+  suspendedAt?: string;
 }
 
 export interface UsersResponse {
@@ -32,14 +35,14 @@ export interface CreateUserData {
   email: string;
   password: string;
   phone: string;
-  role?: 'administrator' | 'editor' | 'viewer' | 'support';
+  role?: 'administrator' | 'viewer';
 }
 
 export interface UpdateUserData {
   name?: string;
   phone?: string;
   bio?: string;
-  role?: 'administrator' | 'editor' | 'viewer' | 'support';
+  role?: 'administrator' | 'viewer';
   email_verified?: boolean;
 }
 
@@ -91,5 +94,25 @@ export const updateRolePreset = async (
   permissions: string[]
 ): Promise<any> => {
   return await patchAccess(`users/roles/presets/${role}`, { permissions });
+};
+
+// Suspend user
+export const suspendUser = async (id: string, reason?: string): Promise<{ message: string; statusCode: number }> => {
+  return await postAccess(`users/${id}/suspend`, { reason });
+};
+
+// Activate user
+export const activateUser = async (id: string): Promise<{ message: string; statusCode: number }> => {
+  return await postAccess(`users/${id}/activate`, {});
+};
+
+// Get user activity
+export const getUserActivity = async (id: string): Promise<any> => {
+  return await getAccess(`users/${id}/activity`);
+};
+
+// Admin reset password
+export const adminResetPassword = async (id: string, newPassword: string): Promise<{ message: string; statusCode: number }> => {
+  return await patchAccess(`users/${id}/reset-password`, { newPassword });
 };
 

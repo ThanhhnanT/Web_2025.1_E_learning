@@ -86,6 +86,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (!pathname) return "/admin/dashboard";
     if (pathname.startsWith("/admin/flashcards")) return "/admin/flashcards";
     if (pathname.startsWith("/admin/posts")) return "/admin/posts";
+    if (pathname.startsWith("/admin/courses")) return "/admin/courses";
+    if (pathname.startsWith("/admin/users")) return "/admin/users";
+    if (pathname.startsWith("/admin/tests")) return "/admin/tests";
     return pathname;
   }, [pathname]);
 

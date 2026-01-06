@@ -14,6 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { Course } from '../courses/schema/course.schema';
 import { User } from '../users/schemas/user.schema';
 import { EnrollmentsService } from '../enrollments/enrollments.service';
+import { FaceVerificationTokenService } from '../face-recognition/face-verification-token.service';
 
 @Injectable()
 export class PaymentsService {
@@ -30,6 +31,7 @@ export class PaymentsService {
     private mailerService: MailerService,
     private configService: ConfigService,
     private enrollmentsService: EnrollmentsService,
+    private faceVerificationTokenService: FaceVerificationTokenService,
   ) {}
 
   async create(createPaymentDto: CreatePaymentDto) {
@@ -92,6 +94,30 @@ export class PaymentsService {
       const user = await this.userModel.findById(userId).exec();
       if (!user) {
         throw new NotFoundException('User not found');
+      }
+
+      // Face verification check
+      if (user.face_encoding_registered && user.face_encoding) {
+        // User has face registered, require verification token
+        if (!dto.face_verification_token) {
+          throw new BadRequestException(
+            'Face verification required. Please verify your face before proceeding with payment.',
+          );
+        }
+
+        // Validate verification token
+        const isValidToken = this.faceVerificationTokenService.validateToken(
+          dto.face_verification_token,
+          userId,
+        );
+
+        if (!isValidToken) {
+          throw new BadRequestException(
+            'Invalid or expired face verification token. Please verify your face again.',
+          );
+        }
+
+        this.logger.log(`Face verification token validated for user ${userId}`);
       }
 
       // Check if user already enrolled (check if there's a completed payment)

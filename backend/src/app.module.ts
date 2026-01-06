@@ -25,6 +25,7 @@ import { PostsModule } from './modules/posts/posts.module';
 import { FriendsModule } from './modules/friends/friends.module';
 import { ChatsModule } from './modules/chats/chats.module';
 import { AiLearningPathsModule } from './modules/ai-learning-paths/ai-learning-paths.module';
+import { FaceRecognitionModule } from './modules/face-recognition/face-recognition.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { AiLearningPathsModule } from './modules/ai-learning-paths/ai-learning-p
     FriendsModule,
     ChatsModule,
     AiLearningPathsModule,
+    FaceRecognitionModule,
 
     ConfigModule.forRoot({
       isGlobal: true, 

@@ -29,9 +29,11 @@ import {
 } from '@ant-design/icons';
 import { getCourseById } from '@/service/courses';
 import paymentService, { CreatePaymentIntentDto } from '@/service/paymentService';
+import faceVerificationService from '@/service/faceVerification';
 import StripeCheckout from '@/components/payment/StripeCheckout';
 import VNPayCheckout from '@/components/payment/VNPayCheckout';
 import MomoCheckout from '@/components/payment/MomoCheckout';
+import FaceVerificationCamera from '@/components/FaceVerificationCamera';
 import type { Course } from '@/types/course';
 
 const { Title, Text, Paragraph } = Typography;
@@ -49,6 +51,10 @@ export default function CheckoutPage() {
   const [savePaymentMethod, setSavePaymentMethod] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
+  const [faceVerificationModalOpen, setFaceVerificationModalOpen] = useState(false);
+  const [faceRegistrationModalOpen, setFaceRegistrationModalOpen] = useState(false);
+  const [faceVerificationToken, setFaceVerificationToken] = useState<string | null>(null);
+  const [faceStatus, setFaceStatus] = useState<{ registered: boolean; hasEncoding: boolean } | null>(null);
 
   const gateways = [
     {
@@ -74,8 +80,19 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (courseId) {
       fetchCourse();
+      checkFaceStatus();
     }
   }, [courseId]);
+
+  const checkFaceStatus = async () => {
+    try {
+      const status = await faceVerificationService.getFaceStatus();
+      setFaceStatus(status);
+    } catch (error) {
+      // If error, assume face is not registered
+      setFaceStatus({ registered: false, hasEncoding: false });
+    }
+  };
 
   const fetchCourse = async () => {
     try {
@@ -95,7 +112,90 @@ export default function CheckoutPage() {
     }
   };
 
+  const handleFaceRegistration = async (imageBase64: string) => {
+    try {
+      const result = await faceVerificationService.registerFace(imageBase64);
+      
+      if (result.success) {
+        notification.success({
+          message: 'Đăng ký thành công',
+          description: 'Khuôn mặt của bạn đã được đăng ký. Vui lòng xác thực để tiếp tục thanh toán.',
+          placement: 'topRight',
+        });
+        setFaceRegistrationModalOpen(false);
+        // Refresh face status
+        await checkFaceStatus();
+        // Open verification modal
+        setFaceVerificationModalOpen(true);
+      } else {
+        notification.error({
+          message: 'Đăng ký thất bại',
+          description: result.message || 'Không thể đăng ký khuôn mặt. Vui lòng thử lại.',
+          placement: 'topRight',
+        });
+      }
+    } catch (error: any) {
+      notification.error({
+        message: 'Lỗi đăng ký',
+        description: error?.response?.data?.message || 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.',
+        placement: 'topRight',
+      });
+    }
+  };
+
+  const handleFaceVerification = async (imageBase64: string) => {
+    try {
+      const result = await faceVerificationService.verifyFace(imageBase64);
+      
+      if (result.success && result.match && result.verification_token) {
+        setFaceVerificationToken(result.verification_token);
+        setFaceVerificationModalOpen(false);
+        // Proceed with payment after successful verification
+        proceedWithPayment(result.verification_token);
+      } else {
+        notification.error({
+          message: 'Xác thực thất bại',
+          description: result.message || 'Khuôn mặt không khớp. Vui lòng thử lại.',
+          placement: 'topRight',
+        });
+      }
+    } catch (error: any) {
+      notification.error({
+        message: 'Lỗi xác thực',
+        description: error?.response?.data?.message || 'Có lỗi xảy ra khi xác thực. Vui lòng thử lại.',
+        placement: 'topRight',
+      });
+    }
+  };
+
   const handlePayment = async () => {
+    // Check if face is not registered
+    if (!faceStatus?.registered || !faceStatus?.hasEncoding) {
+      notification.warning({
+        message: 'Yêu cầu đăng ký khuôn mặt',
+        description: 'Bạn cần đăng ký khuôn mặt trước khi thanh toán. Vui lòng đăng ký khuôn mặt của bạn.',
+        placement: 'topRight',
+        duration: 5,
+      });
+      // Open face registration modal
+      setFaceRegistrationModalOpen(true);
+      return;
+    }
+
+    // Check if face verification is required (user has registered but not verified in this session)
+    if (faceStatus?.registered && !faceVerificationToken) {
+      // Open face verification modal
+      setFaceVerificationModalOpen(true);
+      return;
+    }
+
+    // Proceed with payment
+    await proceedWithPayment();
+  };
+
+  const proceedWithPayment = async (verificationToken?: string) => {
+    const token = verificationToken || faceVerificationToken;
+    
     if (!agreedToTerms) {
       notification.warning({
         message: 'Cảnh báo',
@@ -106,15 +206,14 @@ export default function CheckoutPage() {
     }
 
     // Check if user is logged in
-    const token = Cookies.get('access_token');
-    if (!token) {
+    const accessToken = Cookies.get('access_token');
+    if (!accessToken) {
       notification.error({
         message: 'Chưa đăng nhập',
         description: 'Vui lòng đăng nhập để tiếp tục thanh toán. Bạn có thể đăng nhập ở menu phía trên.',
         placement: 'topRight',
         duration: 6,
       });
-      // Don't redirect if login page doesn't exist yet
       return;
     }
 
@@ -129,23 +228,16 @@ export default function CheckoutPage() {
       const returnUrl = `${baseUrl}/payment/result`;
       const cancelUrl = `${baseUrl}/courses/${course!._id}`;
 
-      console.log('Base URL:', baseUrl);
-      console.log('Return URL:', returnUrl);
-      console.log('Cancel URL:', cancelUrl);
-
       const paymentIntent: CreatePaymentIntentDto = {
         courseId: course!._id,
         paymentGateway: selectedGateway,
         savePaymentMethod,
         returnUrl,
         cancelUrl,
+        ...(token && { face_verification_token: token }),
       };
 
-      console.log('Creating payment intent:', paymentIntent);
-
       const response = await paymentService.createPaymentIntent(paymentIntent);
-      
-      console.log('Payment intent response:', response);
       
       if (!response) {
         throw new Error('Không nhận được phản hồi từ server');
@@ -192,7 +284,6 @@ export default function CheckoutPage() {
         });
       }
     } catch (error: any) {
-      console.error('Payment error:', error);
       const errorMessage = error?.response?.data?.message || error?.message || 'Tạo thanh toán thất bại. Vui lòng thử lại.';
       notification.error({
         message: 'Lỗi thanh toán',
@@ -259,14 +350,6 @@ export default function CheckoutPage() {
           Quay lại khóa học
         </Button>
 
-        {/* Page Title */}
-        <div style={{ marginBottom: '32px', textAlign: 'center' }}>
-          <ShoppingCartOutlined style={{ fontSize: '48px', color: '#1890ff', marginBottom: '16px' }} />
-          <Title level={2} style={{ margin: 0 }}>
-            Hoàn tất thanh toán
-          </Title>
-          <Text type="secondary">Chọn phương thức thanh toán và hoàn tất đơn hàng của bạn</Text>
-        </div>
 
         <Row gutter={24}>
           {/* Left Column - Payment Form */}
@@ -319,37 +402,9 @@ export default function CheckoutPage() {
                 {selectedGateway === 'stripe' && !paymentData && (
                   <Alert
                     message="Thanh toán an toàn với Stripe"
-                    description={
-                      <div>
-                        <p style={{ marginBottom: 12, fontSize: '14px' }}>
-                          Khi bạn nhấn <strong>"Hoàn tất thanh toán"</strong>, bạn sẽ được chuyển đến trang thanh toán bảo mật của Stripe để nhập thông tin thẻ.
-                        </p>
-                        <div style={{ 
-                          backgroundColor: '#f0f5ff', 
-                          padding: '12px', 
-                          borderRadius: '6px',
-                          border: '1px solid #d6e4ff'
-                        }}>
-                          <div style={{ fontSize: '13px', color: '#1890ff', fontWeight: 500, marginBottom: 8 }}>
-                            🔐 Bảo mật tối đa
-                          </div>
-                          <ul style={{ paddingLeft: 20, marginBottom: 0, fontSize: '13px', color: '#595959' }}>
-                            <li style={{ marginBottom: 4 }}>✓ Chấp nhận Visa, Mastercard, American Express</li>
-                            <li style={{ marginBottom: 4 }}>✓ Mã hóa SSL 256-bit</li>
-                            <li style={{ marginBottom: 4 }}>✓ Tuân thủ chuẩn bảo mật PCI DSS Level 1</li>
-                            <li style={{ marginBottom: 0 }}>✓ Thông tin thẻ KHÔNG được lưu trên hệ thống của chúng tôi</li>
-                          </ul>
-                        </div>
-                        <Divider style={{ margin: '12px 0' }} />
-                        <Text style={{ fontSize: '12px', color: '#8c8c8c', fontStyle: 'italic' }}>
-                          💡 <strong>Lưu ý:</strong> Bạn sẽ nhập thông tin thẻ trực tiếp trên trang của Stripe, không phải trên website này. 
-                          Điều này đảm bảo thông tin thẻ của bạn được bảo mật tối đa.
-                        </Text>
-                      </div>
-                    }
+                    description="Bạn sẽ được chuyển đến trang thanh toán bảo mật của Stripe để nhập thông tin thẻ."
                     type="info"
-                    showIcon
-                    icon={<LockOutlined style={{ fontSize: 20 }} />}
+                    showIcon={false}
                     style={{ 
                       border: '1px solid #91d5ff',
                       borderRadius: '8px'
@@ -426,20 +481,6 @@ export default function CheckoutPage() {
                 </Checkbox>
               </div>
             </Card>
-
-            {/* Security Notice */}
-            <Alert
-              message={
-                <span>
-                  <LockOutlined style={{ marginRight: '8px' }} />
-                  Thanh toán an toàn
-                </span>
-              }
-              description="Thông tin thanh toán của bạn được bảo mật và mã hóa. Chúng tôi không bao giờ lưu trữ thông tin thẻ của bạn."
-              type="info"
-              showIcon={false}
-              style={{ marginBottom: '24px' }}
-            />
           </Col>
 
           {/* Right Column - Order Summary */}
@@ -564,26 +605,30 @@ export default function CheckoutPage() {
                   boxShadow: '0 2px 8px rgba(24, 144, 255, 0.3)',
                 }}
               >
-                {processingPayment ? 'Đang xử lý...' : 'Hoàn tất thanh toán'}
+                {processingPayment ? 'Đang xử lý...' : 'Thanh toán khóa học'}
               </Button>
-
-              {/* Security Badge */}
-              <div style={{ 
-                marginTop: '16px', 
-                padding: '12px',
-                backgroundColor: '#f6f6f6',
-                borderRadius: '8px',
-                textAlign: 'center',
-              }}>
-                <LockOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
-                <Text style={{ fontSize: '12px', color: '#666' }}>
-                  Giao dịch được bảo mật với SSL encryption
-                </Text>
-              </div>
             </Card>
           </Col>
         </Row>
       </div>
+
+      {/* Face Registration Modal */}
+      <FaceVerificationCamera
+        open={faceRegistrationModalOpen}
+        onClose={() => setFaceRegistrationModalOpen(false)}
+        onCapture={handleFaceRegistration}
+        mode="register"
+        title="Đăng ký khuôn mặt"
+      />
+
+      {/* Face Verification Modal */}
+      <FaceVerificationCamera
+        open={faceVerificationModalOpen}
+        onClose={() => setFaceVerificationModalOpen(false)}
+        onCapture={handleFaceVerification}
+        mode="verify"
+        title="Xác thực khuôn mặt để thanh toán"
+      />
     </div>
   );
 }

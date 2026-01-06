@@ -30,7 +30,7 @@ export class User {
   @Prop({ type: Boolean, default: false })
   email_verified: boolean;
 
-  @Prop({ type: String, enum: ['administrator', 'editor', 'viewer', 'support'], default: 'viewer' })
+  @Prop({ type: String, enum: ['administrator', 'viewer'], default: 'viewer' })
   role: string;
 
   @Prop({ type: [String], default: [] })
@@ -63,6 +63,23 @@ export class User {
 
   @Prop({ type: Boolean, default: true })
   showFriends: boolean; 
+
+  // Face recognition
+  @Prop({ type: [Number], default: null })
+  face_encoding: number[];
+
+  @Prop({ type: Boolean, default: false })
+  face_encoding_registered: boolean;
+
+  // Account status
+  @Prop({ type: Boolean, default: false })
+  suspended: boolean;
+
+  @Prop({ type: String })
+  suspensionReason: string;
+
+  @Prop({ type: Date })
+  suspendedAt: Date;
 
 }
 

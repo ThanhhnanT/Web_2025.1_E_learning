@@ -12,6 +12,7 @@ export type Test = {
   title: string;
   series?: string;
   testNumber?: string;
+  status?: string;
   durationMinutes: number;
   totalQuestions: number;
   totalUser: number;
@@ -115,7 +116,7 @@ const TestList: React.FC<TestListProps> = ({
       setError(null);
       try {
         const skillQuery = skill && skill !== "all" ? `&skill=${skill}` : "";
-        const payload = await get(`tests?page=${currentPage}&pageSize=${pageSize}${skillQuery}`);
+        const payload = await get(`tests?page=${currentPage}&pageSize=${pageSize}${skillQuery}&status=active`);
         const data = payload?.data;
         const pageMeta = payload?.pagination;
         if (Array.isArray(data) && pageMeta) {
@@ -142,11 +143,12 @@ const TestList: React.FC<TestListProps> = ({
 
   // Filter tests theo keyword + skill (client-side filtering)
   const filteredTests = React.useMemo(() => {
+    const activeOnly = tests.filter((t) => (t.status || "active").toLowerCase() === "active");
     const lowerSkill = skill.toLowerCase();
     const skillFiltered =
       skill === "all"
-        ? tests
-        : tests.filter((t) => (t.skill || "").toLowerCase() === lowerSkill);
+        ? activeOnly
+        : activeOnly.filter((t) => (t.skill || "").toLowerCase() === lowerSkill);
 
     if (!keyword || keyword.trim() === "") {
       return skillFiltered;

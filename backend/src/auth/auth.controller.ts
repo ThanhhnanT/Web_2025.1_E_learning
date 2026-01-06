@@ -34,8 +34,10 @@ export class AuthController {
     const { _id, email } = user;
     const forwarded = (req.headers?.['x-forwarded-for'] as string) || '';
     const clientIp = forwarded ? forwarded.split(',')[0].trim() : (req.ip || req.connection?.remoteAddress);
-    const country = req.headers?.['cf-ipcountry'] as string | undefined;
-    const location = country ? `Country: ${country}` : undefined;
+    
+    // Get location from ipinfo.io API
+    const location = await this.authService.getLocationFromIp(clientIp || '');
+    
     await this.authService.recordLogin(_id, clientIp, location);
     return this.authService.signIn( _id, email);
   }
@@ -70,8 +72,10 @@ export class AuthController {
     const { _id, email } = user;
     const forwarded = (req.headers?.['x-forwarded-for'] as string) || '';
     const clientIp = forwarded ? forwarded.split(',')[0].trim() : (req.ip || req.connection?.remoteAddress);
-    const country = req.headers?.['cf-ipcountry'] as string | undefined;
-    const location = country ? `Country: ${country}` : undefined;
+    
+    // Get location from ipinfo.io API
+    const location = await this.authService.getLocationFromIp(clientIp || '');
+    
     await this.authService.recordLogin(_id, clientIp, location);
     return this.authService.signIn(_id, email);
   }

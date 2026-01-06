@@ -62,5 +62,14 @@ export class CreatePaymentIntentDto {
     protocols: ['http', 'https'],
   })
   cancelUrl?: string;
+
+  @ApiProperty({ 
+    description: 'Face verification token (required if face is registered)',
+    example: 'abc123def456...',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  face_verification_token?: string;
 }
 

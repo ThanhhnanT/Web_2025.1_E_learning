@@ -236,11 +236,14 @@ export default function UsersManagementPage() {
       title: "Vai trò",
       dataIndex: "role",
       key: "role",
-      render: (role: string) => (
-        <Tag color={role === "admin" ? "blue" : "default"}>
-          {role === "admin" ? "Quản trị viên" : "Người dùng"}
-        </Tag>
-      ),
+      render: (role: string) => {
+        const roleMap: Record<string, { label: string; color: string }> = {
+          administrator: { label: "Quản trị viên", color: "red" },
+          viewer: { label: "Người dùng", color: "blue" },
+        };
+        const roleInfo = roleMap[role] || { label: role || "N/A", color: "default" };
+        return <Tag color={roleInfo.color}>{roleInfo.label}</Tag>;
+      },
     },
     {
       title: "Trạng thái",
@@ -334,9 +337,7 @@ export default function UsersManagementPage() {
             >
               <Option value="all">Tất cả vai trò</Option>
               <Option value="administrator">Quản trị viên</Option>
-              <Option value="editor">Biên tập viên</Option>
-              <Option value="viewer">Người xem</Option>
-              <Option value="support">Hỗ trợ</Option>
+              <Option value="viewer">Người dùng</Option>
             </Select>
           </Col>
         </Row>

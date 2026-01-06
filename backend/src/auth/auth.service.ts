@@ -31,9 +31,9 @@ export class AuthService {
     const isValid = await comparePass(pass, user.password);
     if (!isValid) throw new UnauthorizedException('Invalid password');
 
-    const adminRoles = ['administrator', 'editor', 'support'];
-    if (!adminRoles.includes(user.role)) {
-      throw new UnauthorizedException('Access denied. Admin role required.');
+    // Only administrator role for admin login
+    if (user.role !== 'administrator') {
+      throw new UnauthorizedException('Access denied. Administrator role required.');
     }
 
     return user;
@@ -79,5 +79,59 @@ export class AuthService {
 
   async recordLogin(userId: string, ip?: string, location?: string) {
     await this.usersService.recordLogin(userId, ip, location);
+  }
+
+  async getLocationFromIp(ip: string): Promise<string | undefined> {
+    try {
+      // Handle localhost - can't get real location, return descriptive message
+      if (!ip || ip === '::1' || ip === '127.0.0.1') {
+        return 'Localhost';
+      }
+      
+      // For private IPs, we can't get real location from public API
+      if (ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.')) {
+        return 'Private Network';
+      }
+
+      // Create AbortController for timeout (compatible with older Node.js)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      let response;
+      try {
+        response = await fetch(`https://ipinfo.io/${ip}/json`, {
+          headers: {
+            'Accept': 'application/json',
+          },
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          console.warn(`ipinfo.io API timeout for IP ${ip}`);
+        }
+        return undefined;
+      }
+
+      if (!response.ok) {
+        console.warn(`ipinfo.io API returned status ${response.status} for IP ${ip}`);
+        return undefined;
+      }
+
+      const data = await response.json();
+      
+      // Format: "City, Region, Country"
+      const parts: string[] = [];
+      if (data.city) parts.push(String(data.city));
+      if (data.region) parts.push(String(data.region));
+      if (data.country) parts.push(String(data.country));
+      
+      return parts.length > 0 ? parts.join(', ') : undefined;
+    } catch (error: any) {
+      // Log error but don't throw - location is optional
+      console.warn(`Failed to get location from ipinfo.io for IP ${ip}:`, error.message);
+      return undefined;
+    }
   }
 }
